@@ -1,0 +1,153 @@
+/* Import Bootstrap first */
+@import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css');
+
+/* Set general styling for the GitHub aesthetic */
+body {
+    background-color: #0d1117; /* GitHub's dark background */
+    color: #c9d1d9; /* GitHub's light text color */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"; /* GitHub's font stack */
+}
+
+/* Links */
+a {
+    color: #58a6ff; /* GitHub's link color */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #79c0ff; /* Slightly lighter on hover */
+}
+
+/* Buttons */
+.btn {
+    background-color: #21262d; /* Dark button background */
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+}
+
+.btn:hover {
+    background-color: #30363d; /* Slightly lighter on hover */
+    border-color: #8b949e;
+    color: #f0f6fc;
+}
+
+/* Cards */
+.card {
+    background-color: #161b22; /* Card background */
+    color: #c9d1d9; /* Card text */
+    border: 1px solid #30363d; /* Card border */
+}
+
+.card-header {
+    background-color: #21262d; /* Darker card header */
+    border-bottom: 1px solid #30363d;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #161b22; /* Navbar background */
+    border-bottom: 1px solid #30363d;
+}
+
+.navbar-brand, .navbar-nav .nav-link {
+    color: #c9d1d9; /* Navbar link color */
+}
+
+.navbar-nav .nav-link:hover {
+    color: #58a6ff; /* Lighter blue on hover */
+}
+
+/* Forms */
+.form-control {
+    background-color: #0d1117; /* Input background */
+    color: #c9d1d9; /* Input text */
+    border: 1px solid #30363d; /* Input border */
+}
+
+.form-control:focus {
+    background-color: #161b22;
+    color: #c9d1d9;
+    border-color: #58a6ff; /* Blue focus border */
+    outline: none;
+}
+
+/* Tables */
+.table {
+    color: #c9d1d9; /* Table text */
+    background-color: #0d1117; /* Table background */
+    border-color: #30363d;
+}
+
+.table thead {
+    background-color: #21262d; /* Header background */
+}
+
+.table tbody tr:hover {
+    background-color: #161b22; /* Row hover effect */
+}
+
+/* Pagination */
+.pagination .page-link {
+    background-color: #0d1117; /* Pagination background */
+    color: #c9d1d9; /* Pagination text */
+    border: 1px solid #30363d;
+}
+
+.pagination .page-link:hover {
+    background-color: #30363d;
+    color: #58a6ff;
+}
+
+/* Footer */
+footer {
+    background-color: #161b22; /* Footer background */
+    color: #8b949e; /* Footer text */
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid #30363d;
+}
+
+/* Utility classes */
+.border-light {
+    border-color: #30363d !important;
+}
+
+.text-light {
+    color: #c9d1d9 !important;
+}
+
+.bg-dark-custom {
+    background-color: #0d1117 !important;
+}
+
+.bg-secondary-custom {
+    background-color: #161b22 !important;
+}
+
+.text-link-hover {
+    color: #58a6ff;
+}
+
+.text-link-hover:hover {
+    color: #79c0ff;
+}
+
+/* Custom scrollbar (optional for GitHub aesthetic) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0d1117;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #484f58;
+}

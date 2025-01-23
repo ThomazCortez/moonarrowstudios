@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6;">
             We received a request to reset your password. Click the button below to proceed.
         </p>
-        <a href="http://localhost/proj_pap_thomaz21_12F_moonarrowstudios/reset_password.php?token=' . $token . '" 
+        <a href="http://localhost/moonarrowstudios/php/password_reset/reset_password.php?token=' . $token . '" 
             style="display: inline-block; margin-top: 20px; padding: 12px 25px; font-size: 14px; color: #FFFFFF; text-decoration: none; background-color: #007BFF; border-radius: 4px;">
             Reset Password
         </a>

@@ -45,7 +45,7 @@
 					<li>
 						<hr class="dropdown-divider">
 					</li>
-					<li><a class="dropdown-item" href="php/sign_out/sign_out.php	">Sign Out</a></li>
+					<li><a class="dropdown-item" href="php/sign_out/sign_out.php">Sign Out</a></li>
 				</ul>
 			</div> <?php else: ?> <button type="button" class="btn btn-primary me-2" onclick="window.location.href='php/sign_in/sign_in_html.php'">Sign In</button>
 			<button type="button" class="btn btn-secondary" onclick="window.location.href='php/sign_up/sign_up_html.php'">Sign Up</button> <?php endif; ?>

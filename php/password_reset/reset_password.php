@@ -52,8 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	<title>Reset Password</title>
 	<!-- Darkly Theme from Bootswatch -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link rel="stylesheet" href="https://bootswatch.com/5/darkly/bootstrap.min.css">
-	<link rel="stylesheet" href="css.css">
+	<link rel="stylesheet" href="../../css/css2.css">
 	<style>
 	body {
 		display: flex;
@@ -61,26 +60,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		align-items: center;
 		height: 100vh;
 		margin: 0;
-		color: #f8f9fa;
-		/* Matches the Darkly theme text color */
 	}
 
 	.reset-password-container {
 		width: 100%;
 		max-width: 400px;
-		background-color: #2a2a2a;
 		border-radius: 10px;
 		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 		padding: 30px;
-	}
-
-	.reset-password-container h2 {
-		color: #f8f9fa;
-	}
-
-	.reset-password-container p {
-		color: #adb5bd;
-		/* Light muted color for subtle contrast */
 	}
 
 	.logo {
@@ -109,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	<!-- Error Alert --> <?php if ($errorMessage): ?> <div class="alert alert-danger alert-dismissible fade show" role="alert"> <?php echo htmlspecialchars($errorMessage); ?> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 	</div> <?php endif; ?> <div class="reset-password-container">
 		<!-- Logo -->
-		<img src="https://i.postimg.cc/cLbHLSL3/horizontal-logo.png" alt="Logo" class="logo" width="180">
+		<img src="../../media/horizontal_logo.png" alt="Logo" class="logo" width="180">
 		<h2 class="text-center">Reset Password</h2>
 		<p class="text-center">Don't worry, happens to the best of us.</p>
 		<form action="reset_password.php" method="post">
@@ -125,6 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			</div>
 			<button type="submit" class="btn btn-primary btn-reset-password w-100">Reset Password</button>
 		</form>
+		<hr>
 		<div class="text-center mt-3">
 			<small> Done? <a href="../sign_in/sign_in_html.php" class="text-decoration-none">Sign in here</a>. </small>
 		</div>
