@@ -1,5 +1,5 @@
 <?php
-require 'config.php';
+require '../config.php';
 
 $token = $_GET['token'] ?? '';
 $successMessage = '';
@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			<button type="submit" class="btn btn-primary btn-reset-password w-100">Reset Password</button>
 		</form>
 		<div class="text-center mt-3">
-			<small> Done? <a href="sign_in_html.php" class="text-decoration-none">Sign in here</a>. </small>
+			<small> Done? <a href="../sign_in/sign_in_html.php" class="text-decoration-none">Sign in here</a>. </small>
 		</div>
 	</div>
 	<!-- Bootstrap JS -->

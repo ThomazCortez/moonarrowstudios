@@ -3,17 +3,9 @@
 session_start();
 
 // Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "moonarrowstudios";
+include 'db_connect';
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-include 'header.php';
+include 'include/header.php';
 ?>
 
 <!DOCTYPE html>

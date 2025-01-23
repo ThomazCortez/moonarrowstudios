@@ -3,15 +3,7 @@ session_start();
 header('Content-Type: application/json');
 
 // Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "moonarrowstudios";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die(json_encode(['error' => 'Database connection failed']));
-}
+include '../db_connect.php';
 
 // Ensure the user is logged in
 if (!isset($_SESSION['user_id'])) {

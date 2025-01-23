@@ -1,7 +1,7 @@
 <?php
 // Include database connection
-include 'db_connect.php';
-require 'vendor/autoload.php'; // Include PHPMailer autoload
+include '../db_connect.php';
+require '../../vendor/autoload.php'; // Include PHPMailer autoload
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $check_email_stmt->store_result();
 
         if ($check_email_stmt->num_rows > 0) {
-            header("Location: sign_up_html.php?alert=This email is already registered. Please use a different email.&type=danger");
+            header("Location: ../sign_up/sign_up_html.php?alert=This email is already registered. Please use a different email.&type=danger");
             exit;
         } else {
             // Check if the username already exists
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $check_username_stmt->store_result();
 
             if ($check_username_stmt->num_rows > 0) {
-                header("Location: sign_up_html.php?alert=This username is already taken. Please choose a different username.&type=danger");
+                header("Location: ../sign_up/sign_up_html.php?alert=This username is already taken. Please choose a different username.&type=danger");
                 exit;
             } else {
                 // Prepare the SQL statement for insertion
@@ -81,14 +81,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>';
 
                         $mail->send();
-                        header("Location: sign_up_html.php?alert=Sign up successful!&type=success");
+                        header("Location: ../sign_up/sign_up_html.php?alert=Sign up successful!&type=success");
                         exit;
                     } catch (Exception $e) {
-                        header("Location: sign_up_html.php?alert=Sign up successful, but email could not be sent. Error: {$mail->ErrorInfo}&type=warning");
+                        header("Location:../sign_up/sign_up_html.php?alert=Sign up successful, but email could not be sent. Error: {$mail->ErrorInfo}&type=warning");
                         exit;
                     }
                 } else {
-                    header("Location: sign_up_html.php?alert=Error: " . $stmt->error . "&type=danger");
+                    header("Location: ../sign_up/sign_up_html.php?alert=Error: " . $stmt->error . "&type=danger");
                     exit;
                 }
 
@@ -100,7 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $check_email_stmt->close();
     } else {
-        header("Location: sign_up_html.php?alert=Please fill in all fields!&type=warning");
+        header("Location: ../sign_up/sign_up_html.php?alert=Please fill in all fields!&type=warning");
         exit;
     }
 }

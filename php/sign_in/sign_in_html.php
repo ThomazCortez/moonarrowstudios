@@ -4,13 +4,13 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Sign Up</title>
+	<title>Sign In</title>
 	<!-- Bootstrap CSS -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="https://bootswatch.com/5/darkly/bootstrap.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-	<link rel="stylesheet" href="css.css">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+	<link rel="stylesheet" href="css.css">
 	<style>
 	html,
 	body {
@@ -93,11 +93,11 @@
 <body class="">
 	<div class="container-fluid vh-100">
 		<div class="row h-100">
-			<!-- Sign Up Form Section -->
+			<!-- Sign In Form Section -->
 			<div class="col-md-6 d-flex flex-column p-3">
 				<!-- Logo Section -->
 				<div class="mb-4">
-					<img src="horizontal_logo.png" alt="Logo" class="img-fluid logo" style="max-width: 200px;">
+					<img src="../../media/horizontal_logo.png" alt="Logo" class="img-fluid logo" style="max-width: 200px;">
 				</div>
 				<!-- Alert Section -->
 				<div class="alert-container"> <?php if (isset($_GET['alert'])): ?> <div class="alert alert-<?= htmlspecialchars($_GET['type']) ?> alert-dismissible fade show" role="alert"> <?= htmlspecialchars($_GET['alert']) ?> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -105,15 +105,11 @@
 				<!-- Form Section -->
 				<div class="form-container d-flex flex-column justify-content-center align-items-start">
 					<div class="w-100 px-3 px-md-5">
-						<h1 class="mb-4">Sign Up</h1>
-						<form id="signUpForm" action="sign_up.php" method="POST">
+						<h1 class="mb-4">Sign In</h1>
+						<form id="signInForm" action="sign_in.php" method="POST">
 							<div class="mb-3">
 								<label for="username" class="form-label">Username</label>
 								<input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
-							</div>
-							<div class="mb-3">
-								<label for="email" class="form-label">E-mail</label>
-								<input type="email" class="form-control" id="email" name="email" placeholder="example@email.com" required>
 							</div>
 							<div class="mb-3">
 								<label for="password" class="form-label">Password</label>
@@ -124,23 +120,25 @@
 									</button>
 								</div>
 							</div>
-							<button id="submitButton" type="submit" class="btn btn-primary w-100">Sign Up</button>
+							<p class="small"> Forgot your password? <a href="../password_reset/forgot_password.php" class="text-decoration-none">Click Here</a>
+							</p>
+							<button id="submitButton" type="submit" class="btn btn-primary w-100">Sign In</button>
 							<button id="spinnerButton" class="btn btn-primary w-100" type="button" disabled>
 								<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-								<span role="status">Signing Up...</span>
+								<span role="status">Signing In...</span>
 							</button>
 						</form>
 						<hr class="my-4">
 						<div class="centered-footer">
-							<p>Already have an account? <a href="sign_in_html.php" class="text-decoration-none">Sign in</a></p>
-							<p>Click <a href="index.php" class="text-decoration-none">here</a> to go back to the main page.</p>
+							<p>Don't have an account? <a href="../sign_up/sign_up_html.php" class="text-decoration-none">Sign up</a></p>
+							<p>Click <a href="../../index.php" class="text-decoration-none">here</a> to go back to the main page.</p>
 						</div>
 					</div>
 				</div>
 			</div>
 			<!-- Art/Image Section -->
 			<div class="col-md-6 art-section p-0 d-none d-md-block">
-				<img src="loginnn.png" alt="Background Image" class="w-100 h-100">
+				<img src="../../media/loginnn.png" alt="Background Image" class="w-100 h-100">
 			</div>
 		</div>
 	</div>
@@ -154,7 +152,7 @@
 			alert.addEventListener('transitionend', () => alert.remove());
 		});
 	}, 5000);
-	document.getElementById('signUpForm').addEventListener('submit', function(event) {
+	document.getElementById('signInForm').addEventListener('submit', function(event) {
 		document.getElementById('submitButton').style.display = 'none';
 		document.getElementById('spinnerButton').style.display = 'block';
 	});

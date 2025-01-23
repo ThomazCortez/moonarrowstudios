@@ -3,15 +3,7 @@
 session_start();
 
 // Database connection (update with your database credentials)
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "moonarrowstudios";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include 'php/db_connect.php';
 
 // Handle post creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
@@ -112,7 +104,7 @@ $categories = $conn->query("SELECT * FROM categories");
 <!DOCTYPE html>
 <html lang="en">
 
-<head> <?php include 'header.php'; ?>
+<head> <?php include 'php/include/header.php'; ?>
 	<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 	<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 	<link rel="stylesheet" href="https://bootswatch.com/5/darkly/bootstrap.min.css">
@@ -269,7 +261,7 @@ $categories = $conn->query("SELECT * FROM categories");
 		<h2 class="mt-4">Posts</h2> <?php while ($post = $result->fetch_assoc()): ?> <div class="card mb-3">
 			<div class="card-body">
 				<h3 class="card-title">
-					<a href="view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none"> <?= htmlspecialchars($post['title'] ?? 'No Title') ?> </a>
+					<a href="php/post/view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none"> <?= htmlspecialchars($post['title'] ?? 'No Title') ?> </a>
 				</h3>
 				<p class="card-text text-muted">
 					<em>Posted on <?= $post['created_at'] ?> by <?= htmlspecialchars($post['username']) ?></em>
@@ -281,7 +273,7 @@ $categories = $conn->query("SELECT * FROM categories");
 					<strong>Rating:</strong> Upvotes <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> ; Downvotes <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> ; Score : <?= $post['score'] ?? 0 ?>; </p>
 			</div>
 		</div> <?php endwhile; ?>
-	</div> <?php include 'footer.php'; ?>
+	</div> <?php include 'php/include/footer.php'; ?>
 </body>
 
 </html> <?php $conn->close(); ?>

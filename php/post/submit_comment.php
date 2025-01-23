@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require_once 'htmlpurifier/library/HTMLPurifier.auto.php';
+require_once '../../vendor/htmlpurifier/library/HTMLPurifier.auto.php';
 
 $config = HTMLPurifier_Config::createDefault();
 $purifier = new HTMLPurifier($config);
@@ -24,15 +24,7 @@ if (!$post_id || !$content) {
 }
 
 // Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "moonarrowstudios";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die(json_encode(['success' => false, 'error' => 'Database connection failed.']));
-}
+include '../db_connect.php';
 
 $stmt = $conn->prepare("INSERT INTO comments (post_id, user_id, content, parent_id, created_at) VALUES (?, ?, ?, ?, NOW())");
 $stmt->bind_param("iisi", $post_id, $_SESSION['user_id'], $content, $parent_id);

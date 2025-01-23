@@ -2,15 +2,7 @@
 session_start();
 
 // Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "moonarrowstudios";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include '../db_connect.php';
 
 // Fetch the post by ID
 $post_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -77,7 +69,7 @@ while ($row = $comments_result->fetch_assoc()) {
 <!DOCTYPE html>
 <html lang="en">
 
-<head> <?php include 'header.php'; ?>
+<head> <?php include '../include/header.php'; ?>
 	<!-- Include Highlight.js -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
 	<link rel="stylesheet" href="https://bootswatch.com/5/darkly/bootstrap.min.css">
@@ -183,7 +175,7 @@ while ($row = $comments_result->fetch_assoc()) {
 
 <body>
 	<div class="container mt-5">
-		<a href="index.php" class="btn btn-primary mb-3">Back to Main Page</a>
+		<a href="../../index.php" class="btn btn-primary mb-3">Back to Main Page</a>
 		<div class="card">
 			<div class="card-body">
 				<!-- Post Header -->
@@ -225,12 +217,12 @@ while ($row = $comments_result->fetch_assoc()) {
 			<i class="bi bi-caret-down-fill"></i> <span id="downvote-count"><?= $post['downvotes'] ?></span>
 		</button>
 		<p class="mt-2">Score: <span id="score"><?= $post['upvotes'] - $post['downvotes'] ?></span></p>
-	</div> <?php if (!isset($_SESSION['user_id'])): ?> <p class="text-center text-muted">You must <a href="sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p> <?php endif; ?>
+	</div> <?php if (!isset($_SESSION['user_id'])): ?> <p class="text-center text-muted">You must <a href="../sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p> <?php endif; ?>
 	<!-- Comment Section -->
 	<div class="card container">
 		<div class="card-body">
 			<h4>Comments</h4> <?php if (isset($_SESSION['user_id'])): ?> <div id="comment-editor" class="mb-3"></div>
-			<button class="btn btn-primary" id="submit-comment" data-post-id="<?= $post_id ?>">Submit Comment</button> <?php else: ?> <p class="text-muted">You must <a href="sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p> <?php endif; ?>
+			<button class="btn btn-primary" id="submit-comment" data-post-id="<?= $post_id ?>">Submit Comment</button> <?php else: ?> <p class="text-muted">You must <a href="../sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p> <?php endif; ?>
 			<hr>
             <div class="mb-3">
                 <label for="filter" class="form-label">Filter Comments:</label>
@@ -274,7 +266,7 @@ while ($row = $comments_result->fetch_assoc()) {
 				</div> <?php endforeach; ?> </div>
 		</div>
 	</div>
-	<br> <?php include 'footer.php'; ?> <?php $conn->close(); ?> <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+	<br> <?php include '../include/footer.php'; ?> <?php $conn->close(); ?> <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 	<script>
 	function toggleFullscreen(event) {
 		const media = event.target.parentElement.querySelector('img, video');

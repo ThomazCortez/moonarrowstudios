@@ -19,7 +19,7 @@
 <!-- Footer -->
 <footer class="text-center text-white mt-auto border-top bg-dark" data-bs-theme="dark">
   <!-- Copyright -->
-  <div class="text-center p-3" style="">
+  <div class="text-center p-3">
     © 2025 Copyright:
     <a class="text-white" href="about.php">MoonArrow Studios</a>
   </div>

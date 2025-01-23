@@ -12,7 +12,7 @@
 	<nav class="navbar p-2 border-bottom sticky-top bg-dark" data-bs-theme="dark">
 		<div>
 			<a class="navbar-brand" href="index.php">
-				<img src="horizontal_logo.png" height="50" alt="">
+				<img src="media/horizontal_logo.png" height="50" alt="">
 			</a>
 		</div>
 		<!-- Center Navigation --> <?php
@@ -24,11 +24,11 @@
 					<i class="bi bi-house-fill me-2"></i>Home </a>
 			</li>
 			<li>
-				<a href="marketplace.php" class="nav-link px-2 <?= $current_page == 'marketplace.php' ? 'link-secondary' : '' ?>">
+				<a href="php/marketplace.php" class="nav-link px-2 <?= $current_page == 'php/marketplace.php' ? 'link-secondary' : '' ?>">
 					<i class="bi bi-shop me-2"></i>Marketplace </a>
 			</li>
 			<li>
-				<a href="about.php" class="nav-link px-2 <?= $current_page == 'about.php' ? 'link-secondary' : '' ?>">
+				<a href="php/about.php" class="nav-link px-2 <?= $current_page == 'php/about.php' ? 'link-secondary' : '' ?>">
 					<i class="bi bi-question-circle-fill me-2"></i>About </a>
 			</li>
 		</ul>
@@ -40,15 +40,15 @@
 					<i class="bi bi-person"></i>
 				</button>
 				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" style="right: 0; top: 60px;">
-					<li><a class="dropdown-item" href="profile.php">Profile</a></li>
-					<li><a class="dropdown-item" href="settings.php">Settings</a></li>
+					<li><a class="dropdown-item" href="php/profile.php">Profile</a></li>
+					<li><a class="dropdown-item" href="php/settings.php">Settings</a></li>
 					<li>
 						<hr class="dropdown-divider">
 					</li>
-					<li><a class="dropdown-item" href="sign_out.php">Sign Out</a></li>
+					<li><a class="dropdown-item" href="php/sign_out/sign_out.php	">Sign Out</a></li>
 				</ul>
-			</div> <?php else: ?> <button type="button" class="btn btn-primary me-2" onclick="window.location.href='sign_in_html.php'">Sign In</button>
-			<button type="button" class="btn btn-secondary" onclick="window.location.href='sign_up_html.php'">Sign Up</button> <?php endif; ?>
+			</div> <?php else: ?> <button type="button" class="btn btn-primary me-2" onclick="window.location.href='php/sign_in/sign_in_html.php'">Sign In</button>
+			<button type="button" class="btn btn-secondary" onclick="window.location.href='php/sign_up/sign_up_html.php'">Sign Up</button> <?php endif; ?>
 		</div>
 	</nav>
 	<!-- Bootstrap JS -->

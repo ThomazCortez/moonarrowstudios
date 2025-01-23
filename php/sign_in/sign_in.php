@@ -1,6 +1,6 @@
 <?php
 // Include database connection
-include 'db_connect.php';
+include '../db_connect.php';
 
 session_start(); // Start session to manage user login state
 
@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['username'] = $db_username;
                 $_SESSION['role'] = $role;
 
-                header("Location: index.php");
+                header("Location: ../../index.php");
                 exit();
             } else {
                 // Redirect with error alert
