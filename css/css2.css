@@ -133,21 +133,88 @@ footer {
     color: #79c0ff;
 }
 
-/* Custom scrollbar (optional for GitHub aesthetic) */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+::placeholder {
+    color: #c9d1d9 !important;
+}
+/* Dropdown Menus */
+.dropdown-menu {
+    background-color: #161b22;
+    border: 1px solid #30363d;
 }
 
-::-webkit-scrollbar-track {
-    background: #0d1117;
+.dropdown-item {
+    color: #c9d1d9;
 }
 
-::-webkit-scrollbar-thumb {
-    background: #30363d;
-    border-radius: 4px;
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: #21262d;
+    color: #58a6ff;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: #484f58;
+/* Modal */
+.modal-content {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+}
+
+.modal-header {
+    border-bottom: 1px solid #30363d;
+}
+
+.modal-footer {
+    border-top: 1px solid #30363d;
+}
+
+/* Progress Bars */
+.progress {
+    background-color: #21262d;
+}
+
+.progress-bar {
+    background-color: #58a6ff;
+}
+
+/* Alerts */
+.alert-primary {
+    background-color: #1158c7;
+    border-color: #1b69d8;
+    color: #c9d1d9;
+}
+
+.alert-secondary {
+    background-color: #21262d;
+    border-color: #30363d;
+    color: #c9d1d9;
+}
+
+/* Badges */
+.badge {
+    background-color: #1f6feb;
+    color: #ffffff;
+}
+
+/* Tooltips */
+.tooltip-inner {
+    background-color: #161b22;
+    color: #c9d1d9;
+}
+
+/* Collapse/Accordion */
+.accordion-button {
+    background-color: #21262d;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #161b22;
+    color: #58a6ff;
+}
+
+/* Offcanvas */
+.offcanvas {
+    background-color: #161b22;
+    color: #c9d1d9;
+    border-left: 1px solid #30363d;
 }

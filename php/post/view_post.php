@@ -72,10 +72,9 @@ while ($row = $comments_result->fetch_assoc()) {
 <head> <?php include '../include/header.php'; ?>
 	<!-- Include Highlight.js -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
-	<link rel="stylesheet" href="https://bootswatch.com/5/darkly/bootstrap.min.css">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
-	<link rel="stylesheet" href="css.css">
+	<link rel="stylesheet" href="../../css/css2.css">
 	<script>
 	document.addEventListener('DOMContentLoaded', () => {
 		hljs.highlightAll();
@@ -83,10 +82,6 @@ while ($row = $comments_result->fetch_assoc()) {
 	</script>
 	<style>
 	pre {
-		background-color: #121212;
-		/* Dark theme background */
-		color: #ffffff;
-		/* Light text for dark background */
 		padding: 1rem;
 		border-radius: 0.25rem;
 		overflow: auto;
@@ -181,8 +176,8 @@ while ($row = $comments_result->fetch_assoc()) {
 				<!-- Post Header -->
 				<div class="text-center mb-4">
 					<h1 class="card-title mb-1"><?= htmlspecialchars($post['title'] ?? 'No Title') ?></h1>
-					<p class="text-muted mb-0"><em>Posted on <?= date('F j, Y, g:i A', strtotime($post['created_at'])) ?></em></p>
-					<p class="text-muted mb-0">By <strong><?= htmlspecialchars($post['username'] ?? 'Anonymous') ?></strong></p>
+					<p class="mb-0"><em>Posted on <?= date('F j, Y, g:i A', strtotime($post['created_at'])) ?></em></p>
+					<p class="mb-0">By <strong><?= htmlspecialchars($post['username'] ?? 'Anonymous') ?></strong></p>
 					<p><strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?></p>
 					<p><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
 				</div>
@@ -217,16 +212,16 @@ while ($row = $comments_result->fetch_assoc()) {
 			<i class="bi bi-caret-down-fill"></i> <span id="downvote-count"><?= $post['downvotes'] ?></span>
 		</button>
 		<p class="mt-2">Score: <span id="score"><?= $post['upvotes'] - $post['downvotes'] ?></span></p>
-	</div> <?php if (!isset($_SESSION['user_id'])): ?> <p class="text-center text-muted">You must <a href="../sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p> <?php endif; ?>
+	</div> <?php if (!isset($_SESSION['user_id'])): ?> <p class="text-center">You must <a href="../sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p> <?php endif; ?>
 	<!-- Comment Section -->
 	<div class="card container">
 		<div class="card-body">
 			<h4>Comments</h4> <?php if (isset($_SESSION['user_id'])): ?> <div id="comment-editor" class="mb-3"></div>
-			<button class="btn btn-primary" id="submit-comment" data-post-id="<?= $post_id ?>">Submit Comment</button> <?php else: ?> <p class="text-muted">You must <a href="../sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p> <?php endif; ?>
+			<button class="btn btn-primary" id="submit-comment" data-post-id="<?= $post_id ?>">Submit Comment</button> <?php else: ?> <p class="">You must <a href="../sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p> <?php endif; ?>
 			<hr>
             <div class="mb-3">
                 <label for="filter" class="form-label">Filter Comments:</label>
-                <select name="filter" id="filter" class="form-select me-2 bg-dark text-body-tertiary">
+                <select name="filter" id="filter" class="form-select me-2 bg-dark text-light">
                     <option value="highest_score" <?= isset($_GET['filter']) && $_GET['filter'] == 'highest_score' ? 'selected' : '' ?>>Highest Score</option>
                     <option value="newest" <?= isset($_GET['filter']) && $_GET['filter'] == 'newest' ? 'selected' : '' ?>>Newest</option>
                     <option value="most_replies" <?= isset($_GET['filter']) && $_GET['filter'] == 'most_replies' ? 'selected' : '' ?>>Most Replies</option>
@@ -235,7 +230,7 @@ while ($row = $comments_result->fetch_assoc()) {
 			<div id="comments-container"> <?php foreach ($comments as $comment): ?> <div class="card mb-3" style="max-width: 100%;">
 					<div class="card-body">
 						<!-- Comment Content -->
-						<h6 class="card-subtitle mb-2 text-muted"><?= htmlspecialchars($comment['username']) ?> - <?= date('F j, Y, g:i A', strtotime($comment['created_at'])) ?></h6>
+						<h6 class="card-subtitle mb-2"><?= htmlspecialchars($comment['username']) ?> - <?= date('F j, Y, g:i A', strtotime($comment['created_at'])) ?></h6>
 						<p class="card-text"><?= $comment['content'] ?></p>
 						<!-- Upvote and Downvote Buttons for Comments -->
 						<button class="btn btn-outline-success me-2 upvote-comment-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-comment-id="<?= $comment['id'] ?>">

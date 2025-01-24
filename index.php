@@ -107,13 +107,11 @@ $categories = $conn->query("SELECT * FROM categories");
 <head> <?php include 'php/include/header.php'; ?>
 	<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 	<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-	<link rel="stylesheet" href="https://bootswatch.com/5/darkly/bootstrap.min.css">
-	<link rel="stylesheet" href="css.css">
 	<style>
 	/* Style for Quill placeholder */
 	.ql-editor.ql-blank::before {
 		color: #6c757d;
-		/* This is the Bootstrap 'text-body-tertiary' color */
+		/* This is the Bootstrap 'text-body-tertiry' color */
 	}
 
 	/* Zoom effect on hover for post cards */
@@ -193,17 +191,17 @@ $categories = $conn->query("SELECT * FROM categories");
 	</script>
 </head>
 
-<body>
+<body class="">
 	<div class="container"> <?php if (isset($_SESSION['error'])): ?> <div class="alert alert-danger alert-dismissible fade show" role="alert"> <?= htmlspecialchars($_SESSION['error']) ?> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 		</div> <?php unset($_SESSION['error']); ?> <?php endif; ?>
 		<!-- Search, Filter, and Create Post Section -->
 		<div class="d-flex justify-content-between align-items-center my-4">
 			<form method="GET" class="d-flex align-items-center">
-				<input type="text" name="search" class="form-control me-2 bg-dark text-body" placeholder="Search" value="<?= htmlspecialchars($search) ?>">
-				<select name="category" class="form-select me-2 bg-dark text-body-tertiary">
+				<input type="text" name="search" class="form-control me-2 bg-dark" placeholder="Search" value="<?= htmlspecialchars($search) ?>">
+				<select name="category" class="form-select me-2 bg-dark text-light">
 					<option value="">All Categories</option> <?php while ($row = $categories->fetch_assoc()): ?> <option value="<?= $row['id'] ?>" <?= $category_filter == $row['id'] ? 'selected' : '' ?>><?= $row['name'] ?></option> <?php endwhile; ?>
 				</select>
-				<select name="filter" class="form-select me-2 bg-dark text-body-tertiary">
+				<select name="filter" class="form-select me-2 bg-dark text-light">
 					<option value="newest" <?= isset($_GET['filter']) && $_GET['filter'] == 'newest' ? 'selected' : '' ?>>Newest</option>
 					<option value="oldest" <?= isset($_GET['filter']) && $_GET['filter'] == 'oldest' ? 'selected' : '' ?>>Oldest</option>
 					<option value="highest_score" <?= isset($_GET['filter']) && $_GET['filter'] == 'highest_score' ? 'selected' : '' ?>>Highest Score</option>
@@ -224,7 +222,7 @@ $categories = $conn->query("SELECT * FROM categories");
 						<form id="createPostForm" method="POST" enctype="multipart/form-data">
 							<div class="mb-3">
 								<label for="title" class="form-label">Title</label>
-								<input type="text" name="title" id="title" class="form-control bg-dark text-body" placeholder="Your post title goes here" required>
+								<input type="text" name="title" id="title" class="form-control bg-dark" placeholder="Your post title goes here" required>
 							</div>
 							<div class="mb-3">
 								<label for="content" class="form-label">Content</label>
@@ -233,13 +231,13 @@ $categories = $conn->query("SELECT * FROM categories");
 							</div>
 							<div class="mb-3">
 								<label for="category" class="form-label">Category</label>
-								<select name="category" id="category" class="form-select bg-dark text-body-tertiary" required>
+								<select name="category" id="category" class="form-select bg-dark text-light" required>
 									<option value="" class="">Select Category</option> <?php $categories->data_seek(0); while ($row = $categories->fetch_assoc()): ?> <option value="<?= $row['id'] ?>"><?= $row['name'] ?></option> <?php endwhile; ?>
 								</select>
 							</div>
 							<div class="mb-3">
 								<label for="hashtags" class="form-label">Hashtags</label>
-								<input type="text" name="hashtags" id="hashtags" class="form-control bg-dark text-body" placeholder="e.g., #2025, #unity, #unrealengine" required>
+								<input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #unity, #unrealengine" required>
 							</div>
 							<div class="mb-3">
 								<label for="images" class="form-label">Images</label>
@@ -263,7 +261,7 @@ $categories = $conn->query("SELECT * FROM categories");
 				<h3 class="card-title">
 					<a href="php/post/view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none"> <?= htmlspecialchars($post['title'] ?? 'No Title') ?> </a>
 				</h3>
-				<p class="card-text text-muted">
+				<p class="card-text text-light">
 					<em>Posted on <?= $post['created_at'] ?> by <?= htmlspecialchars($post['username']) ?></em>
 				</p>
 				<p class="card-text"><strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?></p>
