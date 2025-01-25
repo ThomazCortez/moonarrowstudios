@@ -4,7 +4,6 @@ session_start();
 
 // Database connection (update with your database credentials)
 include 'php/db_connect.php';
-
 // Handle post creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
     if (!isset($_SESSION['user_id'])) {
@@ -107,6 +106,7 @@ $categories = $conn->query("SELECT * FROM categories");
 <head> <?php include 'php/include/header.php'; ?>
 	<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 	<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+	
 	<style>
 	/* Style for Quill placeholder */
 	.ql-editor.ql-blank::before {
@@ -271,7 +271,6 @@ $categories = $conn->query("SELECT * FROM categories");
 					<strong>Rating:</strong> Upvotes <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> ; Downvotes <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> ; Score : <?= $post['score'] ?? 0 ?>; </p>
 			</div>
 		</div> <?php endwhile; ?>
-	</div> <?php include 'php/include/footer.php'; ?>
 </body>
 
 </html> <?php $conn->close(); ?>

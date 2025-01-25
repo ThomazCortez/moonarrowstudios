@@ -261,7 +261,7 @@ while ($row = $comments_result->fetch_assoc()) {
 				</div> <?php endforeach; ?> </div>
 		</div>
 	</div>
-	<br> <?php include '../include/footer.php'; ?> <?php $conn->close(); ?> <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+	<br> <?php $conn->close(); ?> <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 	<script>
 	function toggleFullscreen(event) {
 		const media = event.target.parentElement.querySelector('img, video');
