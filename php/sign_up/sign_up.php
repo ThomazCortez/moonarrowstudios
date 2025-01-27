@@ -63,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div style="max-width: 500px; margin: auto; background-color: #24222A; border: 1px solid #333; border-radius: 8px; padding: 30px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);">
         <!-- Logo Section -->
         <div style="margin-bottom: 20px;">
-            <img src="https://i.postimg.cc/cLbHLSL3/horizontal-logo.png" alt="MoonArrow Studios Logo" style="width: 120px; height: auto;">
+            <img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" alt="MoonArrow Studios Logo" style="width: 120px; height: auto;">
         </div>
         <!-- Content Section -->
         <h2 style="font-size: 20px; color: #FFFFFF; margin-bottom: 10px;">Welcome to MoonArrow Studios, ' . htmlspecialchars($username) . '!</h2>

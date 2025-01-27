@@ -124,6 +124,226 @@ $categories = $conn->query("SELECT * FROM categories");
 		transform: scale(1.05);
 		/* Slightly zoom in */
 	}
+	:root {
+    --color-canvas-default: #ffffff;
+    --color-canvas-subtle: #f6f8fa;
+    --color-border-default: #d0d7de;
+    --color-border-muted: #d8dee4;
+    --color-btn-primary-bg: #2da44e;
+    --color-btn-primary-hover-bg: #2c974b;
+    --color-fg-default: #1F2328;
+    --color-fg-muted: #656d76;
+    --color-accent-fg: #0969da;
+    --color-input-bg: #ffffff;
+    --color-card-bg: #ffffff;
+    --color-card-border: #d0d7de;
+    --color-header-bg: #f6f8fa;
+    --color-modal-bg: #ffffff;
+    --color-alert-error-bg: #FFEBE9;
+    --color-alert-error-border: rgba(255, 129, 130, 0.4);
+    --color-alert-error-fg: #cf222e;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-canvas-default: #0d1117;
+        --color-canvas-subtle: #161b22;
+        --color-border-default: #30363d;
+        --color-border-muted: #21262d;
+        --color-btn-primary-bg: #238636;
+        --color-btn-primary-hover-bg: #2ea043;
+        --color-fg-default: #c9d1d9;
+        --color-fg-muted: #8b949e;
+        --color-accent-fg: #58a6ff;
+        --color-input-bg: #0d1117;
+        --color-card-bg: #161b22;
+        --color-card-border: #30363d;
+        --color-header-bg: #161b22;
+        --color-modal-bg: #161b22;
+        --color-alert-error-bg: #ff000015;
+        --color-alert-error-border: rgba(248, 81, 73, 0.4);
+        --color-alert-error-fg: #f85149;
+    }
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    background-color: var(--color-canvas-default);
+    color: var(--color-fg-default);
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    padding: 5px 12px;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--color-fg-default);
+    background-color: var(--color-input-bg);
+    border: 1px solid var(--color-border-default);
+    border-radius: 6px;
+    box-shadow: var(--color-primer-shadow-inset);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--color-accent-fg);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+}
+
+/* Labels */
+.form-label {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--color-fg-default);
+    margin-bottom: 8px;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 6px;
+    padding: 5px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    transition: .2s cubic-bezier(0.3, 0, 0.5, 1);
+}
+
+.btn-primary {
+    color: #ffffff;
+    background-color: var(--color-btn-primary-bg);
+    border: 1px solid rgba(27, 31, 36, 0.15);
+    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-btn-primary-hover-bg);
+}
+
+/* Cards for Posts */
+.card {
+    background-color: var(--color-card-bg);
+    border: 1px solid var(--color-card-border);
+    border-radius: 6px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s ease;
+}
+
+.card:hover {
+    border-color: var(--color-accent-fg);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.card-body {
+    padding: 16px;
+}
+
+/* Modal Styling */
+.modal-content {
+    background-color: var(--color-modal-bg);
+    border: 1px solid var(--color-border-default);
+    border-radius: 6px;
+}
+
+.modal-header {
+    background-color: var(--color-header-bg);
+    border-bottom: 1px solid var(--color-border-muted);
+    padding: 16px;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 16px;
+}
+
+/* Alerts */
+.alert {
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+}
+
+.alert-danger {
+    background-color: var(--color-alert-error-bg);
+    border-color: var(--color-alert-error-border);
+    color: var(--color-alert-error-fg);
+}
+
+/* Quill Editor Customization */
+.ql-container {
+    border-radius: 0 0 6px 6px !important;
+    background-color: var(--color-input-bg) !important;
+    border-color: var(--color-border-default) !important;
+}
+
+.ql-toolbar {
+    border-radius: 6px 6px 0 0 !important;
+    background-color: var(--color-header-bg) !important;
+    border-color: var(--color-border-default) !important;
+}
+
+.ql-editor {
+    min-height: 200px;
+    color: var(--color-fg-default) !important;
+}
+
+/* Search and Filter Section */
+.search-filter-section {
+    background-color: var(--color-canvas-subtle);
+    padding: 16px;
+    border-radius: 6px;
+    margin-bottom: 24px;
+}
+
+/* Post Metadata */
+.post-metadata {
+    font-size: 12px;
+    color: var(--color-fg-muted);
+    margin-bottom: 8px;
+}
+
+/* Rating Section */
+.rating-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+    border-top: 1px solid var(--color-border-muted);
+    margin-top: 16px;
+}
+
+.rating-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Hashtags */
+.hashtags {
+    color: var(--color-accent-fg);
+    font-size: 12px;
+}
+
+.hashtag {
+    background-color: var(--color-canvas-subtle);
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-right: 4px;
+}
 	</style>
 	<script>
 	document.addEventListener("DOMContentLoaded", function() {

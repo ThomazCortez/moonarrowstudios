@@ -4,6 +4,7 @@ require '../config.php';
 $token = $_GET['token'] ?? '';
 $successMessage = '';
 $errorMessage = '';
+$disableInput = false;
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     // Validate token
@@ -13,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     if (!$resetEntry) {
         $errorMessage = 'Invalid or expired token.';
+        $disableInput = true;
     }
 }
 
@@ -27,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (!$resetEntry) {
         $errorMessage = 'Invalid or expired token.';
+        $disableInput = true;
     } else {
         // Hash the new password
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
@@ -40,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$token]);
 
         $successMessage = 'Password has been reset successfully.';
+        $disableInput = true;
     }
 }
 ?>
@@ -55,39 +59,174 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../../css/css2.css">
     <style>
-    body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
+        :root {
+            --color-canvas-default: #ffffff;
+            --color-canvas-subtle: #f6f8fa;
+            --color-border-default: #d0d7de;
+            --color-border-muted: #d8dee4;
+            --color-btn-primary-bg: #2da44e;
+            --color-btn-primary-hover-bg: #2c974b;
+            --color-fg-default: #1F2328;
+            --color-fg-muted: #656d76;
+            --color-accent-fg: #0969da;
+            --color-input-bg: #ffffff;
+        }
 
-    .reset-password-container {
-        width: 100%;
-        max-width: 400px;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-        padding: 30px;
-    }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-canvas-default: #0d1117;
+                --color-canvas-subtle: #161b22;
+                --color-border-default: #30363d;
+                --color-border-muted: #21262d;
+                --color-btn-primary-bg: #238636;
+                --color-btn-primary-hover-bg: #2ea043;
+                --color-fg-default: #c9d1d9;
+                --color-fg-muted: #8b949e;
+                --color-accent-fg: #58a6ff;
+                --color-input-bg: #0d1117;
+            }
+        }
+    
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            background-color: var(--color-canvas-default);
+            color: var(--color-fg-default);
+        }
 
-    .logo {
-        display: block;
-        margin: 0 auto 20px auto;
-    }
+        .reset-password-container {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            background-color: var(--color-canvas-subtle);
+        }
 
-    .alert {
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1050;
-        max-width: 90%;
-    }
+        .logo {
+            display: block;
+            margin: 0 auto 20px auto;
+        }
 
-    .input-group-text {
-        cursor: pointer;
-    }
+        .alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            max-width: 90%;
+        }
+
+        .form-control {
+            padding: 5px 12px;
+            font-size: 14px;
+            line-height: 20px;
+            color: var(--color-fg-default);
+            background-color: var(--color-input-bg);
+            border: 1px solid var(--color-border-default);
+            border-radius: 6px;
+            box-shadow: var(--color-primer-shadow-inset);
+        }
+
+        .form-control:focus {
+            border-color: #0969da;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+        }
+
+        .form-control:disabled {
+            background-color: var(--color-canvas-subtle);
+            cursor: not-allowed;
+        }
+
+        .form-label {
+            font-weight: 400;
+            font-size: 14px;
+            color: var(--color-fg-default);
+        }
+
+        .btn-primary {
+            color: #ffffff;
+            background-color: var(--color-btn-primary-bg);
+            border-color: rgba(27, 31, 36, 0.15);
+            box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+            padding: 5px 16px;
+            border-radius: 6px;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-btn-primary-hover-bg);
+        }
+
+        .btn-primary:disabled {
+            background-color: var(--color-btn-primary-bg);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-outline-secondary {
+            color: var(--color-fg-muted);
+            border-color: var(--color-border-default);
+            background-color: var(--color-canvas-default);
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: var(--color-canvas-subtle);
+            border-color: var(--color-border-muted);
+        }
+
+        .btn-outline-secondary:disabled {
+            background-color: var(--color-canvas-subtle);
+            cursor: not-allowed;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: -0.5px;
+        }
+
+        a {
+            color: var(--color-accent-fg);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .input-group {
+            border-radius: 6px;
+        }
+
+        .input-group .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .input-group .btn {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        hr {
+            border-color: var(--color-border-muted);
+        }
+
+        .centered-footer {
+            text-align: center;
+        }
+
+        .centered-footer p {
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 
@@ -118,13 +257,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="mb-3">
                 <label for="password" class="form-label">New Password</label>
                 <div class="input-group">
-                    <input type="password" name="password" id="password" class="form-control" placeholder="Enter new password" required>
-                    <button type="button" id="togglePassword" class="btn btn-outline-secondary">
+                    <input type="password" 
+                           name="password" 
+                           id="password" 
+                           class="form-control" 
+                           placeholder="Enter new password" 
+                           required
+                           <?php if ($disableInput): ?>disabled<?php endif; ?>>
+                    <button type="button" 
+                            id="togglePassword" 
+                            class="btn btn-outline-secondary"
+                            <?php if ($disableInput): ?>disabled<?php endif; ?>>
                         <i class="bi bi-eye"></i>
                     </button>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary btn-reset-password w-100">Reset Password</button>
+            <button type="submit" 
+                    class="btn btn-primary btn-reset-password w-100"
+                    <?php if ($disableInput): ?>disabled<?php endif; ?>>
+                Reset Password
+            </button>
         </form>
         <hr>
         <div class="text-center mt-3">
@@ -157,7 +309,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             alert.addEventListener('transitionend', () => alert.remove());
         });
     }, 5000);
+
+    // If there's a success message, redirect to sign in page after 5 seconds
+    <?php if ($successMessage): ?>
+    setTimeout(() => {
+        window.location.href = '../sign_in/sign_in_html.php';
+    }, 5000);
+    <?php endif; ?>
     </script>
 </body>
-
 </html>

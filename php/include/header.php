@@ -6,14 +6,105 @@
 	<!-- Bootstrap Icons -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymou.s">
+	<style>
+		:root {
+    --color-canvas-default: #ffffff;
+    --color-canvas-subtle: #f6f8fa;
+    --color-border-default: #d0d7de;
+    --color-border-muted: #d8dee4;
+    --color-btn-primary-bg: #2da44e;
+    --color-btn-primary-hover-bg: #2c974b;
+    --color-fg-default: #1F2328;
+    --color-fg-muted: #656d76;
+    --color-accent-fg: #0969da;
+    --color-input-bg: #ffffff;
+    --color-card-bg: #ffffff;
+    --color-card-border: #d0d7de;
+    --color-header-bg: #f6f8fa;
+    --color-modal-bg: #ffffff;
+    --color-alert-error-bg: #FFEBE9;
+    --color-alert-error-border: rgba(255, 129, 130, 0.4);
+    --color-alert-error-fg: #cf222e;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-canvas-default: #0d1117;
+        --color-canvas-subtle: #161b22;
+        --color-border-default: #30363d;
+        --color-border-muted: #21262d;
+        --color-btn-primary-bg: #238636;
+        --color-btn-primary-hover-bg: #2ea043;
+        --color-fg-default: #c9d1d9;
+        --color-fg-muted: #8b949e;
+        --color-accent-fg: #58a6ff;
+        --color-input-bg: #0d1117;
+        --color-card-bg: #161b22;
+        --color-card-border: #30363d;
+        --color-header-bg: #161b22;
+        --color-modal-bg: #161b22;
+        --color-alert-error-bg: #ff000015;
+        --color-alert-error-border: rgba(248, 81, 73, 0.4);
+        --color-alert-error-fg: #f85149;
+    }
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    background-color: var(--color-canvas-default);
+    color: var(--color-fg-default);
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 6px;
+    padding: 5px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    transition: .2s cubic-bezier(0.3, 0, 0.5, 1);
+}
+
+.btn-primary {
+    color: #ffffff;
+    background-color: var(--color-btn-primary-bg);
+    border: 1px solid rgba(27, 31, 36, 0.15);
+    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-btn-primary-hover-bg);
+}
+
+/* Alerts */
+.alert {
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+}
+
+.alert-danger {
+    background-color: var(--color-alert-error-bg);
+    border-color: var(--color-alert-error-border);
+    color: var(--color-alert-error-fg);
+}
+.navbar {
+        background-color: var(--color-header-bg);
+        border-bottom: 1px solid var(--color-border-muted);
+        z-index: 1030; /* Ensures it stays above content */
+    }
+	</style>
 </head>
 
 <body>
 	<nav class="navbar p-2 sticky-top" data-bs-theme="">
 		<div>
 			<a class="navbar-brand" href="index.php">
-				<img src="media/horizontal_logo.png" height="50" alt="">
+				<img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" height="50" alt="">
 			</a>
 		</div>
 		<!-- Center Navigation --> <?php

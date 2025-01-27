@@ -67,105 +67,435 @@ while ($row = $comments_result->fetch_assoc()) {
 
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 
 <head> <?php include '../include/header.php'; ?>
 	<!-- Include Highlight.js -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
-	<link rel="stylesheet" href="../../css/css2.css">
 	<script>
 	document.addEventListener('DOMContentLoaded', () => {
 		hljs.highlightAll();
 	});
 	</script>
 	<style>
-	pre {
-		padding: 1rem;
-		border-radius: 0.25rem;
-		overflow: auto;
-	}
+	:root {
+    /* Base colors from previous styles */
+    --color-canvas-default: #ffffff;
+    --color-canvas-subtle: #f6f8fa;
+    --color-border-default: #d0d7de;
+    --color-border-muted: #d8dee4;
+    --color-btn-primary-bg: #2da44e;
+    --color-btn-primary-hover-bg: #2c974b;
+    --color-fg-default: #1F2328;
+    --color-fg-muted: #656d76;
+    --color-accent-fg: #0969da;
+    --color-input-bg: #ffffff;
+    /* Additional colors for post view */
+    --color-vote-active: #238636;
+    --color-downvote-active: #cf222e;
+    --color-comment-bg: #ffffff;
+    --color-comment-border: #d0d7de;
+    --color-reply-bg: #f6f8fa;
+    --color-code-bg: #f6f8fa;
+    --color-media-overlay: rgba(0, 0, 0, 0.5);
+}
 
-	code {
-		font-family: 'Courier New', monospace;
-		font-size: 0.9rem;
-	}
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Base dark colors from previous styles */
+        --color-canvas-default: #0d1117;
+        --color-canvas-subtle: #161b22;
+        --color-border-default: #30363d;
+        --color-border-muted: #21262d;
+        --color-btn-primary-bg: #238636;
+        --color-btn-primary-hover-bg: #2ea043;
+        --color-fg-default: #c9d1d9;
+        --color-fg-muted: #8b949e;
+        --color-accent-fg: #58a6ff;
+        --color-input-bg: #0d1117;
+        /* Additional dark colors */
+        --color-vote-active: #238636;
+        --color-downvote-active: #f85149;
+        --color-comment-bg: #161b22;
+        --color-comment-border: #30363d;
+        --color-reply-bg: #1c2129;
+        --color-code-bg: #161b22;
+        --color-media-overlay: rgba(0, 0, 0, 0.7);
+    }
+}
 
-	.media-container {
-		display: flex;
-		justify-content: center;
-		flex-wrap: wrap;
-		gap: 1rem;
-	}
+/* Post Title and Metadata */
+.card-title {
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--color-fg-default);
+}
 
-	.media-item {
-		width: 150px;
-		height: 100px;
-		overflow: hidden;
-		position: relative;
-		border: 1px solid #ddd;
-		border-radius: 5px;
-	}
+.post-metadata {
+    color: var(--color-fg-muted);
+    font-size: 14px;
+    margin-bottom: 16px;
+}
 
-	.media-item img,
-	.media-item video {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
+/* Content Styling */
+.card {
+    background-color: var(--color-canvas-default);
+    border: 1px solid var(--color-border-default);
+    border-radius: 6px;
+    margin-bottom: 24px;
+}
 
-	.fullscreen-btn {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		background-color: rgba(0, 0, 0, 0.5);
-		color: white;
-		border: none;
-		padding: 0.5rem 1rem;
-		border-radius: 5px;
-		cursor: pointer;
-		z-index: 10;
-	}
+.card-body {
+    padding: 24px;
+}
 
-	.fullscreen-btn:hover {
-		background-color: rgba(0, 0, 0, 0.8);
-	}
+/* Media Gallery */
+.media-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+    padding: 16px;
+    background-color: var(--color-canvas-subtle);
+    border-radius: 6px;
+}
 
-	.exit-fullscreen-btn {
-		position: fixed;
-		top: 10px;
-		right: 10px;
-		background-color: rgba(0, 0, 0, 0.7);
-		color: white;
-		border: none;
-		padding: 0.5rem 1rem;
-		border-radius: 5px;
-		cursor: pointer;
-		z-index: 1000;
-		display: none;
-	}
+.media-item {
+    position: relative;
+    aspect-ratio: 16/9;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--color-border-muted);
+    transition: transform 0.2s ease;
+}
 
-	.upvote-btn.active,
-	.downvote-btn.active {
-		background-color: #28a745 !important;
-		/* Upvote color */
-		color: white;
-	}
+.media-item:hover {
+    transform: scale(1.05);
+}
 
-	.downvote-btn.active {
-		background-color: #dc3545 !important;
-		/* Downvote color */
-		color: white;
-	}
+.media-item img,
+.media-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
 
-	/* Style for Quill placeholder */
-	.ql-editor.ql-blank::before {
+.fullscreen-btn {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background-color: var(--color-media-overlay);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+    cursor: pointer;
+	display: none;
+}
+
+.media-item:hover .fullscreen-btn {
+    opacity: 1;
+}
+
+/* Voting System */
+.vote-section {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.upvote-btn, .downvote-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border-default);
+    background-color: var(--color-canvas-default);
+    transition: all 0.2s ease;
+}
+
+.upvote-btn:hover, .downvote-btn:hover {
+    background-color: var(--color-canvas-subtle);
+}
+
+.upvote-btn.active {
+    background-color: var(--color-vote-active);
+    color: white;
+    border-color: transparent;
+}
+
+.downvote-btn.active {
+    background-color: var(--color-downvote-active);
+    color: white;
+    border-color: transparent;
+}
+
+/* Comments Section */
+.comments-section {
+    margin-top: 32px;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+/* Quill Editor Customization */
+.ql-toolbar {
+    background-color: var(--color-canvas-subtle) !important;
+    border-color: var(--color-border-default) !important;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.ql-container {
+    background-color: var(--color-canvas-default) !important;
+    border-color: var(--color-border-default) !important;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+}
+
+.ql-editor {
+    min-height: 120px;
+    font-size: 14px;
+    color: var(--color-fg-default) !important;
+}
+
+/* Comments and Replies */
+.comment-card {
+    border: 1px solid var(--color-border-muted);
+    border-radius: 6px;
+    margin-bottom: 16px;
+    background-color: var(--color-comment-bg);
+}
+
+.replies {
+    margin-left: 24px;
+    padding-left: 24px;
+    border-left: 2px solid var(--color-border-muted);
+}
+
+.reply-card {
+    background-color: var(--color-reply-bg);
+    border: 1px solid var(--color-border-muted);
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.reply-btn, .toggle-replies-btn {
+    color: var(--color-accent-fg);
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.reply-btn:hover, .toggle-replies-btn:hover {
+    background-color: var(--color-canvas-subtle);
+    text-decoration: none;
+}
+
+/* Code Blocks */
+pre {
+    background-color: var(--color-code-bg) !important;
+    border: 1px solid var(--color-border-muted);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 16px 0;
+}
+
+code {
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 85%;
+    background-color: var(--color-code-bg);
+    padding: 0.2em 0.4em;
+    border-radius: 6px;
+}
+
+/* Alert Styling */
+.alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 16px;
+    border-radius: 6px;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.alert-danger {
+    background-color: var(--color-downvote-active);
+    color: white;
+    border: none;
+}
+
+/* Filter Select */
+.filter-select {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border-default);
+    background-color: var(--color-canvas-default);
+    color: var(--color-fg-default);
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+/* Modal Styles */
+.media-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.media-modal.active {
+    display: flex;
+}
+
+.modal-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90vh;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.modal-content img,
+.modal-content video {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.close-modal {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.close-modal:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Update existing media item styles */
+.media-item img,
+.media-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+/* Style for Quill placeholder */
+.ql-editor.ql-blank::before {
 		color: #6c757d;
-		/* This is the Bootstrap 'text-body-tertiary' color */
+		/* This is the Bootstrap 'text-body-tertiry' color */
 	}
 	</style>
+	<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Create modal container
+    const modal = document.createElement('div');
+    modal.className = 'media-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <button class="close-modal">×</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    const modalContent = modal.querySelector('.modal-content');
+    const closeButton = modal.querySelector('.close-modal');
+
+    // Function to open modal
+    function openModal(mediaElement) {
+        const clone = mediaElement.cloneNode(true);
+        
+        // Reset any specific sizing from the thumbnail
+        clone.style.position = 'static';
+        clone.style.width = 'auto';
+        clone.style.height = 'auto';
+        
+        // If it's a video, add controls
+        if (clone.tagName.toLowerCase() === 'video') {
+            clone.controls = true;
+        }
+        
+        modalContent.insertBefore(clone, closeButton);
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
+
+    // Function to close modal
+    function closeModal() {
+        const mediaElement = modalContent.querySelector('img, video');
+        if (mediaElement) {
+            mediaElement.remove();
+        }
+        modal.classList.remove('active');
+        document.body.style.overflow = ''; // Restore scrolling
+    }
+
+    // Event listeners for opening modal
+    document.querySelectorAll('.media-item img, .media-item video').forEach(media => {
+        media.addEventListener('click', () => openModal(media));
+    });
+
+    // Event listeners for closing modal
+    closeButton.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+});
+</script>
 </head>
 
 <body>
@@ -184,9 +514,18 @@ while ($row = $comments_result->fetch_assoc()) {
 				<hr>
 				<!-- Post Content -->
 				<div> <?= $post['content'] ?> </div> <?php
-            // Decode attachments data
-            $images = !empty($post['images']) ? json_decode($post['images'], true) : [];
-            $videos = !empty($post['videos']) ? json_decode($post['videos'], true) : [];
+			// After decoding the JSON, clean up the paths
+			$images = !empty($post['images']) ? json_decode($post['images'], true) : [];
+			$videos = !empty($post['videos']) ? json_decode($post['videos'], true) : [];
+
+			// Clean up the paths by replacing escaped slashes
+			$images = array_map(function($path) {
+				return str_replace('\\/', '/', $path);
+			}, $images);
+
+			$videos = array_map(function($path) {
+				return str_replace('\\/', '/', $path);
+			}, $videos);
 
             // Check if there are any attachments
             if (!empty($images) || !empty($videos)): ?>
@@ -194,11 +533,11 @@ while ($row = $comments_result->fetch_assoc()) {
 				<!-- Display Images and Videos -->
 				<h6 class='text-center'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
 				<div class="media-container"> <?php if (!empty($images)): ?> <?php foreach ($images as $image): ?> <div class="media-item">
-						<img src="<?= htmlspecialchars($image) ?>" alt="Post Image">
+						<img src="../../<?= htmlspecialchars($image) ?>" alt="Post Image">
 						<button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
 					</div> <?php endforeach; ?> <?php endif; ?> <?php if (!empty($videos)): ?> <?php foreach ($videos as $video_path): ?> <div class="media-item">
 						<video>
-							<source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag. </video>
+							<source src="../../<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag. </video>
 						<button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
 					</div> <?php endforeach; ?> <?php endif; ?> </div> <?php endif; ?>
 			</div>
