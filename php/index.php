@@ -493,7 +493,7 @@ body {
 				<p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
 				<!-- Simplified Rating Display -->
 				<p class="card-text">
-					<strong>Rating:</strong> Upvotes <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> ; Downvotes <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> ; Score : <?= $post['score'] ?? 0 ?>; </p>
+					<strong>Rating:</strong> <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> Score : <?= $post['score'] ?? 0 ?></p>
 			</div>
 		</div> <?php endwhile; ?>
 </body>

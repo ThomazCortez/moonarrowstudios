@@ -272,9 +272,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
                     </div>
                     <div class="col-auto">
                         <select name="sort" class="form-select" onchange="this.form.submit()">
-                            <option value="recent" <?= (!isset($_GET['sort']) || $_GET['sort'] == 'recent') ? 'selected' : '' ?>>Most Recent</option>
+                            <option value="recent" <?= (!isset($_GET['sort']) || $_GET['sort'] == 'recent') ? 'selected' : '' ?>>Newest</option>
                             <option value="score" <?= (isset($_GET['sort']) && $_GET['sort'] == 'score') ? 'selected' : '' ?>>Highest Score</option>
-                            <option value="oldest" <?= (isset($_GET['sort']) && $_GET['sort'] == 'oldest') ? 'selected' : '' ?>>Oldest First</option>
+                            <option value="oldest" <?= (isset($_GET['sort']) && $_GET['sort'] == 'oldest') ? 'selected' : '' ?>>Oldest</option>
                         </select>
                     </div>
                 </form>
