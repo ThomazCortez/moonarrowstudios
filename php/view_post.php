@@ -507,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				<div class="text-center mb-4">
 					<h1 class="card-title mb-1"><?= htmlspecialchars($post['title'] ?? 'No Title') ?></h1>
 					<p class="mb-0"><em>Posted on <?= date('F j, Y, g:i A', strtotime($post['created_at'])) ?></em></p>
-					<p class="mb-0">By <strong><?= htmlspecialchars($post['username'] ?? 'Anonymous') ?></strong></p>
+					<p class="mb-0">By <strong><a href="profile.php?id=<?= htmlspecialchars($post['user_id']) ?>"><?= htmlspecialchars($post['username'] ?? 'Anonymous') ?></a></strong></p>
 					<p><strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?></p>
 					<p><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
 				</div>
@@ -533,11 +533,11 @@ document.addEventListener('DOMContentLoaded', () => {
 				<!-- Display Images and Videos -->
 				<h6 class='text-center'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
 				<div class="media-container"> <?php if (!empty($images)): ?> <?php foreach ($images as $image): ?> <div class="media-item">
-						<img src="../../<?= htmlspecialchars($image) ?>" alt="Post Image">
+						<img src="<?= htmlspecialchars($image) ?>" alt="Post Image">
 						<button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
 					</div> <?php endforeach; ?> <?php endif; ?> <?php if (!empty($videos)): ?> <?php foreach ($videos as $video_path): ?> <div class="media-item">
 						<video>
-							<source src="../../<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag. </video>
+							<source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag. </video>
 						<button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
 					</div> <?php endforeach; ?> <?php endif; ?> </div> <?php endif; ?>
 			</div>
@@ -551,12 +551,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			<i class="bi bi-caret-down-fill"></i> <span id="downvote-count"><?= $post['downvotes'] ?></span>
 		</button>
 		<p class="mt-2">Score: <span id="score"><?= $post['upvotes'] - $post['downvotes'] ?></span></p>
-	</div> <?php if (!isset($_SESSION['user_id'])): ?> <p class="text-center">You must <a href="../sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p> <?php endif; ?>
+	</div> <?php if (!isset($_SESSION['user_id'])): ?> <p class="text-center">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p> <?php endif; ?>
 	<!-- Comment Section -->
 	<div class="card container">
 		<div class="card-body">
 			<h4>Comments</h4> <?php if (isset($_SESSION['user_id'])): ?> <div id="comment-editor" class="mb-3"></div>
-			<button class="btn btn-primary" id="submit-comment" data-post-id="<?= $post_id ?>">Submit Comment</button> <?php else: ?> <p class="">You must <a href="../sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p> <?php endif; ?>
+			<button class="btn btn-primary" id="submit-comment" data-post-id="<?= $post_id ?>">Submit Comment</button> <?php else: ?> <p class="">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p> <?php endif; ?>
 			<hr>
             <div class="mb-3">
                 <label for="filter" class="form-label">Filter Comments:</label>
@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			<div id="comments-container"> <?php foreach ($comments as $comment): ?> <div class="card mb-3" style="max-width: 100%;">
 					<div class="card-body">
 						<!-- Comment Content -->
-						<h6 class="card-subtitle mb-2"><?= htmlspecialchars($comment['username']) ?> - <?= date('F j, Y, g:i A', strtotime($comment['created_at'])) ?></h6>
+						<h6 class="card-subtitle mb-2"><a href="profile.php?id=<?= htmlspecialchars($comment['user_id']) ?>"><?= htmlspecialchars($comment['username']) ?></a> - <?= date('F j, Y, g:i A', strtotime($comment['created_at'])) ?></h6>
 						<p class="card-text"><?= $comment['content'] ?></p>
 						<!-- Upvote and Downvote Buttons for Comments -->
 						<button class="btn btn-outline-success me-2 upvote-comment-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-comment-id="<?= $comment['id'] ?>">
@@ -585,7 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						<div class="replies ms-4 mt-3" style="display: none;"> <?php foreach ($comment['replies'] as $reply): ?> <div class="card mb-2" style="max-width: 100%;">
 								<div class="card-body">
 									<!-- Reply Content -->
-									<h6 class="card-subtitle mb-2 text-muted"><?= htmlspecialchars($reply['username']) ?> - <?= date('F j, Y, g:i A', strtotime($reply['created_at'])) ?></h6>
+									<h6 class="card-subtitle mb-2 text-muted"><a href="profile.php?id=<?= htmlspecialchars($reply['user_id']) ?>"><?= htmlspecialchars($reply['username']) ?></a> - <?= date('F j, Y, g:i A', strtotime($reply['created_at'])) ?></h6>
 									<p class="card-text"><?= $reply['content'] ?></p>
 									<!-- Upvote and Downvote Buttons for Replies -->
 									<button class="btn btn-outline-success me-3 upvote-reply-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-comment-id="<?= $reply['id'] ?>">
