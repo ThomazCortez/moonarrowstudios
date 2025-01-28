@@ -154,7 +154,10 @@ while ($row = $comments_result->fetch_assoc()) {
 
 /* Media Gallery */
 .media-container {
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 16px;
     padding: 16px;
@@ -163,6 +166,12 @@ while ($row = $comments_result->fetch_assoc()) {
 }
 
 .media-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    object-fit: contain;
+    width: 150px;
+    height: 100px;
     position: relative;
     aspect-ratio: 16/9;
     border-radius: 6px;
