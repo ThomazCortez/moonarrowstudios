@@ -3,10 +3,11 @@
 session_start();
 include 'db_connect.php';
 
-$user_id = isset($_GET['id']) ? $_GET['id'] : ($_SESSION['user_id'] ?? null);
+// Get user ID from URL or session
+$user_id = isset($_GET['id']) ? (int)$_GET['id'] : ($_SESSION['user_id'] ?? null);
 
 if (!$user_id) {
-    header("Location: index.php");
+    header("Location: sign_in/sign_in_html.php");
     exit;
 }
 
@@ -51,28 +52,29 @@ $posts = $stmt->get_result();
 
 // Check if the current user is following this profile
 $is_following = false;
-if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != $user_id) {
-    $stmt = $conn->prepare("SELECT * FROM follows WHERE follower_id = ? AND following_id = ?");
+$is_logged_in = isset($_SESSION['user_id']);
+$viewing_own_profile = $is_logged_in && $_SESSION['user_id'] == $user_id;
+
+if ($is_logged_in && !$viewing_own_profile) {
+    $stmt = $conn->prepare("SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?");
     $stmt->bind_param("ii", $_SESSION['user_id'], $user_id);
     $stmt->execute();
     $is_following = $stmt->get_result()->num_rows > 0;
 }
 
 // Handle follow/unfollow actions
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in && !$viewing_own_profile) {
     if (isset($_POST['follow'])) {
-        $stmt = $conn->prepare("INSERT INTO follows (follower_id, following_id) VALUES (?, ?)");
+        $stmt = $conn->prepare("INSERT IGNORE INTO follows (follower_id, following_id) VALUES (?, ?)");
         $stmt->bind_param("ii", $_SESSION['user_id'], $user_id);
         $stmt->execute();
-        header("Location: profile.php?id=" . $user_id);
-        exit;
     } elseif (isset($_POST['unfollow'])) {
         $stmt = $conn->prepare("DELETE FROM follows WHERE follower_id = ? AND following_id = ?");
         $stmt->bind_param("ii", $_SESSION['user_id'], $user_id);
         $stmt->execute();
-        header("Location: profile.php?id=" . $user_id);
-        exit;
     }
+    header("Location: profile.php?id=" . $user_id);
+    exit;
 }
 ?>
 
@@ -160,7 +162,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
             color: var(--color-fg-muted);
         }
 
-        /* Card styles */
         .card {
             background-color: var(--color-card-bg);
             border: 1px solid var(--color-card-border);
@@ -242,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
                 <div class="profile-header">
                     <div class="username-container">
                         <h1 class="username mb-0"><?= htmlspecialchars($user['username']) ?></h1>
-                        <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != $user_id): ?>
+                        <?php if ($is_logged_in && !$viewing_own_profile): ?>
                             <form method="POST" class="follow-button">
                                 <?php if ($is_following): ?>
                                     <button type="submit" name="unfollow" class="btn btn-outline-primary">Unfollow</button>
@@ -253,10 +254,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
                         <?php endif; ?>
                     </div>
                 </div>
+
                 <div class="user-stats">
                     <p class="mb-1">Joined <?= htmlspecialchars($user['formatted_join_date']) ?></p>
                     <p class="mb-1">Followers: <?= htmlspecialchars($follower_count) ?></p>
                 </div>
+
                 <?php if ($user['description']): ?>
                     <p class="description"><?= nl2br(htmlspecialchars($user['description'])) ?></p>
                 <?php endif; ?>
