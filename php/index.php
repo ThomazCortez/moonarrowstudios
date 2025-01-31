@@ -412,6 +412,16 @@ body {
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
 }
+// Add this CSS to your existing styles
+.hashtag-container .badge {
+    font-size: 0.9em;
+    padding: 0.5em 0.7em;
+}
+
+.hashtag-container .btn-close {
+    padding: 0.5em;
+    margin-left: 0.3em;
+}
 	</style>
 	<script>
 	document.addEventListener("DOMContentLoaded", function() {
@@ -552,6 +562,110 @@ document.addEventListener('DOMContentLoaded', function() {
         hoverCard.classList.remove('visible');
     });
 });
+// Add this JavaScript after your existing scripts
+document.addEventListener('DOMContentLoaded', function() {
+    const hashtagInput = document.querySelector('#hashtags');
+    const hashtagContainer = document.createElement('div');
+    hashtagContainer.className = 'hashtag-container d-flex flex-wrap gap-2 mb-2';
+    const hiddenHashtagInput = document.createElement('input');
+    hiddenHashtagInput.type = 'hidden';
+    hiddenHashtagInput.name = 'hashtags';
+    
+    // Insert container before the input
+    hashtagInput.parentNode.insertBefore(hashtagContainer, hashtagInput);
+    hashtagInput.parentNode.appendChild(hiddenHashtagInput);
+    
+    // Style the input
+    hashtagInput.style.paddingLeft = '20px';
+    
+    // Create a '#' prefix that stays before the input
+    const hashPrefix = document.createElement('div');
+    hashPrefix.textContent = '#';
+    hashPrefix.style.position = 'absolute';
+    hashPrefix.style.left = '8px';
+    hashPrefix.style.top = '50%';
+    hashPrefix.style.transform = 'translateY(-50%)';
+    hashPrefix.style.color = '#6c757d';
+    hashPrefix.style.pointerEvents = 'none';
+    
+    // Wrap input in relative container
+    const inputWrapper = document.createElement('div');
+    inputWrapper.style.position = 'relative';
+    hashtagInput.parentNode.insertBefore(inputWrapper, hashtagInput);
+    inputWrapper.appendChild(hashPrefix);
+    inputWrapper.appendChild(hashtagInput);
+    
+    let hashtags = new Set();
+    
+    function addHashtag(tag) {
+        if (tag && !hashtags.has(tag)) {
+            hashtags.add(tag);
+            updateHashtagDisplay();
+            updateHiddenInput();
+        }
+    }
+    
+    function removeHashtag(tag) {
+        hashtags.delete(tag);
+        updateHashtagDisplay();
+        updateHiddenInput();
+    }
+    
+    function updateHashtagDisplay() {
+        hashtagContainer.innerHTML = '';
+        hashtags.forEach(tag => {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-dark d-flex align-items-center gap-2';
+            badge.innerHTML = `
+                #${tag}
+                <button type="button" class="btn-close btn-close-white" style="font-size: 0.5rem;"></button>
+            `;
+            badge.querySelector('.btn-close').addEventListener('click', () => removeHashtag(tag));
+            hashtagContainer.appendChild(badge);
+        });
+    }
+    
+    function updateHiddenInput() {
+        hiddenHashtagInput.value = Array.from(hashtags).map(tag => `#${tag}`).join(' ');
+    }
+    
+    hashtagInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const tag = this.value.trim().replace(/^#/, '');
+            if (tag) {
+                addHashtag(tag);
+                this.value = '';
+            }
+        }
+    });
+    
+    // Handle paste events
+    hashtagInput.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const paste = (e.clipboardData || window.clipboardData).getData('text');
+        const tags = paste.split(/[\s,]+/);
+        tags.forEach(tag => {
+            tag = tag.trim().replace(/^#/, '');
+            if (tag) addHashtag(tag);
+        });
+    });
+});
+// Modify the post display section to show hashtags as badges
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.card-text').forEach(element => {
+        if (element.innerHTML.includes('<strong>Hashtags:</strong>')) {
+            const hashtags = element.innerHTML.split('<strong>Hashtags:</strong> ')[1].trim();
+            if (hashtags) {
+                const hashtagArray = hashtags.split(' ');
+                const hashtagBadges = hashtagArray.map(tag => 
+                    `<span class="badge bg-dark me-1">${tag}</span>`
+                ).join('');
+                element.innerHTML = `<strong>Hashtags:</strong> ${hashtagBadges}`;
+            }
+        }
+    });
+});
 	</script>
 </head>
 
@@ -601,7 +715,7 @@ document.addEventListener('DOMContentLoaded', function() {
 							</div>
 							<div class="mb-3">
 								<label for="hashtags" class="form-label">Hashtags</label>
-								<input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #unity, #unrealengine" required>
+								<input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #unity, #unrealengine">
 							</div>
 							<div class="mb-3">
 								<label for="images" class="form-label">Images</label>
