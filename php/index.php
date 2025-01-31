@@ -509,8 +509,13 @@ document.addEventListener('DOMContentLoaded', function() {
                          <i class="bi bi-person-fill text-light" style="font-size: 1.5rem;"></i>
                        </div>`;
                 
+                // Set banner background with specific RGB values
+                const bannerStyle = userData.banner 
+                    ? `background-image: url('${userData.banner}')`
+                    : `background-color: rgb(108, 117, 125) !important`;
+                
                 hoverCard.innerHTML = `
-                    <div class="hover-card-banner" style="background-image: url('${userData.banner || ''}')"></div>
+                    <div class="hover-card-banner" style="${bannerStyle}"></div>
                     <div class="hover-card-content">
                         ${avatarContent}
                         <div class="hover-card-info">
