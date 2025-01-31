@@ -140,9 +140,6 @@ $categories = $conn->query("SELECT * FROM categories");
     --color-card-border: #d0d7de;
     --color-header-bg: #f6f8fa;
     --color-modal-bg: #ffffff;
-    --color-alert-error-bg: #FFEBE9;
-    --color-alert-error-border: rgba(255, 129, 130, 0.4);
-    --color-alert-error-fg: #cf222e;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -161,9 +158,6 @@ $categories = $conn->query("SELECT * FROM categories");
         --color-card-border: #30363d;
         --color-header-bg: #161b22;
         --color-modal-bg: #161b22;
-        --color-alert-error-bg: #ff000015;
-        --color-alert-error-border: rgba(248, 81, 73, 0.4);
-        --color-alert-error-fg: #f85149;
     }
 }
 
@@ -268,20 +262,6 @@ body {
 
 .modal-body {
     padding: 16px;
-}
-
-/* Alerts */
-.alert {
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    border-radius: 6px;
-    border: 1px solid transparent;
-}
-
-.alert-danger {
-    background-color: var(--color-alert-error-bg);
-    border-color: var(--color-alert-error-border);
-    color: var(--color-alert-error-fg);
 }
 
 /* Quill Editor Customization */
@@ -412,7 +392,7 @@ body {
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
 }
-// Add this CSS to your existing styles
+
 .hashtag-container .badge {
     font-size: 0.9em;
     padding: 0.5em 0.7em;
@@ -425,29 +405,27 @@ body {
 	</style>
 	<script>
 	document.addEventListener("DOMContentLoaded", function() {
-		// Initialize Quill editor
-		var quill = new Quill('#editor', {
-			placeholder: 'Your post content goes here',
-			theme: 'snow',
-			modules: {
-				toolbar: [
-					[{
-						header: [3, 4, false]
-					}],
-					['bold', 'italic', 'underline'],
-					['blockquote', 'code-block'],
-					[{
-						list: 'ordered'
-					}, {
-						list: 'bullet'
-					}],
-					['link']
-				]
-			}
-		});
-		// Submit handler to sync Quill content with hidden textarea
-		const form = document.querySelector('#createPostForm');
-    
+    // Initialize Quill editor
+    var quill = new Quill('#editor', {
+        placeholder: 'Your post content goes here',
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                [{
+                    header: [3, 4, false]
+                }],
+                ['bold', 'italic', 'underline'],
+                ['blockquote', 'code-block'],
+                [{
+                    list: 'ordered'
+                }, {
+                    list: 'bullet'
+                }],
+                ['link']
+            ]
+        }
+    });
+
     // Create alert container
     const alertContainer = document.createElement('div');
     alertContainer.style.position = 'fixed';
@@ -459,7 +437,7 @@ body {
     
     function showBootstrapAlert(message) {
         const alert = `
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show">
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>`;
@@ -474,18 +452,120 @@ body {
             }
         }, 5000);
     }
-    
+
+    let hashtags = new Set(); // Move hashtags Set to global scope
+
+    // Submit handler
+    const form = document.querySelector('#createPostForm');
     form.addEventListener('submit', function(e) {
         const contentInput = document.querySelector('input[name="content"]');
         const quillContent = quill.root.innerHTML.trim();
+        
+        let hasError = false;
+        
+        // Check content
         if(quillContent === '' || quillContent === '<p><br></p>') {
             e.preventDefault();
             showBootstrapAlert('Post content is required!');
-        } else {
+            hasError = true;
+        }
+        
+        // Check for hashtag badges
+        if(hashtags.size === 0) {
+            e.preventDefault();
+            if (!hasError) { // Only show if no content error
+                showBootstrapAlert('At least one hashtag badge is required!');
+            }
+            hasError = true;
+        }
+
+        if (!hasError) {
             contentInput.value = quillContent;
         }
     });
+
+    // Hashtag handling
+    const hashtagInput = document.querySelector('#hashtags');
+    const hashtagContainer = document.createElement('div');
+    hashtagContainer.className = 'hashtag-container d-flex flex-wrap gap-2 mb-2';
+    const hiddenHashtagInput = document.createElement('input');
+    hiddenHashtagInput.type = 'hidden';
+    hiddenHashtagInput.name = 'hashtags';
+    
+    hashtagInput.parentNode.insertBefore(hashtagContainer, hashtagInput);
+    hashtagInput.parentNode.appendChild(hiddenHashtagInput);
+    
+    hashtagInput.style.paddingLeft = '20px';
+    
+    const hashPrefix = document.createElement('div');
+    hashPrefix.textContent = '#';
+    hashPrefix.style.position = 'absolute';
+    hashPrefix.style.left = '8px';
+    hashPrefix.style.top = '50%';
+    hashPrefix.style.transform = 'translateY(-50%)';
+    hashPrefix.style.color = '#6c757d';
+    hashPrefix.style.pointerEvents = 'none';
+    
+    const inputWrapper = document.createElement('div');
+    inputWrapper.style.position = 'relative';
+    hashtagInput.parentNode.insertBefore(inputWrapper, hashtagInput);
+    inputWrapper.appendChild(hashPrefix);
+    inputWrapper.appendChild(hashtagInput);
+    
+    function addHashtag(tag) {
+        if (tag && !hashtags.has(tag)) {
+            hashtags.add(tag);
+            updateHashtagDisplay();
+            updateHiddenInput();
+        }
+    }
+    
+    function removeHashtag(tag) {
+        hashtags.delete(tag);
+        updateHashtagDisplay();
+        updateHiddenInput();
+    }
+    
+    function updateHashtagDisplay() {
+        hashtagContainer.innerHTML = '';
+        hashtags.forEach(tag => {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-dark d-flex align-items-center gap-2';
+            badge.innerHTML = `
+                #${tag}
+                <button type="button" class="btn-close btn-close-white" style="font-size: 0.5rem;"></button>
+            `;
+            badge.querySelector('.btn-close').addEventListener('click', () => removeHashtag(tag));
+            hashtagContainer.appendChild(badge);
+        });
+    }
+    
+    function updateHiddenInput() {
+        hiddenHashtagInput.value = Array.from(hashtags).map(tag => `#${tag}`).join(' ');
+    }
+    
+    hashtagInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const tag = this.value.trim().replace(/^#/, '');
+            if (tag) {
+                addHashtag(tag);
+                this.value = '';
+            }
+        }
+    });
+    
+    hashtagInput.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const paste = (e.clipboardData || window.clipboardData).getData('text');
+        const tags = paste.split(/[\s,]+/);
+        tags.forEach(tag => {
+            tag = tag.trim().replace(/^#/, '');
+            if (tag) addHashtag(tag);
+        });
+    });
 });
+
 // Add this JavaScript to handle the hover card functionality
 document.addEventListener('DOMContentLoaded', function() {
     let hoverCard = document.createElement('div');

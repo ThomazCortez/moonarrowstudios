@@ -79,19 +79,6 @@ body {
     background-color: var(--color-btn-primary-hover-bg);
 }
 
-/* Alerts */
-.alert {
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    border-radius: 6px;
-    border: 1px solid transparent;
-}
-
-.alert-danger {
-    background-color: var(--color-alert-error-bg);
-    border-color: var(--color-alert-error-border);
-    color: var(--color-alert-error-fg);
-}
 .navbar {
         background-color: var(--color-header-bg);
         border-bottom: 1px solid var(--color-border-muted);
