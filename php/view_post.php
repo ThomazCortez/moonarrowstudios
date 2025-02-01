@@ -436,9 +436,86 @@ code {
 }
 /* Style for Quill placeholder */
 .ql-editor.ql-blank::before {
-		color: #6c757d;
-		/* This is the Bootstrap 'text-body-tertiry' color */
-	}
+	color: #6c757d;
+	/* This is the Bootstrap 'text-body-tertiry' color */
+}
+/* Add this to your existing CSS */
+.profile-hover-card {
+    position: fixed;
+    width: 300px;
+    background-color: var(--color-card-bg);
+    border: 1px solid var(--color-card-border);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.profile-hover-card.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.hover-card-banner {
+    height: 80px;
+    width: 100%;
+    object-fit: cover;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    background-color: var(--color-canvas-subtle);
+}
+
+.hover-card-content {
+    padding: 12px;
+    position: relative;
+}
+
+.hover-card-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px solid var(--color-card-bg);
+    position: absolute;
+    top: -24px;
+    left: 12px;
+    background-color: var(--color-canvas-subtle);
+}
+
+.hover-card-info {
+    margin-top: 28px;
+}
+
+.hover-card-username {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-fg-default);
+    margin-bottom: 4px;
+}
+
+.hover-card-meta {
+    font-size: 12px;
+    color: var(--color-fg-muted);
+}
+.card-banner {
+    width: 100%;
+    height: 200px; /* Set height for the banner */
+    object-fit: cover; /* Ensure the image covers the area */
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.hashtag-container .badge {
+    font-size: 0.9em;
+    padding: 0.5em 0.7em;
+}
+
+.hashtag-container .btn-close {
+    padding: 0.5em;
+    margin-left: 0.3em;
+}
 	</style>
 	<script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -879,5 +956,81 @@ document.addEventListener('DOMContentLoaded', () => {
         url.searchParams.set('filter', selectedFilter);
         window.location.href = url.toString();
     });
+    // Add this JavaScript to handle the hover card functionality
+document.addEventListener('DOMContentLoaded', function() {
+    let hoverCard = document.createElement('div');
+    hoverCard.className = 'profile-hover-card';
+    document.body.appendChild(hoverCard);
+    
+    let hoverTimeout;
+    let currentUsername;
+    
+    // Add hover listeners to all username links
+    document.querySelectorAll('a[href^="profile.php"]').forEach(link => {
+        link.addEventListener('mouseenter', async (e) => {
+            clearTimeout(hoverTimeout);
+            const userId = new URLSearchParams(link.href.split('?')[1]).get('id');
+            currentUsername = link;
+            
+            // Position the hover card near the username
+            const rect = link.getBoundingClientRect();
+            hoverCard.style.left = `${rect.left}px`;
+            hoverCard.style.top = `${rect.bottom + 8}px`;
+            
+            // Fetch and display user data
+            try {
+                const response = await fetch(`fetch_user_preview.php?user_id=${userId}`);
+                const userData = await response.json();
+                
+                // Create avatar content based on whether there's a profile picture
+                const avatarContent = userData.profile_picture 
+                    ? `<img class="hover-card-avatar" src="${userData.profile_picture}" alt="${userData.username}'s avatar">` 
+                    : `<div class="hover-card-avatar d-flex align-items-center justify-content-center bg-dark">
+                         <i class="bi bi-person-fill text-light" style="font-size: 1.5rem;"></i>
+                       </div>`;
+                
+                // Set banner background with specific RGB values
+                const bannerStyle = userData.banner 
+                    ? `background-image: url('${userData.banner}')`
+                    : `background-color: rgb(108, 117, 125) !important`;
+                
+                hoverCard.innerHTML = `
+                    <div class="hover-card-banner" style="${bannerStyle}"></div>
+                    <div class="hover-card-content">
+                        ${avatarContent}
+                        <div class="hover-card-info">
+                            <div class="hover-card-username">${userData.username}</div>
+                            <div class="hover-card-meta">
+                                Joined ${userData.formatted_join_date}<br>
+                                ${userData.follower_count} followers
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                hoverCard.classList.add('visible');
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        });
+        
+        link.addEventListener('mouseleave', () => {
+            hoverTimeout = setTimeout(() => {
+                if (currentUsername === link) {
+                    hoverCard.classList.remove('visible');
+                }
+            }, 200);
+        });
+    });
+    
+    // Handle hover on the card itself
+    hoverCard.addEventListener('mouseenter', () => {
+        clearTimeout(hoverTimeout);
+    });
+    
+    hoverCard.addEventListener('mouseleave', () => {
+        hoverCard.classList.remove('visible');
+    });
+});
 	</script>
 </body>
