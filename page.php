@@ -1,4 +1,11 @@
-<?php include 'php/header.php'; ?>
+<?php
+// Start the session at the top of the page to check for user login state
+session_start();
+
+include 'php/header.php';
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MoonArrow Studios</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
             --color-canvas-default: #ffffff;

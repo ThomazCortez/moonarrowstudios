@@ -25,12 +25,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = base64_decode($img);
         
         $new_filename = 'profile_' . $user_id . '.png';
-        $profile_picture_path = $upload_dir . $new_filename;
+        // Local path for file saving
+        $local_path = $upload_dir . $new_filename;
+        // Database path for storage
+        $db_path = '\moonarrowstudios\uploads\profile_pictures\\' . $new_filename;
         
-        file_put_contents($profile_picture_path, $data);
+        file_put_contents($local_path, $data);
         
         $stmt = $conn->prepare("UPDATE users SET profile_picture = ? WHERE user_id = ?");
-        $stmt->bind_param("si", $profile_picture_path, $user_id);
+        $stmt->bind_param("si", $db_path, $user_id);
         $stmt->execute();
     }
     
@@ -47,12 +50,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = base64_decode($img);
         
         $new_filename = 'banner_' . $user_id . '.png';
-        $banner_path = $upload_dir . $new_filename;
+        // Local path for file saving
+        $local_path = $upload_dir . $new_filename;
+        // Database path for storage
+        $db_path = '\moonarrowstudios\uploads\banners\\' . $new_filename;
         
-        file_put_contents($banner_path, $data);
+        file_put_contents($local_path, $data);
         
         $stmt = $conn->prepare("UPDATE users SET banner = ? WHERE user_id = ?");
-        $stmt->bind_param("si", $banner_path, $user_id);
+        $stmt->bind_param("si", $db_path, $user_id);
         $stmt->execute();
     }
     
