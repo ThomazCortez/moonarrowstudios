@@ -28,27 +28,56 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $follower_count = $stmt->get_result()->fetch_assoc()['follower_count'];
 
-// Determine sort order
-$sort_order = isset($_GET['sort']) ? $_GET['sort'] : 'recent';
+// Get search parameters
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+$category_filter = isset($_GET['category']) ? $_GET['category'] : '';
+$sort_order = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
 
+// Determine sort order
 $order_by = match($sort_order) {
-    'score' => 'ORDER BY (posts.upvotes - posts.downvotes) DESC, posts.created_at DESC',
-    'oldest' => 'ORDER BY posts.created_at ASC',
-    default => 'ORDER BY posts.created_at DESC'
+    'oldest' => 'posts.created_at ASC',
+    'highest_score' => '(posts.upvotes - posts.downvotes) DESC, posts.created_at DESC',
+    default => 'posts.created_at DESC'
 };
 
-// Fetch user's posts
-$stmt = $conn->prepare("
-    SELECT posts.*, categories.name AS category_name, 
-           (posts.upvotes - posts.downvotes) AS score 
-    FROM posts 
-    JOIN categories ON posts.category_id = categories.id 
-    WHERE posts.user_id = ? 
-    $order_by
-");
-$stmt->bind_param("i", $user_id);
+// Build the base query
+$sql = "SELECT posts.*, categories.name AS category_name, 
+               (posts.upvotes - posts.downvotes) AS score 
+        FROM posts 
+        JOIN categories ON posts.category_id = categories.id 
+        WHERE posts.user_id = ?";
+
+// Add search conditions
+if ($search) {
+    $sql .= " AND (posts.title LIKE ? OR posts.content LIKE ? OR posts.hashtags LIKE ?)";
+}
+if ($category_filter) {
+    $sql .= " AND category_id = ?";
+}
+
+$sql .= " ORDER BY " . $order_by;
+
+// Prepare and execute the query with dynamic parameters
+$types = "i"; // Start with user_id parameter type
+$params = [$user_id];
+
+if ($search) {
+    $search_param = "%$search%";
+    $types .= "sss"; // Add three string parameter types for title, content, and hashtags
+    $params = array_merge($params, [$search_param, $search_param, $search_param]);
+}
+if ($category_filter) {
+    $types .= "i"; // Add integer parameter type for category
+    $params[] = $category_filter;
+}
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $posts = $stmt->get_result();
+
+// Fetch categories for the filter dropdown
+$categories = $conn->query("SELECT * FROM categories");
 
 // Check if the current user is following this profile
 $is_following = false;
@@ -77,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in && !$viewing_own_prof
     exit;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -279,19 +309,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in && !$viewing_own_prof
 
             <hr class="my-4">
 
-            <div class="filter-section">
-                <form method="GET" class="row align-items-center">
+            <div class="">
+                <form method="GET" class="d-flex align-items-center gap-2">
                     <input type="hidden" name="id" value="<?= $user_id ?>">
-                    <div class="col-auto">
-                        <label class="form-label mb-0 me-2">Sort by:</label>
-                    </div>
-                    <div class="col-auto">
-                        <select name="sort" class="form-select" onchange="this.form.submit()">
-                            <option value="recent" <?= (!isset($_GET['sort']) || $_GET['sort'] == 'recent') ? 'selected' : '' ?>>Newest</option>
-                            <option value="score" <?= (isset($_GET['sort']) && $_GET['sort'] == 'score') ? 'selected' : '' ?>>Highest Score</option>
-                            <option value="oldest" <?= (isset($_GET['sort']) && $_GET['sort'] == 'oldest') ? 'selected' : '' ?>>Oldest</option>
-                        </select>
-                    </div>
+                    <input type="text" name="search" class="form-control bg-dark" 
+                        placeholder="Search" value="<?= htmlspecialchars($search) ?>">
+                    
+                    <select name="category" class="form-select bg-dark text-light">
+                        <option value="">All Categories</option>
+                        <?php 
+                        $categories->data_seek(0);
+                        while ($cat = $categories->fetch_assoc()): 
+                        ?>
+                            <option value="<?= $cat['id'] ?>" 
+                                    <?= $category_filter == $cat['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($cat['name']) ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+
+                    <select name="sort" class="form-select bg-dark text-light">
+                        <option value="newest" <?= $sort_order == 'newest' ? 'selected' : '' ?>>Newest</option>
+                        <option value="oldest" <?= $sort_order == 'oldest' ? 'selected' : '' ?>>Oldest</option>
+                        <option value="highest_score" <?= $sort_order == 'highest_score' ? 'selected' : '' ?>>Highest Score</option>
+                    </select>
+
+                    <button type="submit" class="btn btn-primary">Search</button>
                 </form>
             </div>
 
