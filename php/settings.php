@@ -1,6 +1,10 @@
 <?php
 // settings.php
 session_start();
+header("Cache-Control: no-cache, no-store, must-revalidate");
+
+header("Pragma: no-cache, no-store");
+
 include 'db_connect.php';
 
 if (!isset($_SESSION['user_id'])) {
