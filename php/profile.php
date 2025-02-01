@@ -218,6 +218,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in && !$viewing_own_prof
                 --color-card-border: #30363d;
             }
         }
+        /* Hashtags */
+        .hashtags {
+            color: var(--color-accent-fg);
+            font-size: 12px;
+        }
+
+        .hashtag {
+            background-color: var(--color-canvas-subtle);
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-right: 4px;
+        }
     </style>
 </head>
 <body>
@@ -314,5 +326,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in && !$viewing_own_prof
             </div>
         </div>
     </div>
+    <script>
+        // Modify the post display section to show hashtags as badges
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.card-text').forEach(element => {
+        if (element.innerHTML.includes('<strong>Hashtags:</strong>')) {
+            const hashtags = element.innerHTML.split('<strong>Hashtags:</strong> ')[1].trim();
+            if (hashtags) {
+                const hashtagArray = hashtags.split(' ');
+                const hashtagBadges = hashtagArray.map(tag => 
+                    `<span class="badge bg-dark me-1">${tag}</span>`
+                ).join('');
+                element.innerHTML = `<strong>Hashtags:</strong> ${hashtagBadges}`;
+            }
+        }
+    });
+});
+    </script>
 </body>
 </html>

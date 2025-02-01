@@ -595,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					<p class="mb-0"><em>Posted on <?= date('F j, Y, g:i A', strtotime($post['created_at'])) ?></em></p>
 					<p class="mb-0">By <strong><a href="profile.php?id=<?= htmlspecialchars($post['user_id']) ?>"><?= htmlspecialchars($post['username'] ?? 'Anonymous') ?></a></strong></p>
 					<p><strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?></p>
-					<p><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
+					<p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
 				</div>
 				<hr>
 				<!-- Post Content -->
@@ -1030,6 +1030,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     hoverCard.addEventListener('mouseleave', () => {
         hoverCard.classList.remove('visible');
+    });
+});
+// Modify the post display section to show hashtags as badges
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.card-text').forEach(element => {
+        if (element.innerHTML.includes('<strong>Hashtags:</strong>')) {
+            const hashtags = element.innerHTML.split('<strong>Hashtags:</strong> ')[1].trim();
+            if (hashtags) {
+                const hashtagArray = hashtags.split(' ');
+                const hashtagBadges = hashtagArray.map(tag => 
+                    `<span class="badge bg-dark me-1">${tag}</span>`
+                ).join('');
+                element.innerHTML = `<strong>Hashtags:</strong> ${hashtagBadges}`;
+            }
+        }
     });
 });
 	</script>
