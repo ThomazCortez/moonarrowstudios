@@ -461,12 +461,12 @@ code {
 }
 
 .hover-card-banner {
-    height: 80px;
     width: 100%;
+    height: 80px;
     object-fit: cover;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
-    background-color: var(--color-canvas-subtle);
+    background-color: rgb(108, 117, 125);
 }
 
 .hover-card-content {
@@ -957,7 +957,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = url.toString();
     });
     // Add this JavaScript to handle the hover card functionality
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     let hoverCard = document.createElement('div');
     hoverCard.className = 'profile-hover-card';
     document.body.appendChild(hoverCard);
@@ -965,37 +965,38 @@ document.addEventListener('DOMContentLoaded', function() {
     let hoverTimeout;
     let currentUsername;
     
-    // Add hover listeners to all username links
     document.querySelectorAll('a[href^="profile.php"]').forEach(link => {
         link.addEventListener('mouseenter', async (e) => {
             clearTimeout(hoverTimeout);
             const userId = new URLSearchParams(link.href.split('?')[1]).get('id');
             currentUsername = link;
             
-            // Position the hover card near the username
             const rect = link.getBoundingClientRect();
             hoverCard.style.left = `${rect.left}px`;
             hoverCard.style.top = `${rect.bottom + 8}px`;
             
-            // Fetch and display user data
             try {
                 const response = await fetch(`fetch_user_preview.php?user_id=${userId}`);
                 const userData = await response.json();
                 
-                // Create avatar content based on whether there's a profile picture
+                // Create avatar content
                 const avatarContent = userData.profile_picture 
                     ? `<img class="hover-card-avatar" src="${userData.profile_picture}" alt="${userData.username}'s avatar">` 
                     : `<div class="hover-card-avatar d-flex align-items-center justify-content-center bg-dark">
                          <i class="bi bi-person-fill text-light" style="font-size: 1.5rem;"></i>
                        </div>`;
                 
-                // Set banner background with specific RGB values
-                const bannerStyle = userData.banner 
-                    ? `background-image: url('${userData.banner}')`
-                    : `background-color: rgb(108, 117, 125) !important`;
+                // Create banner content
+                let bannerContent;
+                if (userData.banner) {
+                    // Use img tag for banner instead of background-image
+                    bannerContent = `<img src="${userData.banner}" class="hover-card-banner" alt="User banner">`;
+                } else {
+                    bannerContent = `<div class="hover-card-banner" style="background-color: rgb(108, 117, 125);"></div>`;
+                }
                 
                 hoverCard.innerHTML = `
-                    <div class="hover-card-banner" style="${bannerStyle}"></div>
+                    ${bannerContent}
                     <div class="hover-card-content">
                         ${avatarContent}
                         <div class="hover-card-info">
@@ -1023,7 +1024,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Handle hover on the card itself
     hoverCard.addEventListener('mouseenter', () => {
         clearTimeout(hoverTimeout);
     });
@@ -1032,6 +1032,7 @@ document.addEventListener('DOMContentLoaded', function() {
         hoverCard.classList.remove('visible');
     });
 });
+
 // Modify the post display section to show hashtags as badges
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.card-text').forEach(element => {

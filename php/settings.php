@@ -1,9 +1,6 @@
 <?php
 // settings.php
 session_start();
-header("Cache-Control: no-cache, no-store, must-revalidate");
-
-header("Pragma: no-cache, no-store");
 
 include 'db_connect.php';
 
@@ -28,11 +25,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $img = str_replace(' ', '+', $img);
         $data = base64_decode($img);
         
-        $new_filename = 'profile_' . $user_id . '.png';
+        // Add timestamp to filename for cache busting
+        $timestamp = time();
+        $new_filename = 'profile_' . $user_id . '_' . $timestamp . '.png';
+        
         // Local path for file saving
         $local_path = $upload_dir . $new_filename;
         // Database path for storage
         $db_path = '\moonarrowstudios\uploads\profile_pictures\\' . $new_filename;
+        
+        // Delete old profile picture if it exists
+        $stmt = $conn->prepare("SELECT profile_picture FROM users WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $old_profile = $stmt->get_result()->fetch_assoc();
+        
+        if ($old_profile && $old_profile['profile_picture']) {
+            $old_file = str_replace('\moonarrowstudios', '..', $old_profile['profile_picture']);
+            if (file_exists($old_file)) {
+                unlink($old_file);
+            }
+        }
         
         file_put_contents($local_path, $data);
         
@@ -53,11 +66,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $img = str_replace(' ', '+', $img);
         $data = base64_decode($img);
         
-        $new_filename = 'banner_' . $user_id . '.png';
+        // Add timestamp to filename for cache busting
+        $timestamp = time();
+        $new_filename = 'banner_' . $user_id . '_' . $timestamp . '.png';
+        
         // Local path for file saving
         $local_path = $upload_dir . $new_filename;
         // Database path for storage
         $db_path = '\moonarrowstudios\uploads\banners\\' . $new_filename;
+        
+        // Delete old banner if it exists
+        $stmt = $conn->prepare("SELECT banner FROM users WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $old_banner = $stmt->get_result()->fetch_assoc();
+        
+        if ($old_banner && $old_banner['banner']) {
+            $old_file = str_replace('\moonarrowstudios', '..', $old_banner['banner']);
+            if (file_exists($old_file)) {
+                unlink($old_file);
+            }
+        }
         
         file_put_contents($local_path, $data);
         
