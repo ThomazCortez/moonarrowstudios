@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in && !$viewing_own_prof
 <html lang="en" data-bs-theme="dark">
 <head>
     <?php require 'header.php'; ?>
-    <title><?= htmlspecialchars($user['username']) ?>'s Profile</title>
+    <title>MoonArrow Studios - <?= htmlspecialchars($user['username']) ?>'s Profile</title>
     <style>
         .banner-container {
             height: 200px;

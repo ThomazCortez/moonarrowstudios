@@ -107,7 +107,7 @@ $categories = $conn->query("SELECT * FROM categories");
 <head> <?php require 'header.php'; ?>
 	<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 	<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-	
+	<title>MoonArrow Studios - Forum</title>
 	<style>
 	/* Style for Quill placeholder */
 	.ql-editor.ql-blank::before {

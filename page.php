@@ -1,9 +1,10 @@
+<?php include 'php/header.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub-style Cover Page</title>
+    <title>MoonArrow Studios</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
@@ -90,7 +91,7 @@
             padding: 1rem;
         }
 
-        img {
+        .image {
             width: 100%;
             height: auto;
             border-radius: 12px;
@@ -99,7 +100,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        img:hover {
+        .image:hover {
             transform: scale(1.02);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
@@ -155,7 +156,7 @@
         }
     </style>
 </head>
-<body>
+<body class="home">
     <!-- Section 1 -->
     <section class="section">
         <div class="container">
@@ -167,7 +168,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="image-container">
-                        <img src="media/placeholder.png" alt="Section 1 Image">
+                        <img src="media/placeholder.png" alt="Section 1 Image" class="image">
                     </div>
                 </div>
             </div>
@@ -185,7 +186,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="image-container">
-                        <img src="media/placeholder.png" alt="Section 2 Image">
+                        <img src="media/placeholder.png" alt="Section 2 Image" class="image">
                     </div>
                 </div>
             </div>
@@ -203,7 +204,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="image-container">
-                        <img src="media/placeholder.png" alt="Section 3 Image">
+                        <img src="media/placeholder.png" alt="Section 3 Image" class="image">
                     </div>
                 </div>
             </div>

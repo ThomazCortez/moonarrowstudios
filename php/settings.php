@@ -78,7 +78,7 @@ $user = $stmt->get_result()->fetch_assoc();
 <html lang="en" data-bs-theme="dark">
 <head>
     <?php require 'header.php'; ?>
-    <title>Settings - Profile</title>
+    <title>MoonArrow Studios - Settings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <style>
         .profile-picture-preview,

@@ -1,3 +1,7 @@
+<?php
+$baseUrl = '/moonarrowstudios/'; // Set your base URL here
+?>
+
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 <head>
@@ -50,7 +54,7 @@
     }
 }
 
-body {
+.header{
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
     background-color: var(--color-canvas-default);
     color: var(--color-fg-default);
@@ -59,7 +63,7 @@ body {
 }
 
 /* Buttons */
-.btn {
+.header .btn {
     border-radius: 6px;
     padding: 5px 16px;
     font-size: 14px;
@@ -68,29 +72,35 @@ body {
     transition: .2s cubic-bezier(0.3, 0, 0.5, 1);
 }
 
-.btn-primary {
+.header .btn-primary {
     color: #ffffff;
     background-color: var(--color-btn-primary-bg);
     border: 1px solid rgba(27, 31, 36, 0.15);
     box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
 }
 
-.btn-primary:hover {
+.header .btn-primary:hover {
     background-color: var(--color-btn-primary-hover-bg);
 }
 
-.navbar {
+.header .navbar {
         background-color: var(--color-header-bg);
         border-bottom: 1px solid var(--color-border-muted);
         z-index: 1030; /* Ensures it stays above content */
     }
+    .nav-separator {
+            border-left: 1px solid var(--color-border-default);
+            height: 24px;
+            margin: 0 12px;
+            margin-top: 8px;
+        }
 	</style>
 </head>
 
-<body>
+<body class="header">
 	<nav class="navbar p-2 sticky-top" data-bs-theme="">
 		<div>
-			<a class="navbar-brand" href="index.php">
+			<a class="navbar-brand" href="<?php echo $baseUrl; ?>">
 				<img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" height="50" alt="">
 			</a>
 		</div>
@@ -98,16 +108,24 @@ body {
         // Get the current file name
         $current_page = basename($_SERVER['PHP_SELF']);
     ?> <ul class="nav mb-2 justify-content-center mx-4 mt-2">
+            <!-- Go Back Button -->
+            <li>
+                <a id="goBackBtn" class=" btn nav-link px-2" style="margin-top: 3px;">
+                    <i class="bi bi-arrow-90deg-left me-1"></i> Back
+                </a>
+            </li>
+            <!-- Separator -->
+            <li class="nav-separator"></li>
 			<li>
-				<a href="index.php" class="nav-link px-2 <?= $current_page == 'index.php' ? 'link-secondary' : '' ?>">
-					<i class="bi bi-house-fill me-2"></i>Home </a>
+				<a href="<?php echo $baseUrl; ?>php/index.php" class="nav-link px-2 <?= $current_page == 'index.php' ? 'link-secondary' : '' ?>">
+					<i class="bi bi-chat-left-text-fill me-2"></i>Forum </a>
 			</li>
 			<li>
-				<a href="marketplace.php" class="nav-link px-2 <?= $current_page == 'marketplace.php' ? 'link-secondary' : '' ?>">
-					<i class="bi bi-shop me-2"></i>Marketplace </a>
+				<a href="<?php echo $baseUrl; ?>php/marketplace.php" class="nav-link px-2 <?= $current_page == 'marketplace.php' ? 'link-secondary' : '' ?>">
+					<i class="bi bi-bag-fill me-2"></i>Marketplace </a>
 			</li>
 			<li>
-				<a href="about.php" class="nav-link px-2 <?= $current_page == 'about.php' ? 'link-secondary' : '' ?>">
+				<a href="<?php echo $baseUrl; ?>php/about.php" class="nav-link px-2 <?= $current_page == 'about.php' ? 'link-secondary' : '' ?>">
 					<i class="bi bi-question-circle-fill me-2"></i>About </a>
 			</li>
 		</ul>
@@ -143,15 +161,15 @@ body {
                 <?php endif; ?>
             </button>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" style="right: 0; top: 60px;">
-                <li><a class="dropdown-item" href="profile.php">Profile</a></li>
-                <li><a class="dropdown-item" href="settings.php">Settings</a></li>
+                <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/profile.php">Profile</a></li>
+                <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/settings.php">Settings</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="sign_out.php">Sign Out</a></li>
+                <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/sign_out.php">Sign Out</a></li>
             </ul>
         </div>
     <?php else: ?>
-        <button type="button" class="btn btn-primary me-2" onclick="window.location.href='sign_in/sign_in_html.php'">Sign In</button>
-        <button type="button" class="btn btn-secondary" onclick="window.location.href='sign_up/sign_up_html.php'">Sign Up</button>
+        <button type="button" class="btn btn-primary me-2" onclick="window.location.href='<?php echo $baseUrl; ?>php/sign_in/sign_in_html.php'">Sign In</button>
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='<?php echo $baseUrl; ?>php/sign_up/sign_up_html.php'">Sign Up</button>
     <?php endif; ?>
 </div>
 
@@ -172,6 +190,16 @@ body {
 			dropdownMenu.classList.remove('show');
 		});
 	});
+    document.addEventListener("DOMContentLoaded", function() {
+            const goBackBtn = document.getElementById("goBackBtn");
+            if (window.history.length > 1) {
+                goBackBtn.addEventListener("click", function() {
+                    window.history.back();
+                });
+            } else {
+                goBackBtn.setAttribute("disabled", "true");
+            }
+        });
 	</script>
 </body>
 </html>
