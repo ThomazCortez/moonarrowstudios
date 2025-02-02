@@ -18,7 +18,7 @@ $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 
 if (!$user) {
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit;
 }
 

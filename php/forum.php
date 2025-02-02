@@ -8,7 +8,7 @@ require 'db_connect.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
     if (!isset($_SESSION['user_id'])) {
         $_SESSION['error'] = "You must be logged in to create a post.";
-        header("Location: index.php");
+        header("Location: forum.php");
         exit;
     }
 
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
     $stmt->execute();
     $stmt->close();
 
-    header("Location: index.php");
+    header("Location: forum.php");
     exit;
 }
 
@@ -474,7 +474,7 @@ body {
         if(hashtags.size === 0) {
             e.preventDefault();
             if (!hasError) { // Only show if no content error
-                showBootstrapAlert('At least one hashtag badge is required!');
+                showBootstrapAlert('At least one hashtag is required!');
             }
             hasError = true;
         }

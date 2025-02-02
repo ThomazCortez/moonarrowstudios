@@ -117,7 +117,7 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             <!-- Separator -->
             <li class="nav-separator"></li>
 			<li>
-				<a href="<?php echo $baseUrl; ?>php/index.php" class="nav-link px-2 <?= $current_page == 'index.php' ? 'link-secondary' : '' ?>">
+				<a href="<?php echo $baseUrl; ?>php/forum.php" class="nav-link px-2 <?= $current_page == 'forum.php' ? 'link-secondary' : '' ?>">
 					<i class="bi bi-chat-left-text-fill me-2"></i>Forum </a>
 			</li>
 			<li>

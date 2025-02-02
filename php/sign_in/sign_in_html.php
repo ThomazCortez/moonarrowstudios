@@ -227,7 +227,7 @@
                         <hr class="my-4">
                         <div class="centered-footer">
                             <p>Don't have an account? <a href="../sign_up/sign_up_html.php" class="text-decoration-none">Sign up</a></p>
-                            <p>Click <a href="../index.php" class="text-decoration-none">here</a> to go back to the main page.</p>
+                            <p>Click <a href="../forum.php" class="text-decoration-none">here</a> to go back to the main page.</p>
                         </div>
                     </div>
                 </div>
