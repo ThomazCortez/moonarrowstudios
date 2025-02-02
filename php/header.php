@@ -89,12 +89,6 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
         border-bottom: 1px solid var(--color-border-muted);
         z-index: 1030; /* Ensures it stays above content */
     }
-    .nav-separator {
-            border-left: 1px solid var(--color-border-default);
-            height: 24px;
-            margin: 0 12px;
-            margin-top: 8px;
-        }
 	</style>
 </head>
 
@@ -109,14 +103,6 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
         // Get the current file name
         $current_page = basename($_SERVER['PHP_SELF']);
     ?> <ul class="nav mb-2 justify-content-center mx-4 mt-2">
-            <!-- Go Back Button -->
-            <li>
-                <a id="goBackBtn" class=" btn nav-link px-2" style="margin-top: 3px;">
-                    <i class="bi bi-arrow-90deg-left me-1"></i> Back
-                </a>
-            </li>
-            <!-- Separator -->
-            <li class="nav-separator"></li>
 			<li>
 				<a href="<?php echo $baseUrl; ?>php/forum.php" class="nav-link px-2 <?= $current_page == 'forum.php' ? 'link-secondary' : '' ?>">
 					<i class="bi bi-chat-left-text-fill me-2"></i>Forum </a>

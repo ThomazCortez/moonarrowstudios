@@ -2,7 +2,46 @@
 // Start the session at the top of the page to check for user login state
 session_start();
 
+require_once 'php/db_connect.php'; // Adjust the path as needed
+
 include 'php/header.php';
+
+// Function to safely get user count
+function getUserCount($conn) {
+    try {
+        if (!$conn) {
+            return "many"; // Fallback text if no connection
+        }
+        $sql = "SELECT COUNT(*) as count FROM users";
+        $result = $conn->query($sql);
+        if ($result) {
+            $row = $result->fetch_assoc();
+            return number_format($row['count']);
+        }
+        return "many"; // Fallback if query fails
+    } catch (Exception $e) {
+        error_log("Error getting user count: " . $e->getMessage());
+        return "many"; // Fallback if any error occurs
+    }
+}
+// Add these functions at the top with your existing getUserCount function
+function getPostCount($conn) {
+    try {
+        if (!$conn) {
+            return "many";
+        }
+        $sql = "SELECT COUNT(*) as count FROM posts";
+        $result = $conn->query($sql);
+        if ($result) {
+            $row = $result->fetch_assoc();
+            return number_format($row['count']);
+        }
+        return "many";
+    } catch (Exception $e) {
+        error_log("Error getting post count: " . $e->getMessage());
+        return "many";
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -43,19 +82,19 @@ include 'php/header.php';
         }
 
         body {
+            margin: 0; /* Remove default margin */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
             background-color: var(--color-canvas-default);
             color: var(--color-fg-default);
             line-height: 1.5;
             font-size: 16px;
-            overflow-y: scroll;
+            overflow-y: auto;
             scroll-snap-type: y mandatory;
             height: 100vh; /* Add this */
         }
 
         .section {
             min-height: 100vh;
-            height: 100vh; /* Add this to make sections exact viewport height */
             display: flex;
             align-items: center;
             background-color: var(--color-canvas-default);
@@ -243,12 +282,65 @@ include 'php/header.php';
         }
         html {
     scroll-behavior: smooth; /* Enables smooth scrolling */
+    height: 100%;
+    overflow: hidden; /* Prevent double scrollbars */
+}
+/* Update the CSS to ensure proper positioning */
+.user-count-container {
+    position: absolute;
+    bottom: 6rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 10;
+}
+
+.line-1 {
+    position: relative;
+    margin: 0 auto;
+    border-right: 2px solid var(--color-fg-default);
+    font-size: 1.25rem;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    color: var(--color-fg-default);
+    font-family: 'Anonymous Pro', monospace;
+    display: inline-block;
+    width: 0;
+    max-width: fit-content;
+}
+
+.anim-typewriter {
+    animation: 
+        typing 6s ease forwards,  /* Increased from 4s to 6s and added ease */
+        blink 1s step-end infinite;  /* New separate blink animation */
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink {
+    0%, 100% { border-right-color: var(--color-fg-default); }
+    50% { border-right-color: transparent; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .user-count-container {
+        bottom: 4rem;
+    }
+    
+    .line-1 {
+        font-size: 1rem;
+    }
 }
     </style>
 </head>
 <body class="home">
     <!-- Section 1 -->
-    <section class="section">
+    <section class="section" id="section1">
     <div class="animated-arrow">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="6 9 12 15 18 9"></polyline>
@@ -270,10 +362,18 @@ include 'php/header.php';
                 </div>
             </div>
         </div>
+        <div class="user-count-container">
+    <div class="line-1 anim-typewriter">
+        <?php 
+            $userCount = getUserCount($conn);
+            echo "Join our " . $userCount . " developers today";
+        ?>
+    </div>
+</div>
     </section>
 
     <!-- Section 2 -->
-    <section class="section alternate-bg">
+    <section class="section alternate-bg" id="section2">
         <div class="animated-arrow-left">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -295,10 +395,18 @@ include 'php/header.php';
                 </div>
             </div>
         </div>
+        <div class="user-count-container">
+    <div class="line-1 anim-typewriter">
+        <?php 
+            $postCount = getPostCount($conn);
+            echo "Discover " . $postCount . " community posts";
+        ?>
+    </div>
+</div>
     </section>
 
     <!-- Section 3 -->
-    <section class="section">
+    <section class="section" id="section3">
         <div class="animated-arrow">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -320,6 +428,13 @@ include 'php/header.php';
                 </div>
             </div>
         </div>
+        <div class="user-count-container">
+    <div class="line-1 anim-typewriter">
+        <?php 
+            echo "Coming soon";
+        ?>
+    </div>
+</div>
     </section>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
@@ -341,6 +456,70 @@ include 'php/header.php';
         sections.forEach(section => {
             observer.observe(section);
         });
+        // Add this JavaScript to calculate and set the exact width
+        document.addEventListener('DOMContentLoaded', function() {
+    const line = document.querySelector('.line-1');
+    const text = line.textContent;
+    const charWidth = 0.6;
+    const textWidth = text.length * charWidth;
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes typing {
+            from { width: 0; }
+            to { width: ${textWidth}em; }
+        }
+        .line-1 {
+            max-width: ${textWidth}em;
+        }
+    `;
+    document.head.appendChild(style);
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const sections = document.querySelectorAll('.section');
+    const typewriterLines = document.querySelectorAll('.line-1');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                const line = entry.target.querySelector('.line-1');
+                if (line) {
+                    const text = line.textContent;
+                    const charWidth = 0.6;
+                    const textWidth = text.length * charWidth;
+
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes typing {
+                            from { width: 0; }
+                            to { width: ${textWidth}em; }
+                        }
+                        .line-1 {
+                            max-width: ${textWidth}em;
+                        }
+                    `;
+                    document.head.appendChild(style);
+
+                    line.classList.add('anim-typewriter');
+                }
+            } else {
+                entry.target.classList.remove('visible');
+                const line = entry.target.querySelector('.line-1');
+                if (line) {
+                    line.classList.remove('anim-typewriter');
+                }
+            }
+        });
+    }, {
+        threshold: 0.2,
+        rootMargin: '0px 0px -100px 0px'
+    });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+});
     </script>
 </body>
 </html>
