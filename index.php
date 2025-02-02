@@ -25,6 +25,7 @@ include 'php/header.php';
             --color-fg-default: #1F2328;
             --color-fg-muted: #656d76;
             --color-accent-fg: #0969da;
+            --container-bg: #1a1a1a;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -38,6 +39,7 @@ include 'php/header.php';
                 --color-fg-default: #c9d1d9;
                 --color-fg-muted: #8b949e;
                 --color-accent-fg: #58a6ff;
+                --container-bg: #1a1a1a;
             }
         }
 
@@ -93,24 +95,36 @@ include 'php/header.php';
             text-decoration: none;
         }
 
-        .image-container {
+        .minimalist-container {
             max-width: 540px;
+            height: 360px;
             margin: 0 auto;
             padding: 1rem;
+            position: relative;
         }
 
-        .image {
+        .dark-container {
             width: 100%;
-            height: auto;
+            height: 100%;
+            background-color: var(--container-bg);
             border-radius: 12px;
-            border: 1px solid var(--color-border-default);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .image:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        .dark-container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .dark-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         h2 {
@@ -150,8 +164,9 @@ include 'php/header.php';
                 align-items: center;
             }
 
-            .image-container {
+            .minimalist-container {
                 padding: 0.5rem;
+                height: 280px;
             }
 
             .row {
@@ -162,21 +177,28 @@ include 'php/header.php';
                 margin-bottom: 2rem;
             }
         }
+        .forum-icon{
+            height: 256px;
+            width: 256px;
+        }
     </style>
 </head>
 <body class="home">
     <!-- Section 1 -->
     <section class="section">
         <div class="container">
+        <div class="container position-relative">
             <div class="row align-items-center">
                 <div class="col-md-6 content">
                     <h2>MoonArrow Studios</h2>
                     <p class="lead">A community-driven platform for game developers to collaborate, share resources, and bring their creative visions to life.</p>
-                    <button class="btn btn-custom">Get Started</button>
+                    <button class="btn btn-custom" onclick="location.href='php/sign_up/sign_up_html.php';">Get Started</button>
                 </div>
                 <div class="col-md-6">
-                    <div class="image-container">
-                        <img src="media/placeholder.png" alt="Section 1 Image" class="image">
+                    <div class="minimalist-container">
+                        <div class="dark-container">
+                            <img src="media/moon-image" alt="Section 1 Image">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -187,15 +209,17 @@ include 'php/header.php';
     <section class="section alternate-bg">
         <div class="container">
             <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="minimalist-container">
+                        <div class="dark-container">
+                            <img src="media/forum-icon.png" alt="Section 2 Image" class="forum-icon">
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-6 content">
                     <h2>Forum</h2>
                     <p class="lead">A dynamic forum where game developers connect, share insights, and troubleshoot challenges together.</p>
-                    <button class="btn btn-custom">View Forum</button>
-                </div>
-                <div class="col-md-6">
-                    <div class="image-container">
-                        <img src="media/placeholder.png" alt="Section 2 Image" class="image">
-                    </div>
+                    <button class="btn btn-custom" onclick="location.href='php/forum.php';">View Forum</button>
                 </div>
             </div>
         </div>
@@ -208,11 +232,13 @@ include 'php/header.php';
                 <div class="col-md-6 content">
                     <h2>Marketplace</h2>
                     <p class="lead">A marketplace offering free, copyright-free assets to streamline game creation, including sprites, sounds, 3D models, and much more.</p>
-                    <button class="btn btn-custom">View Marketplace</button>
+                    <button class="btn btn-custom" onclick="location.href='php/marketplace.php';">View Marketplace</button>
                 </div>
                 <div class="col-md-6">
-                    <div class="image-container">
-                        <img src="media/placeholder.png" alt="Section 3 Image" class="image">
+                    <div class="minimalist-container">
+                        <div class="dark-container">
+                            <img src="media/share-icon" alt="Section 3 Image">
+                        </div>
                     </div>
                 </div>
             </div>
