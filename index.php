@@ -3,7 +3,6 @@
 session_start();
 
 include 'php/header.php';
-
 ?>
 
 <!DOCTYPE html>
@@ -49,10 +48,14 @@ include 'php/header.php';
             color: var(--color-fg-default);
             line-height: 1.5;
             font-size: 16px;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            height: 100vh; /* Add this */
         }
 
         .section {
             min-height: 100vh;
+            height: 100vh; /* Add this to make sections exact viewport height */
             display: flex;
             align-items: center;
             background-color: var(--color-canvas-default);
@@ -60,12 +63,64 @@ include 'php/header.php';
             opacity: 0;
             transform: translateY(30px);
             transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+            scroll-snap-align: start;
+            scroll-snap-stop: always; /* Add this to prevent partial snapping */
         }
 
         .section.visible {
             opacity: 1;
             transform: translateY(0);
         }
+
+        /* Add this CSS to your existing styles - I'll just show the new/modified parts */
+
+        .animated-arrow {
+    position: absolute;
+    right: 2rem; /* Keep it at the right */
+    top: -5vh; /* Start just above the section */
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+    animation: arrowFlow 3s ease-in-out infinite;
+}
+
+.animated-arrow-left {
+    position: absolute;
+    left: 2rem; /* Keep it at the left */
+    top: -5vh; /* Start just above the section */
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+    animation: arrowFlow 3s ease-in-out infinite;
+}
+
+@keyframes arrowFlow {
+    0%, 10% {
+        transform: translateY(-10vh);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    80% {
+        transform: translateY(90vh); /* Moves down the full section */
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh); /* Ends just below */
+        opacity: 0;
+    }
+}
+
+
+/* Make sure your section has this for proper arrow positioning */
+.section {
+    position: relative;
+    overflow: hidden;
+}
 
         .content {
             display: flex;
@@ -143,6 +198,11 @@ include 'php/header.php';
             background-color: var(--color-canvas-subtle);
         }
 
+        .forum-icon {
+            height: 256px;
+            width: 256px;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .section {
@@ -176,18 +236,25 @@ include 'php/header.php';
             .col-md-6 {
                 margin-bottom: 2rem;
             }
+
+            .animated-arrow {
+                right: 1rem;
+            }
         }
-        .forum-icon{
-            height: 256px;
-            width: 256px;
-        }
+        html {
+    scroll-behavior: smooth; /* Enables smooth scrolling */
+}
     </style>
 </head>
 <body class="home">
     <!-- Section 1 -->
     <section class="section">
+    <div class="animated-arrow">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+</div>
         <div class="container">
-        <div class="container position-relative">
             <div class="row align-items-center">
                 <div class="col-md-6 content">
                     <h2>MoonArrow Studios</h2>
@@ -207,6 +274,11 @@ include 'php/header.php';
 
     <!-- Section 2 -->
     <section class="section alternate-bg">
+        <div class="animated-arrow-left">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </div>
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6">
@@ -227,6 +299,11 @@ include 'php/header.php';
 
     <!-- Section 3 -->
     <section class="section">
+        <div class="animated-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </div>
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6 content">
