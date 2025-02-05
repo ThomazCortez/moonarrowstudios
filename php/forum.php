@@ -402,6 +402,80 @@ body {
     padding: 0.5em;
     margin-left: 0.3em;
 }
+.main-container {
+    display: flex;
+    gap: 20px;
+    position: relative;
+    padding: 0 20px;
+}
+
+.sidebar {
+    flex: 0 0 350px;
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+    margin-top: 25px;
+}
+
+.sidebar h2 {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.sidebar-lists {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+}
+
+.sidebar-row {
+    flex: 1;
+    width: 170px;
+}
+
+.list-group {
+    margin-bottom: 20px;
+    width: 170px;
+    min-height: 200px;
+}
+
+.list-group-item {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    word-break: break-word;
+    height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.post-list {
+    flex: 1;
+    max-width: calc(100% - 450px);
+    margin-left: 60px;
+}
+
+@media (max-width: 1200px) {
+    .sidebar {
+        flex: 0 0 300px;
+    }
+    
+    .sidebar-row {
+        width: 140px;
+    }
+    
+    .list-group {
+        width: 140px;
+    }
+    
+    .post-list {
+        max-width: calc(100% - 360px);
+    }
+}
+.list-group-item {
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-card-border);
+            color: var(--color-fg-default);
+        }
 	</style>
 	<script>
 	document.addEventListener("DOMContentLoaded", function() {
@@ -751,89 +825,189 @@ document.addEventListener('DOMContentLoaded', function() {
 </head>
 
 <body class="">
-	<div class="container"> <?php if (isset($_SESSION['error'])): ?> <div class="alert alert-danger alert-dismissible fade show" role="alert"> <?= htmlspecialchars($_SESSION['error']) ?> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-		</div> <?php unset($_SESSION['error']); ?> <?php endif; ?>
-		<!-- Search, Filter, and Create Post Section -->
-		<div class="d-flex justify-content-between align-items-center my-4">
-			<form method="GET" class="d-flex align-items-center">
-				<input type="text" name="search" class="form-control me-2 bg-dark" placeholder="Search" value="<?= htmlspecialchars($search) ?>">
-				<select name="category" class="form-select me-2 bg-dark text-light">
-					<option value="">All Categories</option> <?php while ($row = $categories->fetch_assoc()): ?> <option value="<?= $row['id'] ?>" <?= $category_filter == $row['id'] ? 'selected' : '' ?>><?= $row['name'] ?></option> <?php endwhile; ?>
-				</select>
-				<select name="filter" class="form-select me-2 bg-dark text-light">
-					<option value="newest" <?= isset($_GET['filter']) && $_GET['filter'] == 'newest' ? 'selected' : '' ?>>Newest</option>
-					<option value="oldest" <?= isset($_GET['filter']) && $_GET['filter'] == 'oldest' ? 'selected' : '' ?>>Oldest</option>
-					<option value="highest_score" <?= isset($_GET['filter']) && $_GET['filter'] == 'highest_score' ? 'selected' : '' ?>>Highest Score</option>
-				</select>
-				<button type="submit" class="btn btn-primary">Search</button>
-			</form> <?php if (isset($_SESSION['user_id'])): ?> <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPostModal">Create Post</button> <?php endif; ?>
-		</div>
-		<hr>
-		<!-- Modal for Creating Post -->
-		<div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<form id="createPostForm" method="POST" enctype="multipart/form-data">
-							<div class="mb-3">
-								<label for="title" class="form-label">Title</label>
-								<input type="text" name="title" id="title" class="form-control bg-dark" placeholder="Your post title goes here" required>
-							</div>
-							<div class="mb-3">
-								<label for="content" class="form-label">Content</label>
-								<div id="editor" style="height: 200px; border: 1px solid #ccc;"></div>
-								<input type="hidden" name="content">
-							</div>
-							<div class="mb-3">
-								<label for="category" class="form-label">Category</label>
-								<select name="category" id="category" class="form-select bg-dark text-light" required>
-									<option value="" class="">Select Category</option> <?php $categories->data_seek(0); while ($row = $categories->fetch_assoc()): ?> <option value="<?= $row['id'] ?>"><?= $row['name'] ?></option> <?php endwhile; ?>
-								</select>
-							</div>
-							<div class="mb-3">
-								<label for="hashtags" class="form-label">Hashtags</label>
-								<input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #unity, #unrealengine">
-							</div>
-							<div class="mb-3">
-								<label for="images" class="form-label">Images</label>
-								<input type="file" name="images[]" id="images" class="form-control" accept="image/*" multiple>
-							</div>
-							<div class="mb-3">
-								<label for="videos" class="form-label">Videos</label>
-								<input type="file" name="videos[]" id="videos" class="form-control" accept="video/*" multiple>
-							</div>
-							<script>
-							</script>
-							<button type="submit" name="create_post" class="btn btn-primary">Post</button>
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-		<!-- Display Posts -->
-		<h2 class="mt-4">Posts</h2> <?php while ($post = $result->fetch_assoc()): ?> <div class="card mb-3">
-			<div class="card-body">
-				<h3 class="card-title">
-					<a href="view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none"> <?= htmlspecialchars($post['title'] ?? 'No Title') ?> </a>
-				</h3>
-				<p class="card-text text-light">
-                <em>Posted on <?= $post['created_at'] ?> by 
-                        <a href="profile.php?id=<?= htmlspecialchars($post['user_id']) ?>" class="text-decoration-none">
-                            <?= htmlspecialchars($post['username']) ?>
-                        </a>
-                    </em>
-				</p>
-				<p class="card-text"><strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?></p>
-				<p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
-				<!-- Simplified Rating Display -->
-				<p class="card-text">
-					<strong>Rating:</strong> <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> Score: <?= $post['score'] ?? 0 ?></p>
-			</div>
-		</div> <?php endwhile; ?>
+    <div class="container">
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?= htmlspecialchars($_SESSION['error']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+
+        <!-- Search, Filter, and Create Post Section -->
+        <div class="d-flex justify-content-between align-items-center my-4">
+            <form method="GET" class="d-flex align-items-center">
+                <input type="text" name="search" class="form-control me-2 bg-dark" placeholder="Search" value="<?= htmlspecialchars($search) ?>">
+                <select name="category" class="form-select me-2 bg-dark text-light">
+                    <option value="">All Categories</option>
+                    <?php while ($row = $categories->fetch_assoc()): ?>
+                        <option value="<?= $row['id'] ?>" <?= $category_filter == $row['id'] ? 'selected' : '' ?>><?= $row['name'] ?></option>
+                    <?php endwhile; ?>
+                </select>
+                <select name="filter" class="form-select me-2 bg-dark text-light">
+                    <option value="newest" <?= isset($_GET['filter']) && $_GET['filter'] == 'newest' ? 'selected' : '' ?>>Newest</option>
+                    <option value="oldest" <?= isset($_GET['filter']) && $_GET['filter'] == 'oldest' ? 'selected' : '' ?>>Oldest</option>
+                    <option value="highest_score" <?= isset($_GET['filter']) && $_GET['filter'] == 'highest_score' ? 'selected' : '' ?>>Highest Score</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPostModal">Create Post</button>
+            <?php endif; ?>
+        </div>
+        <hr>
+
+        <!-- Main Content -->
+        <div class="main-container">
+            <!-- Sidebar with List Groups -->
+            <div class="sidebar">
+            <h2>Leaderboard</h2>
+                <div class="sidebar-lists">
+                    <!-- First Column -->
+                    <div class="sidebar-row">
+                        <!-- Top 5 Posts of the Day -->
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action">Top 5 Posts of the Day</a>
+                            <?php
+                            $top_posts = $conn->query("SELECT * FROM posts ORDER BY upvotes DESC LIMIT 5");
+                            while ($post = $top_posts->fetch_assoc()): ?>
+                                <a href="view_post.php?id=<?= $post['id'] ?>" class="list-group-item list-group-item-action">
+                                    <?= htmlspecialchars($post['title']) ?>
+                                </a>
+                            <?php endwhile; ?>
+                        </div>
+
+                        <!-- New Users (5) -->
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action">New Users</a>
+                            <?php
+                            $new_users = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT 5");
+                            while ($user = $new_users->fetch_assoc()): ?>
+                                <a href="profile.php?id=<?= $user['user_id'] ?>" class="list-group-item list-group-item-action">
+                                    <?= htmlspecialchars($user['username']) ?>
+                                </a>
+                            <?php endwhile; ?>
+                        </div>
+                    </div>
+
+                    <!-- Second Column -->
+                    <div class="sidebar-row">
+                        <!-- Top Followed Users (5) -->
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action">Top Followed Users</a>
+                            <?php
+                            $top_followed = $conn->query("SELECT users.user_id, users.username, COUNT(follows.follower_id) AS followers 
+                                                          FROM users 
+                                                          LEFT JOIN follows ON users.user_id = follows.following_id 
+                                                          GROUP BY users.user_id 
+                                                          ORDER BY followers DESC 
+                                                          LIMIT 5");
+                            while ($user = $top_followed->fetch_assoc()): ?>
+                                <a href="profile.php?id=<?= $user['user_id'] ?>" class="list-group-item list-group-item-action">
+                                    <?= htmlspecialchars($user['username']) ?> (<?= $user['followers'] ?> followers)
+                                </a>
+                            <?php endwhile; ?>
+                        </div>
+
+                        <!-- Top Hashtags of the Week (5) -->
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action">Top Hashtags of the Week</a>
+                            <?php
+                            $top_hashtags = $conn->query("SELECT hashtags, COUNT(*) AS count 
+                                                          FROM posts 
+                                                          WHERE created_at >= NOW() - INTERVAL 7 DAY 
+                                                          GROUP BY hashtags 
+                                                          ORDER BY count DESC 
+                                                          LIMIT 5");
+                            while ($hashtag = $top_hashtags->fetch_assoc()): ?>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <?= htmlspecialchars($hashtag['hashtags']) ?> (<?= $hashtag['count'] ?> posts)
+                                </a>
+                            <?php endwhile; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post List -->
+            <div class="post-list">
+                <h2 class="mt-4">Posts</h2>
+                <?php while ($post = $result->fetch_assoc()): ?>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h3 class="card-title">
+                                <a href="view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none">
+                                    <?= htmlspecialchars($post['title'] ?? 'No Title') ?>
+                                </a>
+                            </h3>
+                            <p class="card-text text-light">
+                                <em>Posted on <?= $post['created_at'] ?> by 
+                                    <a href="profile.php?id=<?= htmlspecialchars($post['user_id']) ?>" class="text-decoration-none">
+                                        <?= htmlspecialchars($post['username']) ?>
+                                    </a>
+                                </em>
+                            </p>
+                            <p class="card-text"><strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?></p>
+                            <p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
+                            <p class="card-text">
+                                <strong>Rating:</strong> 
+                                <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> 
+                                <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> 
+                                Score: <?= $post['score'] ?? 0 ?>
+                            </p>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Creating Post -->
+    <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createPostForm" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" name="title" id="title" class="form-control bg-dark" placeholder="Your post title goes here" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Content</label>
+                            <div id="editor" style="height: 200px; border: 1px solid #ccc;"></div>
+                            <input type="hidden" name="content">
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select name="category" id="category" class="form-select bg-dark text-light" required>
+                                <option value="" class="">Select Category</option>
+                                <?php $categories->data_seek(0); while ($row = $categories->fetch_assoc()): ?>
+                                    <option value="<?= $row['id'] ?>"><?= $row['name'] ?></option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="hashtags" class="form-label">Hashtags</label>
+                            <input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #unity, #unrealengine">
+                        </div>
+                        <div class="mb-3">
+                            <label for="images" class="form-label">Images</label>
+                            <input type="file" name="images[]" id="images" class="form-control" accept="image/*" multiple>
+                        </div>
+                        <div class="mb-3">
+                            <label for="videos" class="form-label">Videos</label>
+                            <input type="file" name="videos[]" id="videos" class="form-control" accept="video/*" multiple>
+                        </div>
+                        <button type="submit" name="create_post" class="btn btn-primary">Post</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html> <?php $conn->close(); ?>
