@@ -476,6 +476,47 @@ body {
             border: 1px solid var(--color-card-border);
             color: var(--color-fg-default);
         }
+        .weather-time-panel {
+    background-color: var(--color-card-bg);
+    border: 1px solid var(--color-card-border);
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 20px;
+    width: 100%; /* Adjusted to match the width of the list groups */
+    font-family: Arial, sans-serif;
+}
+
+.weather-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.weather-header img {
+    margin-left: auto;
+}
+
+.time-date {
+    display: flex; /* Use flexbox to align items horizontally */
+    justify-content: center; /* Center the time and date horizontally */
+    align-items: center; /* Vertically center the items */
+    gap: 10px; /* Add some spacing between time and date */
+    margin-top: 10px;
+}
+
+.time-date p {
+    margin: 0; /* Remove default margin for <p> elements */
+    font-size: 16px;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: var(--color-card-border);
+    margin: 10px 0;
+}
 	</style>
 	<script>
 	document.addEventListener("DOMContentLoaded", function() {
@@ -821,6 +862,75 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+document.addEventListener("DOMContentLoaded", function () {
+    const apiKey = 'c76c182ca2bcf8a7b99b18f65f86c548'; // Replace with your OpenWeatherMap API key
+    const cityName = document.getElementById('city-name');
+    const temperature = document.getElementById('temperature');
+    const weatherIcon = document.getElementById('weather-icon');
+    const currentTime = document.getElementById('current-time');
+    const currentDate = document.getElementById('current-date');
+
+    // Function to update the current time and date
+    function updateTimeAndDate() {
+        const now = new Date();
+        currentTime.textContent = now.toLocaleTimeString();
+        currentDate.textContent = now.toLocaleDateString();
+    }
+
+    // Update time and date every second
+    setInterval(updateTimeAndDate, 1000);
+    updateTimeAndDate(); // Initial call
+
+    // Function to fetch weather data
+    async function fetchWeather(lat, lon) {
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.cod === 200) {
+                const { name, main, weather } = data;
+                cityName.textContent = name;
+                temperature.textContent = `${Math.round(main.temp)}°C`;
+                weatherIcon.src = `https://openweathermap.org/img/wn/${weather[0].icon}.png`;
+                weatherIcon.alt = weather[0].description;
+            } else {
+                cityName.textContent = 'Location not found';
+                temperature.textContent = '-°C';
+                weatherIcon.src = '';
+            }
+        } catch (error) {
+            cityName.textContent = 'Error fetching weather';
+            temperature.textContent = '-°C';
+            weatherIcon.src = '';
+            console.error('Error fetching weather data:', error);
+        }
+    }
+
+    // Function to get user's location
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    fetchWeather(latitude, longitude);
+                },
+                (error) => {
+                    cityName.textContent = 'Location access denied';
+                    temperature.textContent = '-°C';
+                    weatherIcon.src = '';
+                    console.error('Error getting location:', error);
+                }
+            );
+        } else {
+            cityName.textContent = 'Geolocation not supported';
+            temperature.textContent = '-°C';
+            weatherIcon.src = '';
+        }
+    }
+
+    // Fetch weather data when the page loads
+    getLocation();
+});
 	</script>
 </head>
 
@@ -945,6 +1055,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                 </div>
+                <h2>Time and Weather</h2>
+                <!-- Weather and Time Panel -->
+                <div class="weather-time-panel">
+    <div class="weather-header">
+        <span id="city-name">Loading...</span>
+        <span id="temperature">-°C</span>
+        <img id="weather-icon" src="" alt="Weather Icon" style="width: 24px; height: 24px;">
+    </div>
+    <hr>
+    <div class="time-date">
+        <p id="current-time">Loading time...</p>
+        <p id="current-date">Loading date...</p>
+    </div>
+</div>
             </div>
 
             <!-- Post List -->
