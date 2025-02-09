@@ -913,17 +913,35 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="list-group">
                             <a href="#" class="list-group-item list-group-item-action">Top Hashtags of the Week</a>
                             <?php
-                            $top_hashtags = $conn->query("SELECT hashtags, COUNT(*) AS count 
-                                                          FROM posts 
-                                                          WHERE created_at >= NOW() - INTERVAL 7 DAY 
-                                                          GROUP BY hashtags 
-                                                          ORDER BY count DESC 
-                                                          LIMIT 5");
-                            while ($hashtag = $top_hashtags->fetch_assoc()): ?>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <?= htmlspecialchars($hashtag['hashtags']) ?> (<?= $hashtag['count'] ?> posts)
-                                </a>
-                            <?php endwhile; ?>
+                            $top_hashtags = $conn->query("
+                            WITH RECURSIVE split_hashtags AS (
+                                SELECT 
+                                    SUBSTRING_INDEX(SUBSTRING_INDEX(hashtags, ' ', 1), ' ', -1) AS hashtag,
+                                    SUBSTRING(hashtags, LENGTH(SUBSTRING_INDEX(hashtags, ' ', 1)) + 2) AS remaining_string,
+                                    created_at
+                                FROM posts
+                                WHERE hashtags != '' AND created_at >= NOW() - INTERVAL 7 DAY
+                                UNION ALL
+                                SELECT 
+                                    SUBSTRING_INDEX(SUBSTRING_INDEX(remaining_string, ' ', 1), ' ', -1),
+                                    SUBSTRING(remaining_string, LENGTH(SUBSTRING_INDEX(remaining_string, ' ', 1)) + 2),
+                                    created_at
+                                FROM split_hashtags
+                                WHERE remaining_string != ''
+                            )
+                            SELECT 
+                                hashtag,
+                                COUNT(*) as count
+                            FROM split_hashtags
+                            GROUP BY hashtag
+                            ORDER BY count DESC, hashtag ASC
+                            LIMIT 5
+                        ");
+                        while ($hashtag = $top_hashtags->fetch_assoc()): ?>
+                            <a href="?search=<?= urlencode($hashtag['hashtag']) ?>" class="list-group-item list-group-item-action">
+                                <?= htmlspecialchars($hashtag['hashtag']) ?> (<?= $hashtag['count'] ?> posts)
+                            </a>
+                        <?php endwhile; ?>
                         </div>
                     </div>
                 </div>
