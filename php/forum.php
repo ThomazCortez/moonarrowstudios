@@ -77,6 +77,39 @@ if ($filter === 'oldest') {
     $order_by = "score DESC";
 }
 
+// At the top of your file, after the database connection
+$posts_per_page = 5;
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$offset = ($page - 1) * $posts_per_page;
+
+// First, get total number of posts for pagination
+$count_sql = "SELECT COUNT(DISTINCT posts.id) as total_count 
+              FROM posts 
+              JOIN categories ON posts.category_id = categories.id
+              JOIN users ON posts.user_id = users.user_id
+              WHERE 1";
+
+if ($search) {
+    $count_sql .= " AND (posts.title LIKE '%$search%' OR posts.content LIKE '%$search%' OR posts.hashtags LIKE '%$search%')";
+}
+if ($category_filter) {
+    $count_sql .= " AND category_id = $category_filter";
+}
+
+$total_result = $conn->query($count_sql);
+$total_row = $total_result->fetch_assoc();
+$total_posts = $total_row['total_count'];
+$total_pages = max(1, ceil($total_posts / $posts_per_page));
+
+// Ensure page number is within valid range
+if ($page > $total_pages) {
+    $page = $total_pages;
+}
+
+// Recalculate offset with validated page number
+$offset = ($page - 1) * $posts_per_page;
+
+// Main query for posts with LIMIT and OFFSET
 $sql = "SELECT posts.*, categories.name AS category_name, 
                users.username, users.user_id,
                posts.upvotes, posts.downvotes, 
@@ -93,8 +126,8 @@ if ($category_filter) {
     $sql .= " AND category_id = $category_filter";
 }
 
-// Append the dynamic ORDER BY clause
-$sql .= " ORDER BY $order_by";
+// Add the ORDER BY and LIMIT clauses
+$sql .= " ORDER BY $order_by LIMIT $posts_per_page OFFSET $offset";
 
 $result = $conn->query($sql);
 
@@ -516,6 +549,38 @@ hr {
     height: 1px;
     background-color: var(--color-card-border);
     margin: 10px 0;
+}
+.pagination {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.pagination .page-item .page-link {
+    color: var(--color-fg-default);
+    background-color: var(--color-card-bg);
+    border: 1px solid var(--color-border-default);
+    padding: 8px 12px;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: var(--color-canvas-subtle);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--color-accent-fg);
+    color: #ffffff;
+    border-color: var(--color-accent-fg);
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--color-fg-muted);
+    pointer-events: none;
+    background-color: var(--color-canvas-subtle);
 }
 	</style>
 	<script>
@@ -1150,6 +1215,42 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
         </div>
     </div>
+    <!-- Pagination -->
+    <nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <!-- First Page -->
+        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+            <a class="page-link" href="?page=1<?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">First</a>
+        </li>
+        
+        <!-- Previous Page -->
+        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+            <a class="page-link" href="?page=<?= max(1, $page - 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Previous</a>
+        </li>
+        
+        <!-- Page Numbers -->
+        <?php
+        $start_page = max(1, $page - 2);
+        $end_page = min($total_pages, $page + 2);
+        
+        for ($i = $start_page; $i <= $end_page; $i++): 
+        ?>
+            <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                <a class="page-link" href="?page=<?= $i ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>"><?= $i ?></a>
+            </li>
+        <?php endfor; ?>
+        
+        <!-- Next Page -->
+        <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+            <a class="page-link" href="?page=<?= min($total_pages, $page + 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Next</a>
+        </li>
+        
+        <!-- Last Page -->
+        <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+            <a class="page-link" href="?page=<?= $total_pages ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Last</a>
+        </li>
+    </ul>
+</nav>
 </body>
 
 </html> <?php $conn->close(); ?>
