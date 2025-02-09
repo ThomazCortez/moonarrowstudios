@@ -948,28 +948,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Function to fetch weather data
     async function fetchWeather(lat, lon) {
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data.cod === 200) {
-                const { name, main, weather } = data;
-                cityName.textContent = name;
-                temperature.textContent = `${Math.round(main.temp)}°C`;
-                weatherIcon.src = `https://openweathermap.org/img/wn/${weather[0].icon}.png`;
-                weatherIcon.alt = weather[0].description;
-            } else {
-                cityName.textContent = 'Location not found';
-                temperature.textContent = '-°C';
-                weatherIcon.src = '';
-            }
-        } catch (error) {
-            cityName.textContent = 'Error fetching weather';
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.cod === 200) {
+            const { name, main, weather } = data;
+            cityName.textContent = name;
+            temperature.textContent = `${Math.round(main.temp)}°C`;
+            weatherIcon.src = `https://openweathermap.org/img/wn/${weather[0].icon}.png`;
+            weatherIcon.alt = weather[0].description;
+            
+            // Add the weather description
+            const weatherDescription = document.getElementById('weather-description');
+            weatherDescription.textContent = weather[0].description; // Set the weather description
+        } else {
+            cityName.textContent = 'Location not found';
             temperature.textContent = '-°C';
             weatherIcon.src = '';
-            console.error('Error fetching weather data:', error);
+            document.getElementById('weather-description').textContent = ''; // Clear the description if no data
         }
+    } catch (error) {
+        cityName.textContent = 'Error fetching weather';
+        temperature.textContent = '-°C';
+        weatherIcon.src = '';
+        document.getElementById('weather-description').textContent = ''; // Clear the description on error
+        console.error('Error fetching weather data:', error);
     }
+}
 
     // Function to get user's location
     function getLocation() {
@@ -1127,6 +1133,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <span id="city-name">Loading...</span>
         <span id="temperature">-°C</span>
         <img id="weather-icon" src="" alt="Weather Icon" style="width: 24px; height: 24px;">
+        <span id="weather-description"></span> <!-- Add this line -->
     </div>
     <hr>
     <div class="time-date">
