@@ -77,6 +77,39 @@ if ($filter === 'oldest') {
     $order_by = "score DESC";
 }
 
+// At the top of your file, after the database connection
+$posts_per_page = 5;
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$offset = ($page - 1) * $posts_per_page;
+
+// First, get total number of posts for pagination
+$count_sql = "SELECT COUNT(DISTINCT posts.id) as total_count 
+              FROM posts 
+              JOIN categories ON posts.category_id = categories.id
+              JOIN users ON posts.user_id = users.user_id
+              WHERE 1";
+
+if ($search) {
+    $count_sql .= " AND (posts.title LIKE '%$search%' OR posts.content LIKE '%$search%' OR posts.hashtags LIKE '%$search%')";
+}
+if ($category_filter) {
+    $count_sql .= " AND category_id = $category_filter";
+}
+
+$total_result = $conn->query($count_sql);
+$total_row = $total_result->fetch_assoc();
+$total_posts = $total_row['total_count'];
+$total_pages = max(1, ceil($total_posts / $posts_per_page));
+
+// Ensure page number is within valid range
+if ($page > $total_pages) {
+    $page = $total_pages;
+}
+
+// Recalculate offset with validated page number
+$offset = ($page - 1) * $posts_per_page;
+
+// Main query for posts with LIMIT and OFFSET
 $sql = "SELECT posts.*, categories.name AS category_name, 
                users.username, users.user_id,
                posts.upvotes, posts.downvotes, 
@@ -93,8 +126,8 @@ if ($category_filter) {
     $sql .= " AND category_id = $category_filter";
 }
 
-// Append the dynamic ORDER BY clause
-$sql .= " ORDER BY $order_by";
+// Add the ORDER BY and LIMIT clauses
+$sql .= " ORDER BY $order_by LIMIT $posts_per_page OFFSET $offset";
 
 $result = $conn->query($sql);
 
@@ -476,6 +509,79 @@ body {
             border: 1px solid var(--color-card-border);
             color: var(--color-fg-default);
         }
+        .weather-time-panel {
+    background-color: var(--color-card-bg);
+    border: 1px solid var(--color-card-border);
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 20px;
+    width: 100%; /* Adjusted to match the width of the list groups */
+    font-family: Arial, sans-serif;
+}
+
+.weather-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.weather-header img {
+    margin-left: auto;
+}
+
+.time-date {
+    display: flex; /* Use flexbox to align items horizontally */
+    justify-content: center; /* Center the time and date horizontally */
+    align-items: center; /* Vertically center the items */
+    gap: 10px; /* Add some spacing between time and date */
+    margin-top: 10px;
+}
+
+.time-date p {
+    margin: 0; /* Remove default margin for <p> elements */
+    font-size: 16px;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: var(--color-card-border);
+    margin: 10px 0;
+}
+.pagination {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.pagination .page-item .page-link {
+    color: var(--color-fg-default);
+    background-color: var(--color-card-bg);
+    border: 1px solid var(--color-border-default);
+    padding: 8px 12px;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: var(--color-canvas-subtle);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--color-accent-fg);
+    color: #ffffff;
+    border-color: var(--color-accent-fg);
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--color-fg-muted);
+    pointer-events: none;
+    background-color: var(--color-canvas-subtle);
+}
 	</style>
 	<script>
 	document.addEventListener("DOMContentLoaded", function() {
@@ -821,6 +927,81 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+document.addEventListener("DOMContentLoaded", function () {
+    const apiKey = 'c76c182ca2bcf8a7b99b18f65f86c548'; // Replace with your OpenWeatherMap API key
+    const cityName = document.getElementById('city-name');
+    const temperature = document.getElementById('temperature');
+    const weatherIcon = document.getElementById('weather-icon');
+    const currentTime = document.getElementById('current-time');
+    const currentDate = document.getElementById('current-date');
+
+    // Function to update the current time and date
+    function updateTimeAndDate() {
+        const now = new Date();
+        currentTime.textContent = now.toLocaleTimeString();
+        currentDate.textContent = now.toLocaleDateString();
+    }
+
+    // Update time and date every second
+    setInterval(updateTimeAndDate, 1000);
+    updateTimeAndDate(); // Initial call
+
+    // Function to fetch weather data
+    async function fetchWeather(lat, lon) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.cod === 200) {
+            const { name, main, weather } = data;
+            cityName.textContent = name;
+            temperature.textContent = `${Math.round(main.temp)}°C`;
+            weatherIcon.src = `https://openweathermap.org/img/wn/${weather[0].icon}.png`;
+            weatherIcon.alt = weather[0].description;
+            
+            // Add the weather description
+            const weatherDescription = document.getElementById('weather-description');
+            weatherDescription.textContent = weather[0].description; // Set the weather description
+        } else {
+            cityName.textContent = 'Location not found';
+            temperature.textContent = '-°C';
+            weatherIcon.src = '';
+            document.getElementById('weather-description').textContent = ''; // Clear the description if no data
+        }
+    } catch (error) {
+        cityName.textContent = 'Error fetching weather';
+        temperature.textContent = '-°C';
+        weatherIcon.src = '';
+        document.getElementById('weather-description').textContent = ''; // Clear the description on error
+        console.error('Error fetching weather data:', error);
+    }
+}
+
+    // Function to get user's location
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    fetchWeather(latitude, longitude);
+                },
+                (error) => {
+                    cityName.textContent = 'Location access denied';
+                    temperature.textContent = '-°C';
+                    weatherIcon.src = '';
+                    console.error('Error getting location:', error);
+                }
+            );
+        } else {
+            cityName.textContent = 'Geolocation not supported';
+            temperature.textContent = '-°C';
+            weatherIcon.src = '';
+        }
+    }
+
+    // Fetch weather data when the page loads
+    getLocation();
+});
 	</script>
 </head>
 
@@ -913,20 +1094,53 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="list-group">
                             <a href="#" class="list-group-item list-group-item-action">Top Hashtags of the Week</a>
                             <?php
-                            $top_hashtags = $conn->query("SELECT hashtags, COUNT(*) AS count 
-                                                          FROM posts 
-                                                          WHERE created_at >= NOW() - INTERVAL 7 DAY 
-                                                          GROUP BY hashtags 
-                                                          ORDER BY count DESC 
-                                                          LIMIT 5");
-                            while ($hashtag = $top_hashtags->fetch_assoc()): ?>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <?= htmlspecialchars($hashtag['hashtags']) ?> (<?= $hashtag['count'] ?> posts)
-                                </a>
-                            <?php endwhile; ?>
+                            $top_hashtags = $conn->query("
+                            WITH RECURSIVE split_hashtags AS (
+                                SELECT 
+                                    SUBSTRING_INDEX(SUBSTRING_INDEX(hashtags, ' ', 1), ' ', -1) AS hashtag,
+                                    SUBSTRING(hashtags, LENGTH(SUBSTRING_INDEX(hashtags, ' ', 1)) + 2) AS remaining_string,
+                                    created_at
+                                FROM posts
+                                WHERE hashtags != '' AND created_at >= NOW() - INTERVAL 7 DAY
+                                UNION ALL
+                                SELECT 
+                                    SUBSTRING_INDEX(SUBSTRING_INDEX(remaining_string, ' ', 1), ' ', -1),
+                                    SUBSTRING(remaining_string, LENGTH(SUBSTRING_INDEX(remaining_string, ' ', 1)) + 2),
+                                    created_at
+                                FROM split_hashtags
+                                WHERE remaining_string != ''
+                            )
+                            SELECT 
+                                hashtag,
+                                COUNT(*) as count
+                            FROM split_hashtags
+                            GROUP BY hashtag
+                            ORDER BY count DESC, hashtag ASC
+                            LIMIT 5
+                        ");
+                        while ($hashtag = $top_hashtags->fetch_assoc()): ?>
+                            <a href="?search=<?= urlencode($hashtag['hashtag']) ?>" class="list-group-item list-group-item-action">
+                                <?= htmlspecialchars($hashtag['hashtag']) ?> (<?= $hashtag['count'] ?> posts)
+                            </a>
+                        <?php endwhile; ?>
                         </div>
                     </div>
                 </div>
+                <h2>Time and Weather</h2>
+                <!-- Weather and Time Panel -->
+                <div class="weather-time-panel">
+    <div class="weather-header">
+        <span id="city-name">Loading...</span>
+        <span id="temperature">-°C</span>
+        <img id="weather-icon" src="" alt="Weather Icon" style="width: 24px; height: 24px;">
+        <span id="weather-description"></span> <!-- Add this line -->
+    </div>
+    <hr>
+    <div class="time-date">
+        <p id="current-time">Loading time...</p>
+        <p id="current-date">Loading date...</p>
+    </div>
+</div>
             </div>
 
             <!-- Post List -->
@@ -1008,6 +1222,42 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
     </div>
+    <!-- Pagination -->
+    <nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <!-- First Page -->
+        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+            <a class="page-link" href="?page=1<?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">First</a>
+        </li>
+        
+        <!-- Previous Page -->
+        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+            <a class="page-link" href="?page=<?= max(1, $page - 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Previous</a>
+        </li>
+        
+        <!-- Page Numbers -->
+        <?php
+        $start_page = max(1, $page - 2);
+        $end_page = min($total_pages, $page + 2);
+        
+        for ($i = $start_page; $i <= $end_page; $i++): 
+        ?>
+            <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                <a class="page-link" href="?page=<?= $i ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>"><?= $i ?></a>
+            </li>
+        <?php endfor; ?>
+        
+        <!-- Next Page -->
+        <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+            <a class="page-link" href="?page=<?= min($total_pages, $page + 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Next</a>
+        </li>
+        
+        <!-- Last Page -->
+        <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+            <a class="page-link" href="?page=<?= $total_pages ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Last</a>
+        </li>
+    </ul>
+</nav>
 </body>
 
 </html> <?php $conn->close(); ?>
