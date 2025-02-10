@@ -5,16 +5,26 @@ require '../../vendor/autoload.php'; // Include PHPMailer autoload
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use Mofodojodino\ProfanityFilter\Check; // Add the profanity filter namespace
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_BCRYPT); // Hash the password for security
-    $role = 'user'; // Default role
+    $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+    $role = 'user';
+
+    // Initialize profanity filter
+    $profanityFilter = new Check();
 
     // Validate inputs
     if (!empty($username) && !empty($email) && !empty($password)) {
-        // Check if the email already exists
+        // Check for profanity in username
+        if ($profanityFilter->hasProfanity($username)) {
+            header("Location: ../sign_up/sign_up_html.php?alert=Username contains inappropriate content. Please choose a different username.&type=danger");
+            exit;
+        }
+        
+        // Rest of your existing code...
         $check_email_stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
         $check_email_stmt->bind_param("s", $email);
         $check_email_stmt->execute();
@@ -44,16 +54,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     try {
                         //Server settings
                         $mail->isSMTP();
-                        $mail->Host = 'smtp.gmail.com'; // Set the SMTP server to send through
+                        $mail->Host = 'smtp.gmail.com';
                         $mail->SMTPAuth = true;
-                        $mail->Username = 'moonarrowstudios@gmail.com'; // Your Gmail address
-                        $mail->Password = 'jbws akjv bxvr xxac'; // Your Gmail password or app password
+                        $mail->Username = 'moonarrowstudios@gmail.com';
+                        $mail->Password = 'jbws akjv bxvr xxac';
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                         $mail->Port = 587;
 
                         //Recipients
                         $mail->setFrom('noreply@moonnarrowstudios.com', 'MoonArrow Studios');
-                        $mail->addAddress($email, $username); // Add the user's email
+                        $mail->addAddress($email, $username);
 
                         //Content
                         $mail->isHTML(true);
