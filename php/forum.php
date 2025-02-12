@@ -4,6 +4,12 @@ session_start();
 
 // Database connection (update with your database credentials)
 require 'db_connect.php';
+// Include the Composer autoload file
+require '../vendor/autoload.php';
+
+// Use the ProfanityFilter\Check class
+use Mofodojodino\ProfanityFilter\Check;
+
 // Handle post creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
     if (!isset($_SESSION['user_id'])) {
@@ -14,6 +20,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
 
     $title = $_POST['title'];
     $content = $_POST['content'];
+
+    // Initialize the profanity filter
+    $profanityFilter = new Check();
+
+    // Check for profanity in the title and content
+    if ($profanityFilter->hasProfanity($title)) {
+        $_SESSION['error'] = "Your post title contains inappropriate language.";
+        header("Location: forum.php");
+        exit;
+    }
+
+    if ($profanityFilter->hasProfanity($content)) {
+        $_SESSION['error'] = "Your post content contains inappropriate language.";
+        header("Location: forum.php");
+        exit;
+    }
 
     // Sanitize content to ensure code blocks are wrapped properly
     $content = preg_replace('/<code>(.*?)<\/code>/', '<pre><code>$1</code></pre>', $content);
