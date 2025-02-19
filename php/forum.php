@@ -459,9 +459,10 @@ body {
 }
 .main-container {
     display: flex;
-    gap: 20px;
-    position: relative;
+    gap: 2rem;
     padding: 0 20px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 .sidebar {
@@ -469,7 +470,6 @@ body {
     position: sticky;
     top: 80px;
     height: fit-content;
-    margin-top: 25px;
 }
 
 .sidebar h2 {
@@ -504,9 +504,15 @@ body {
 }
 
 .post-list {
-    flex: 1;
-    max-width: calc(100% - 450px);
-    margin-left: 60px;
+    flex: 0 0 700px; /* Fixed width instead of flex-1 */
+    margin-left: 0; /* Remove the margin */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.post-list .card {
+    width: 100%;
 }
 
 @media (max-width: 1200px) {
@@ -531,40 +537,6 @@ body {
             border: 1px solid var(--color-card-border);
             color: var(--color-fg-default);
         }
-        .weather-time-panel {
-    background-color: var(--color-card-bg);
-    border: 1px solid var(--color-card-border);
-    border-radius: 6px;
-    padding: 15px;
-    margin-top: 20px;
-    width: 100%; /* Adjusted to match the width of the list groups */
-    font-family: Arial, sans-serif;
-}
-
-.weather-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.weather-header img {
-    margin-left: auto;
-}
-
-.time-date {
-    display: flex; /* Use flexbox to align items horizontally */
-    justify-content: center; /* Center the time and date horizontally */
-    align-items: center; /* Vertically center the items */
-    gap: 10px; /* Add some spacing between time and date */
-    margin-top: 10px;
-}
-
-.time-date p {
-    margin: 0; /* Remove default margin for <p> elements */
-    font-size: 16px;
-}
 
 hr {
     border: 0;
@@ -603,6 +575,109 @@ hr {
     color: var(--color-fg-muted);
     pointer-events: none;
     background-color: var(--color-canvas-subtle);
+}
+/* Add these styles to your existing CSS */
+.leaderboard-card {
+    background-color: rgba(var(--color-card-bg-rgb), 0.8); /* Semi-transparent background */
+    border: 1px solid var(--color-card-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(10px); /* Optional: Adds a blur effect */
+}
+
+.leaderboard-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--color-fg-default);
+}
+
+.leaderboard-section {
+    margin-bottom: 2rem;
+}
+
+.leaderboard-section-title {
+    font-size: 0.875rem;
+    color: var(--color-fg-muted);
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+}
+
+.leaderboard-item:hover {
+    background-color: var(--color-canvas-subtle);
+}
+
+.leaderboard-rank {
+    width: 24px;
+    font-size: 0.875rem;
+    color: var(--color-fg-muted);
+    font-weight: 500;
+}
+
+.leaderboard-content {
+    flex: 1;
+    margin-left: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--color-fg-default);
+}
+
+.leaderboard-stat {
+    font-size: 0.75rem;
+    color: var(--color-fg-muted);
+}
+
+.trending-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag-badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 1rem;
+    background-color: var(--color-canvas-subtle);
+    color: var(--color-fg-muted);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.tag-badge:hover {
+    background-color: var(--color-accent-fg);
+    color: white;
+}
+
+/* Update pagination styles */
+.post-list {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* Ensure posts stretch to full width */
+    gap: 1rem; /* Add spacing between posts */
+}
+
+.pagination-wrapper {
+    width: 100%; /* Ensure it spans the full width */
+    display: flex;
+    justify-content: center;
+    padding: 2rem 0;
+    margin-top: auto; /* Push it to the bottom of the container */
+}
+
+.posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 	</style>
 	<script>
@@ -949,81 +1024,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-document.addEventListener("DOMContentLoaded", function () {
-    const apiKey = 'c76c182ca2bcf8a7b99b18f65f86c548'; // Replace with your OpenWeatherMap API key
-    const cityName = document.getElementById('city-name');
-    const temperature = document.getElementById('temperature');
-    const weatherIcon = document.getElementById('weather-icon');
-    const currentTime = document.getElementById('current-time');
-    const currentDate = document.getElementById('current-date');
-
-    // Function to update the current time and date
-    function updateTimeAndDate() {
-        const now = new Date();
-        currentTime.textContent = now.toLocaleTimeString();
-        currentDate.textContent = now.toLocaleDateString();
-    }
-
-    // Update time and date every second
-    setInterval(updateTimeAndDate, 1000);
-    updateTimeAndDate(); // Initial call
-
-    // Function to fetch weather data
-    async function fetchWeather(lat, lon) {
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        if (data.cod === 200) {
-            const { name, main, weather } = data;
-            cityName.textContent = name;
-            temperature.textContent = `${Math.round(main.temp)}°C`;
-            weatherIcon.src = `https://openweathermap.org/img/wn/${weather[0].icon}.png`;
-            weatherIcon.alt = weather[0].description;
-            
-            // Add the weather description
-            const weatherDescription = document.getElementById('weather-description');
-            weatherDescription.textContent = weather[0].description; // Set the weather description
-        } else {
-            cityName.textContent = 'Location not found';
-            temperature.textContent = '-°C';
-            weatherIcon.src = '';
-            document.getElementById('weather-description').textContent = ''; // Clear the description if no data
-        }
-    } catch (error) {
-        cityName.textContent = 'Error fetching weather';
-        temperature.textContent = '-°C';
-        weatherIcon.src = '';
-        document.getElementById('weather-description').textContent = ''; // Clear the description on error
-        console.error('Error fetching weather data:', error);
-    }
-}
-
-    // Function to get user's location
-    function getLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    fetchWeather(latitude, longitude);
-                },
-                (error) => {
-                    cityName.textContent = 'Location access denied';
-                    temperature.textContent = '-°C';
-                    weatherIcon.src = '';
-                    console.error('Error getting location:', error);
-                }
-            );
-        } else {
-            cityName.textContent = 'Geolocation not supported';
-            temperature.textContent = '-°C';
-            weatherIcon.src = '';
-        }
-    }
-
-    // Fetch weather data when the page loads
-    getLocation();
-});
 	</script>
 </head>
 
@@ -1064,112 +1064,88 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="main-container">
             <!-- Sidebar with List Groups -->
             <div class="sidebar">
-            <h2>Leaderboard</h2>
-                <div class="sidebar-lists">
-                    <!-- First Column -->
-                    <div class="sidebar-row">
-                        <!-- Top 5 Posts of the Day -->
-                        <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action">Top 5 Posts of the Day</a>
-                            <?php
-                            $top_posts = $conn->query("SELECT * FROM posts ORDER BY upvotes DESC LIMIT 5");
-                            while ($post = $top_posts->fetch_assoc()): ?>
-                                <a href="view_post.php?id=<?= $post['id'] ?>" class="list-group-item list-group-item-action">
-                                    <?= htmlspecialchars($post['title']) ?>
-                                </a>
-                            <?php endwhile; ?>
-                        </div>
+    <div class="leaderboard-card">
+        <h2 class="leaderboard-title">Leaderboard</h2>
+        
+        <!-- Top Posts Section -->
+        <div class="leaderboard-section">
+            <h3 class="leaderboard-section-title">Top Posts Today</h3>
+            <?php
+            $top_posts = $conn->query("SELECT * FROM posts ORDER BY upvotes DESC LIMIT 5");
+            $rank = 1;
+            while ($post = $top_posts->fetch_assoc()): ?>
+                <a href="view_post.php?id=<?= $post['id'] ?>" class="leaderboard-item">
+                    <span class="leaderboard-rank">#<?= $rank++ ?></span>
+                    <span class="leaderboard-content"><?= htmlspecialchars($post['title']) ?></span>
+                </a>
+            <?php endwhile; ?>
+        </div>
 
-                        <!-- New Users (5) -->
-                        <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action">New Users</a>
-                            <?php
-                            $new_users = $conn->query("SELECT * FROM users ORDER BY created_at DESC LIMIT 5");
-                            while ($user = $new_users->fetch_assoc()): ?>
-                                <a href="profile.php?id=<?= $user['user_id'] ?>" class="list-group-item list-group-item-action">
-                                    <?= htmlspecialchars($user['username']) ?>
-                                </a>
-                            <?php endwhile; ?>
-                        </div>
+        <!-- Top Users Section -->
+        <div class="leaderboard-section">
+            <h3 class="leaderboard-section-title">Most Followed Users</h3>
+            <?php
+            $top_followed = $conn->query("SELECT users.user_id, users.username, COUNT(follows.follower_id) AS followers 
+                                        FROM users 
+                                        LEFT JOIN follows ON users.user_id = follows.following_id 
+                                        GROUP BY users.user_id 
+                                        ORDER BY followers DESC 
+                                        LIMIT 5");
+            while ($user = $top_followed->fetch_assoc()): ?>
+                <a href="profile.php?id=<?= $user['user_id'] ?>" class="leaderboard-item">
+                    <div class="leaderboard-content">
+                        <?= htmlspecialchars($user['username']) ?>
+                        <span class="leaderboard-stat"><?= $user['followers'] ?> followers</span>
                     </div>
+                </a>
+            <?php endwhile; ?>
+        </div>
 
-                    <!-- Second Column -->
-                    <div class="sidebar-row">
-                        <!-- Top Followed Users (5) -->
-                        <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action">Top Followed Users</a>
-                            <?php
-                            $top_followed = $conn->query("SELECT users.user_id, users.username, COUNT(follows.follower_id) AS followers 
-                                                          FROM users 
-                                                          LEFT JOIN follows ON users.user_id = follows.following_id 
-                                                          GROUP BY users.user_id 
-                                                          ORDER BY followers DESC 
-                                                          LIMIT 5");
-                            while ($user = $top_followed->fetch_assoc()): ?>
-                                <a href="profile.php?id=<?= $user['user_id'] ?>" class="list-group-item list-group-item-action">
-                                    <?= htmlspecialchars($user['username']) ?> (<?= $user['followers'] ?> followers)
-                                </a>
-                            <?php endwhile; ?>
-                        </div>
-
-                        <!-- Top Hashtags of the Week (5) -->
-                        <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action">Top Hashtags of the Week</a>
-                            <?php
-                            $top_hashtags = $conn->query("
-                            WITH RECURSIVE split_hashtags AS (
-                                SELECT 
-                                    SUBSTRING_INDEX(SUBSTRING_INDEX(hashtags, ' ', 1), ' ', -1) AS hashtag,
-                                    SUBSTRING(hashtags, LENGTH(SUBSTRING_INDEX(hashtags, ' ', 1)) + 2) AS remaining_string,
-                                    created_at
-                                FROM posts
-                                WHERE hashtags != '' AND created_at >= NOW() - INTERVAL 7 DAY
-                                UNION ALL
-                                SELECT 
-                                    SUBSTRING_INDEX(SUBSTRING_INDEX(remaining_string, ' ', 1), ' ', -1),
-                                    SUBSTRING(remaining_string, LENGTH(SUBSTRING_INDEX(remaining_string, ' ', 1)) + 2),
-                                    created_at
-                                FROM split_hashtags
-                                WHERE remaining_string != ''
-                            )
-                            SELECT 
-                                hashtag,
-                                COUNT(*) as count
-                            FROM split_hashtags
-                            GROUP BY hashtag
-                            ORDER BY count DESC, hashtag ASC
-                            LIMIT 5
-                        ");
-                        while ($hashtag = $top_hashtags->fetch_assoc()): ?>
-                            <a href="?search=<?= urlencode($hashtag['hashtag']) ?>" class="list-group-item list-group-item-action">
-                                <?= htmlspecialchars($hashtag['hashtag']) ?> (<?= $hashtag['count'] ?> posts)
-                            </a>
-                        <?php endwhile; ?>
-                        </div>
-                    </div>
-                </div>
-                <h2>Time and Weather</h2>
-                <!-- Weather and Time Panel -->
-                <div class="weather-time-panel">
-    <div class="weather-header">
-        <span id="city-name">Loading...</span>
-        <span id="temperature">-°C</span>
-        <img id="weather-icon" src="" alt="Weather Icon" style="width: 24px; height: 24px;">
-        <span id="weather-description"></span> <!-- Add this line -->
-    </div>
-    <hr>
-    <div class="time-date">
-        <p id="current-time">Loading time...</p>
-        <p id="current-date">Loading date...</p>
+        <!-- Trending Tags Section -->
+        <div class="leaderboard-section">
+            <h3 class="leaderboard-section-title">Trending Tags</h3>
+            <div class="trending-tags">
+                <?php
+                $top_hashtags = $conn->query("
+                    WITH RECURSIVE split_hashtags AS (
+                        SELECT 
+                            SUBSTRING_INDEX(SUBSTRING_INDEX(hashtags, ' ', 1), ' ', -1) AS hashtag,
+                            SUBSTRING(hashtags, LENGTH(SUBSTRING_INDEX(hashtags, ' ', 1)) + 2) AS remaining_string,
+                            created_at
+                        FROM posts
+                        WHERE hashtags != '' AND created_at >= NOW() - INTERVAL 7 DAY
+                        UNION ALL
+                        SELECT 
+                            SUBSTRING_INDEX(SUBSTRING_INDEX(remaining_string, ' ', 1), ' ', -1),
+                            SUBSTRING(remaining_string, LENGTH(SUBSTRING_INDEX(remaining_string, ' ', 1)) + 2),
+                            created_at
+                        FROM split_hashtags
+                        WHERE remaining_string != ''
+                    )
+                    SELECT 
+                        hashtag,
+                        COUNT(*) as count
+                    FROM split_hashtags
+                    GROUP BY hashtag
+                    ORDER BY count DESC, hashtag ASC
+                    LIMIT 5
+                ");
+                while ($hashtag = $top_hashtags->fetch_assoc()): ?>
+                    <a href="?search=<?= urlencode($hashtag['hashtag']) ?>" class="tag-badge">
+                        <?= htmlspecialchars($hashtag['hashtag']) ?>
+                    </a>
+                <?php endwhile; ?>
+            </div>
+        </div>
     </div>
 </div>
-            </div>
 
             <!-- Post List -->
             <div class="post-list">
-                <h2 class="mt-4">Posts</h2>
-                <?php while ($post = $result->fetch_assoc()): ?>
-                    <div class="card mb-3">
+    <h2 class="mt-4">Posts</h2>
+    <div class="posts-container">
+        <?php while ($post = $result->fetch_assoc()): ?>
+            <div class="card">
                         <div class="card-body">
                             <h3 class="card-title">
                                 <a href="view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none">
@@ -1245,8 +1221,9 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
     </div>
     <!-- Pagination -->
-    <nav aria-label="Page navigation" class="mt-4">
-    <ul class="pagination justify-content-center">
+    <div class="pagination-wrapper">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
         <!-- First Page -->
         <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
             <a class="page-link" href="?page=1<?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">First</a>
@@ -1278,8 +1255,9 @@ document.addEventListener("DOMContentLoaded", function () {
         <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
             <a class="page-link" href="?page=<?= $total_pages ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Last</a>
         </li>
-    </ul>
-</nav>
+        </ul>
+    </nav>
+</div>
 </body>
 
 </html> <?php $conn->close(); ?>
