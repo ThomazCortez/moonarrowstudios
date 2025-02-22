@@ -578,65 +578,91 @@ hr {
 }
 /* Add these styles to your existing CSS */
 .leaderboard-card {
-    background-color: rgba(var(--color-card-bg-rgb), 0.8); /* Semi-transparent background */
-    border: 1px solid var(--color-card-border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    backdrop-filter: blur(10px); /* Optional: Adds a blur effect */
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: 2rem;
+    backdrop-filter: none;
+    position: fixed;
+    top: 60%;
+    left: 10%;
+    transform: translateY(-50%);
+    width: 350px;
 }
 
+/* Clean up title styling */
 .leaderboard-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
     color: var(--color-fg-default);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border-muted);
 }
 
+
+/* Section spacing */
 .leaderboard-section {
     margin-bottom: 2rem;
 }
 
+/* Subtle section titles */
 .leaderboard-section-title {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: var(--color-fg-muted);
     margin-bottom: 1rem;
-    font-weight: 500;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
+/* Top posts styling with separation */
 .leaderboard-item {
+    padding: 0.5rem 0;
+    border-radius: 0;
+    transition: color 0.2s ease;
+    border: none;
+    margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
-    padding: 0.75rem;
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
     text-decoration: none;
-    margin-bottom: 0.5rem;
+    color: var(--color-fg-default);
+    border-bottom: 1px solid var(--color-border-muted);
+}
+
+.leaderboard-item:last-child {
+    border-bottom: none;
 }
 
 .leaderboard-item:hover {
-    background-color: var(--color-canvas-subtle);
+    background-color: transparent;
+    color: var(--color-accent-fg);
 }
-
+/* Rank styling */
 .leaderboard-rank {
-    width: 24px;
-    font-size: 0.875rem;
+    width: 20px;
+    font-size: 0.8rem;
     color: var(--color-fg-muted);
-    font-weight: 500;
+    font-weight: 400;
 }
 
+/* Content styling */
 .leaderboard-content {
-    flex: 1;
-    margin-left: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--color-fg-default);
+    font-size: 0.9rem;
+    margin-left: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .leaderboard-stat {
     font-size: 0.75rem;
     color: var(--color-fg-muted);
+    margin-left: 0.5rem;
 }
 
+/* Tag styling */
 .trending-tags {
     display: flex;
     flex-wrap: wrap;
@@ -645,17 +671,19 @@ hr {
 
 .tag-badge {
     font-size: 0.75rem;
-    padding: 0.375rem 0.75rem;
-    border-radius: 1rem;
-    background-color: var(--color-canvas-subtle);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background-color: transparent;
     color: var(--color-fg-muted);
     text-decoration: none;
     transition: all 0.2s ease;
+    border: 1px solid var(--color-border-muted);
 }
 
 .tag-badge:hover {
-    background-color: var(--color-accent-fg);
-    color: white;
+    background-color: transparent;
+    color: var(--color-accent-fg);
+    border-color: var(--color-accent-fg);
 }
 
 /* Update pagination styles */
