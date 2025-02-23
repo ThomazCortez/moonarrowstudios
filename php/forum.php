@@ -160,6 +160,7 @@ $categories = $conn->query("SELECT * FROM categories");
 <html lang="en" data-bs-theme="dark">
 
 <head> <?php require 'header.php'; ?>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 	<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 	<title>MoonArrow Studios - Forum</title>
