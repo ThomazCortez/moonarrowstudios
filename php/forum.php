@@ -288,9 +288,15 @@ body {
 }
 
 .card-title {
-    font-size: 16px;
+    font-size: 1.25rem;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: var(--color-fg-muted);
+    margin-bottom: 0.5rem;
 }
 
 .card-body {
@@ -370,8 +376,18 @@ body {
 
 /* Hashtags */
 .hashtags {
-    color: var(--color-accent-fg);
-    font-size: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.hashtags .badge {
+    background-color: var(--color-canvas-subtle);
+    color: var(--color-fg-default);
+    border: 1px solid var(--color-border-default);
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
 }
 
 .hashtag {
@@ -458,7 +474,8 @@ body {
     margin-left: 0.3em;
 }
 .main-container {
-    display: flex;
+    display: grid;
+    grid-template-columns: 300px 1fr;
     gap: 2rem;
     padding: 0 20px;
     max-width: 1400px;
@@ -466,9 +483,8 @@ body {
 }
 
 .sidebar {
-    flex: 0 0 350px;
     position: sticky;
-    top: 80px;
+    top: 1rem;
     height: fit-content;
 }
 
@@ -504,15 +520,20 @@ body {
 }
 
 .post-list {
-    flex: 0 0 700px; /* Fixed width instead of flex-1 */
-    margin-left: 0; /* Remove the margin */
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    flex: 1;
+    min-width: 0; /* Allow the post list to shrink */
 }
 
 .post-list .card {
-    width: 100%;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--color-border-default);
+    border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.post-list .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 1200px) {
@@ -555,8 +576,8 @@ hr {
     color: var(--color-fg-default);
     background-color: var(--color-card-bg);
     border: 1px solid var(--color-border-default);
-    padding: 8px 12px;
-    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.25rem;
     border-radius: 6px;
     transition: all 0.2s ease;
 }
@@ -578,56 +599,43 @@ hr {
 }
 /* Add these styles to your existing CSS */
 .leaderboard-card {
-    background-color: transparent;
-    border: none;
-    padding: 0;
-    margin-bottom: 2rem;
-    backdrop-filter: none;
-    position: fixed;
-    top: 60%;
-    left: 10%;
-    transform: translateY(-50%);
-    width: 350px;
+    padding: 1rem;
 }
 
-/* Clean up title styling */
-.leaderboard-title {
-    font-size: 1.1rem;
-    font-weight: 500;
-    margin-bottom: 2rem;
-    color: var(--color-fg-default);
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--color-border-muted);
-}
+        @media (max-width: 992px) {
+            .leaderboard-card {
+                position: static;
+                max-height: none;
+                overflow-y: visible;
+            }
+        }
 
+        .leaderboard-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--color-fg-default);
+        }
 
-/* Section spacing */
-.leaderboard-section {
-    margin-bottom: 2rem;
-}
+        .leaderboard-section {
+            margin-bottom: 1.5rem;
+        }
 
-/* Subtle section titles */
-.leaderboard-section-title {
-    font-size: 0.8rem;
+        .leaderboard-section-title {
+    font-size: 0.875rem;
     color: var(--color-fg-muted);
     margin-bottom: 1rem;
-    font-weight: 400;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-/* Top posts styling with separation */
 .leaderboard-item {
-    padding: 0.5rem 0;
-    border-radius: 0;
-    transition: color 0.2s ease;
-    border: none;
-    margin-bottom: 0.5rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-border-muted);
     display: flex;
     align-items: center;
     text-decoration: none;
     color: var(--color-fg-default);
-    border-bottom: 1px solid var(--color-border-muted);
 }
 
 .leaderboard-item:last-child {
@@ -635,56 +643,66 @@ hr {
 }
 
 .leaderboard-item:hover {
-    background-color: transparent;
-    color: var(--color-accent-fg);
+    background-color: var(--color-canvas-subtle);
 }
-/* Rank styling */
+
 .leaderboard-rank {
-    width: 20px;
-    font-size: 0.8rem;
+    width: 24px;
+    font-size: 0.875rem;
     color: var(--color-fg-muted);
-    font-weight: 400;
+    font-weight: 500;
+    margin-right: 0.5rem;
 }
 
-/* Content styling */
-.leaderboard-content {
-    font-size: 0.9rem;
-    margin-left: 0.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
+        .leaderboard-content {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+
+        .leaderboard-stat {
+            font-size: 0.75rem;
+            color: var(--color-fg-muted);
+            margin-left: 0.5rem;
+        }
+
+        .trending-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background-color: var(--color-canvas-subtle);
+            color: var(--color-fg-muted);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid var(--color-border-muted);
+        }
+
+        .tag-badge:hover {
+            background-color: var(--color-canvas-subtle);
+            color: var(--color-accent-fg);
+            border-color: var(--color-accent-fg);
+        }
+
+        @media (max-width: 992px) {
+    .main-container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: static;
+        order: 2;
+    }
+
+    .post-list {
+        order: 1;
+    }
 }
 
-.leaderboard-stat {
-    font-size: 0.75rem;
-    color: var(--color-fg-muted);
-    margin-left: 0.5rem;
-}
-
-/* Tag styling */
-.trending-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.tag-badge {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    background-color: transparent;
-    color: var(--color-fg-muted);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    border: 1px solid var(--color-border-muted);
-}
-
-.tag-badge:hover {
-    background-color: transparent;
-    color: var(--color-accent-fg);
-    border-color: var(--color-accent-fg);
-}
 
 /* Update pagination styles */
 .post-list {
@@ -695,18 +713,16 @@ hr {
 }
 
 .pagination-wrapper {
-    width: 100%; /* Ensure it spans the full width */
     display: flex;
     justify-content: center;
-    padding: 2rem 0;
-    margin-top: auto; /* Push it to the bottom of the container */
+    margin-top: 2rem;
 }
 
+
+
 .posts-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
+            width: 100%;
+        }
 	</style>
 	<script>
 	document.addEventListener("DOMContentLoaded", function() {
@@ -1090,202 +1106,204 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <!-- Main Content -->
         <div class="main-container">
-            <!-- Sidebar with List Groups -->
+            <!-- Sidebar with Leaderboard -->
             <div class="sidebar">
-    <div class="leaderboard-card">
-        <h2 class="leaderboard-title">Leaderboard</h2>
-        
-        <!-- Top Posts Section -->
-        <div class="leaderboard-section">
-            <h3 class="leaderboard-section-title">Top Posts Today</h3>
-            <?php
-            $top_posts = $conn->query("SELECT * FROM posts ORDER BY upvotes DESC LIMIT 5");
-            $rank = 1;
-            while ($post = $top_posts->fetch_assoc()): ?>
-                <a href="view_post.php?id=<?= $post['id'] ?>" class="leaderboard-item">
-                    <span class="leaderboard-rank">#<?= $rank++ ?></span>
-                    <span class="leaderboard-content"><?= htmlspecialchars($post['title']) ?></span>
-                </a>
-            <?php endwhile; ?>
-        </div>
-
-        <!-- Top Users Section -->
-        <div class="leaderboard-section">
-            <h3 class="leaderboard-section-title">Most Followed Users</h3>
-            <?php
-            $top_followed = $conn->query("SELECT users.user_id, users.username, COUNT(follows.follower_id) AS followers 
-                                        FROM users 
-                                        LEFT JOIN follows ON users.user_id = follows.following_id 
-                                        GROUP BY users.user_id 
-                                        ORDER BY followers DESC 
-                                        LIMIT 5");
-            while ($user = $top_followed->fetch_assoc()): ?>
-                <a href="profile.php?id=<?= $user['user_id'] ?>" class="leaderboard-item">
-                    <div class="leaderboard-content">
-                        <?= htmlspecialchars($user['username']) ?>
-                        <span class="leaderboard-stat"><?= $user['followers'] ?> followers</span>
+                <div class="leaderboard-card">
+                    <h2 class="leaderboard-title">Leaderboard</h2>
+                    
+                    <!-- Top Posts Section -->
+                    <div class="leaderboard-section">
+                        <h3 class="leaderboard-section-title">Top Posts Today</h3>
+                        <?php
+                        $top_posts = $conn->query("SELECT * FROM posts ORDER BY upvotes DESC LIMIT 5");
+                        $rank = 1;
+                        while ($post = $top_posts->fetch_assoc()): ?>
+                            <a href="view_post.php?id=<?= $post['id'] ?>" class="leaderboard-item">
+                                <span class="leaderboard-rank">#<?= $rank++ ?></span>
+                                <span class="leaderboard-content"><?= htmlspecialchars($post['title']) ?></span>
+                            </a>
+                        <?php endwhile; ?>
                     </div>
-                </a>
-            <?php endwhile; ?>
-        </div>
 
-        <!-- Trending Tags Section -->
-        <div class="leaderboard-section">
-            <h3 class="leaderboard-section-title">Trending Tags</h3>
-            <div class="trending-tags">
-                <?php
-                $top_hashtags = $conn->query("
-                    WITH RECURSIVE split_hashtags AS (
-                        SELECT 
-                            SUBSTRING_INDEX(SUBSTRING_INDEX(hashtags, ' ', 1), ' ', -1) AS hashtag,
-                            SUBSTRING(hashtags, LENGTH(SUBSTRING_INDEX(hashtags, ' ', 1)) + 2) AS remaining_string,
-                            created_at
-                        FROM posts
-                        WHERE hashtags != '' AND created_at >= NOW() - INTERVAL 7 DAY
-                        UNION ALL
-                        SELECT 
-                            SUBSTRING_INDEX(SUBSTRING_INDEX(remaining_string, ' ', 1), ' ', -1),
-                            SUBSTRING(remaining_string, LENGTH(SUBSTRING_INDEX(remaining_string, ' ', 1)) + 2),
-                            created_at
-                        FROM split_hashtags
-                        WHERE remaining_string != ''
-                    )
-                    SELECT 
-                        hashtag,
-                        COUNT(*) as count
-                    FROM split_hashtags
-                    GROUP BY hashtag
-                    ORDER BY count DESC, hashtag ASC
-                    LIMIT 5
-                ");
-                while ($hashtag = $top_hashtags->fetch_assoc()): ?>
-                    <a href="?search=<?= urlencode($hashtag['hashtag']) ?>" class="tag-badge">
-                        <?= htmlspecialchars($hashtag['hashtag']) ?>
-                    </a>
-                <?php endwhile; ?>
+                    <!-- Top Users Section -->
+                    <div class="leaderboard-section">
+                        <h3 class="leaderboard-section-title">Most Followed Users</h3>
+                        <?php
+                        $top_followed = $conn->query("SELECT users.user_id, users.username, COUNT(follows.follower_id) AS followers 
+                                                    FROM users 
+                                                    LEFT JOIN follows ON users.user_id = follows.following_id 
+                                                    GROUP BY users.user_id 
+                                                    ORDER BY followers DESC 
+                                                    LIMIT 5");
+                        while ($user = $top_followed->fetch_assoc()): ?>
+                            <a href="profile.php?id=<?= $user['user_id'] ?>" class="leaderboard-item">
+                                <div class="leaderboard-content">
+                                    <?= htmlspecialchars($user['username']) ?>
+                                    <span class="leaderboard-stat"><?= $user['followers'] ?> followers</span>
+                                </div>
+                            </a>
+                        <?php endwhile; ?>
+                    </div>
+
+                    <!-- Trending Tags Section -->
+                    <div class="leaderboard-section">
+                        <h3 class="leaderboard-section-title">Trending Tags</h3>
+                        <div class="trending-tags">
+                            <?php
+                            $top_hashtags = $conn->query("
+                                WITH RECURSIVE split_hashtags AS (
+                                    SELECT 
+                                        SUBSTRING_INDEX(SUBSTRING_INDEX(hashtags, ' ', 1), ' ', -1) AS hashtag,
+                                        SUBSTRING(hashtags, LENGTH(SUBSTRING_INDEX(hashtags, ' ', 1)) + 2) AS remaining_string,
+                                        created_at
+                                    FROM posts
+                                    WHERE hashtags != '' AND created_at >= NOW() - INTERVAL 7 DAY
+                                    UNION ALL
+                                    SELECT 
+                                        SUBSTRING_INDEX(SUBSTRING_INDEX(remaining_string, ' ', 1), ' ', -1),
+                                        SUBSTRING(remaining_string, LENGTH(SUBSTRING_INDEX(remaining_string, ' ', 1)) + 2),
+                                        created_at
+                                    FROM split_hashtags
+                                    WHERE remaining_string != ''
+                                )
+                                SELECT 
+                                    hashtag,
+                                    COUNT(*) as count
+                                FROM split_hashtags
+                                GROUP BY hashtag
+                                ORDER BY count DESC, hashtag ASC
+                                LIMIT 5
+                            ");
+                            while ($hashtag = $top_hashtags->fetch_assoc()): ?>
+                                <a href="?search=<?= urlencode($hashtag['hashtag']) ?>" class="tag-badge">
+                                    <?= htmlspecialchars($hashtag['hashtag']) ?>
+                                </a>
+                            <?php endwhile; ?>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</div>
 
             <!-- Post List -->
             <div class="post-list">
-    <h2 class="mt-4">Posts</h2>
-    <div class="posts-container">
-        <?php while ($post = $result->fetch_assoc()): ?>
-            <div class="card">
-                        <div class="card-body">
-                            <h3 class="card-title">
-                                <a href="view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none">
-                                    <?= htmlspecialchars($post['title'] ?? 'No Title') ?>
-                                </a>
-                            </h3>
-                            <p class="card-text text-light">
-                                <em>Posted on <?= $post['created_at'] ?> by 
-                                    <a href="profile.php?id=<?= htmlspecialchars($post['user_id']) ?>" class="text-decoration-none">
-                                        <?= htmlspecialchars($post['username']) ?>
+                <h2 class="mt-4">Posts</h2>
+                <div class="posts-container">
+                    <?php while ($post = $result->fetch_assoc()): ?>
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title">
+                                    <a href="view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none">
+                                        <?= htmlspecialchars($post['title'] ?? 'No Title') ?>
                                     </a>
-                                </em>
-                            </p>
-                            <p class="card-text"><strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?></p>
-                            <p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
-                            <p class="card-text">
-                                <strong>Rating:</strong> 
-                                <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> 
-                                <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> 
-                                Score: <?= $post['score'] ?? 0 ?>
-                            </p>
+                                </h3>
+                                <p class="card-text text-light">
+                                    <em>Posted on <?= $post['created_at'] ?> by 
+                                        <a href="profile.php?id=<?= htmlspecialchars($post['user_id']) ?>" class="text-decoration-none">
+                                            <?= htmlspecialchars($post['username']) ?>
+                                        </a>
+                                    </em>
+                                </p>
+                                <p class="card-text"><strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?></p>
+                                <p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
+                                <p class="card-text">
+                                    <strong>Rating:</strong> 
+                                    <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> 
+                                    <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> 
+                                    Score: <?= $post['score'] ?? 0 ?>
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                <?php endwhile; ?>
+                    <?php endwhile; ?>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal for Creating Post -->
-    <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="createPostForm" method="POST" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Title</label>
-                            <input type="text" name="title" id="title" class="form-control bg-dark" placeholder="Your post title goes here" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="content" class="form-label">Content</label>
-                            <div id="editor" style="height: 200px; border: 1px solid #ccc;"></div>
-                            <input type="hidden" name="content">
-                        </div>
-                        <div class="mb-3">
-                            <label for="category" class="form-label">Category</label>
-                            <select name="category" id="category" class="form-select bg-dark text-light" required>
-                                <option value="" class="">Select Category</option>
-                                <?php $categories->data_seek(0); while ($row = $categories->fetch_assoc()): ?>
-                                    <option value="<?= $row['id'] ?>"><?= $row['name'] ?></option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="hashtags" class="form-label">Hashtags</label>
-                            <input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #unity, #unrealengine">
-                        </div>
-                        <div class="mb-3">
-                            <label for="images" class="form-label">Images</label>
-                            <input type="file" name="images[]" id="images" class="form-control" accept="image/*" multiple>
-                        </div>
-                        <div class="mb-3">
-                            <label for="videos" class="form-label">Videos</label>
-                            <input type="file" name="videos[]" id="videos" class="form-control" accept="video/*" multiple>
-                        </div>
-                        <button type="submit" name="create_post" class="btn btn-primary">Post</button>
-                    </form>
+        <!-- Modal for Creating Post -->
+        <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createPostForm" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title</label>
+                                <input type="text" name="title" id="title" class="form-control bg-dark" placeholder="Your post title goes here" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="content" class="form-label">Content</label>
+                                <div id="editor" style="height: 200px; border: 1px solid #ccc;"></div>
+                                <input type="hidden" name="content">
+                            </div>
+                            <div class="mb-3">
+                                <label for="category" class="form-label">Category</label>
+                                <select name="category" id="category" class="form-select bg-dark text-light" required>
+                                    <option value="" class="">Select Category</option>
+                                    <?php $categories->data_seek(0); while ($row = $categories->fetch_assoc()): ?>
+                                        <option value="<?= $row['id'] ?>"><?= $row['name'] ?></option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hashtags" class="form-label">Hashtags</label>
+                                <input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #unity, #unrealengine">
+                            </div>
+                            <div class="mb-3">
+                                <label for="images" class="form-label">Images</label>
+                                <input type="file" name="images[]" id="images" class="form-control" accept="image/*" multiple>
+                            </div>
+                            <div class="mb-3">
+                                <label for="videos" class="form-label">Videos</label>
+                                <input type="file" name="videos[]" id="videos" class="form-control" accept="video/*" multiple>
+                            </div>
+                            <button type="submit" name="create_post" class="btn btn-primary">Post</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Pagination -->
+        <div class="pagination-wrapper">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <!-- First Page -->
+                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=1<?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">First</a>
+                    </li>
+                    
+                    <!-- Previous Page -->
+                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= max(1, $page - 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Previous</a>
+                    </li>
+                    
+                    <!-- Page Numbers -->
+                    <?php
+                    $start_page = max(1, $page - 2);
+                    $end_page = min($total_pages, $page + 2);
+                    
+                    for ($i = $start_page; $i <= $end_page; $i++): 
+                    ?>
+                        <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                            <a class="page-link" href="?page=<?= $i ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>"><?= $i ?></a>
+                        </li>
+                    <?php endfor; ?>
+                    
+                    <!-- Next Page -->
+                    <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= min($total_pages, $page + 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Next</a>
+                    </li>
+                    
+                    <!-- Last Page -->
+                    <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= $total_pages ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Last</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
-    <!-- Pagination -->
-    <div class="pagination-wrapper">
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-        <!-- First Page -->
-        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-            <a class="page-link" href="?page=1<?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">First</a>
-        </li>
-        
-        <!-- Previous Page -->
-        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-            <a class="page-link" href="?page=<?= max(1, $page - 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Previous</a>
-        </li>
-        
-        <!-- Page Numbers -->
-        <?php
-        $start_page = max(1, $page - 2);
-        $end_page = min($total_pages, $page + 2);
-        
-        for ($i = $start_page; $i <= $end_page; $i++): 
-        ?>
-            <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                <a class="page-link" href="?page=<?= $i ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>"><?= $i ?></a>
-            </li>
-        <?php endfor; ?>
-        
-        <!-- Next Page -->
-        <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
-            <a class="page-link" href="?page=<?= min($total_pages, $page + 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Next</a>
-        </li>
-        
-        <!-- Last Page -->
-        <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
-            <a class="page-link" href="?page=<?= $total_pages ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Last</a>
-        </li>
-        </ul>
-    </nav>
-</div>
 </body>
 
 </html> <?php $conn->close(); ?>
