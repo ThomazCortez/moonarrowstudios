@@ -476,14 +476,16 @@ body {
 }
 .main-container {
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 300px minmax(0, 1fr);
     gap: 2rem;
     padding: 0 20px;
     max-width: 1400px;
     margin: 0 auto;
+    min-height: 100vh;
 }
 
 .sidebar {
+    width: 300px;
     position: sticky;
     top: 1rem;
     height: fit-content;
@@ -521,39 +523,25 @@ body {
 }
 
 .post-list {
-    flex: 1;
-    min-width: 0; /* Allow the post list to shrink */
+    width: 100%;
+    min-width: 0; /* Allows content to shrink below minimum content size */
 }
 
 .post-list .card {
-    margin-bottom: 1.5rem;
+    width: 100%;
+    margin: 0;
     border: 1px solid var(--color-border-default);
     border-radius: 8px;
     transition: transform 0.2s, box-shadow 0.2s;
 }
+
 
 .post-list .card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-@media (max-width: 1200px) {
-    .sidebar {
-        flex: 0 0 300px;
-    }
-    
-    .sidebar-row {
-        width: 140px;
-    }
-    
-    .list-group {
-        width: 140px;
-    }
-    
-    .post-list {
-        max-width: calc(100% - 360px);
-    }
-}
+
 .list-group-item {
             background-color: var(--color-card-bg);
             border: 1px solid var(--color-card-border);
@@ -692,26 +680,18 @@ hr {
         @media (max-width: 992px) {
     .main-container {
         grid-template-columns: 1fr;
+        padding: 0 15px;
     }
 
     .sidebar {
+        width: 100%;
         position: static;
-        order: 2;
-    }
-
-    .post-list {
-        order: 1;
+        margin-top: 2rem;
     }
 }
 
 
-/* Update pagination styles */
-.post-list {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch; /* Ensure posts stretch to full width */
-    gap: 1rem; /* Add spacing between posts */
-}
+
 
 .pagination-wrapper {
     display: flex;
@@ -722,8 +702,11 @@ hr {
 
 
 .posts-container {
-            width: 100%;
-        }
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
 	</style>
 	<script>
 	document.addEventListener("DOMContentLoaded", function() {
