@@ -682,15 +682,56 @@ hr {
         grid-template-columns: 1fr;
         padding: 0 15px;
     }
-
+    
+    /* Move sidebar/leaderboard to bottom */
+    .main-container {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .post-list {
+        order: 1;
+    }
+    
     .sidebar {
+        order: 2;
         width: 100%;
         position: static;
         margin-top: 2rem;
     }
+    
+    /* Adjust leaderboard card styles for mobile */
+    .leaderboard-card {
+        margin-bottom: 2rem;
+    }
+    
+    /* Make cards full width on mobile */
+    .card {
+        width: 100%;
+    }
 }
 
-
+@media (max-width: 576px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .leaderboard-title {
+        font-size: 1.1rem;
+    }
+    
+    .trending-tags {
+        gap: 0.25rem;
+    }
+    
+    .tag-badge {
+        font-size: 0.7rem;
+    }
+}
 
 
 .pagination-wrapper {
@@ -706,6 +747,37 @@ hr {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+}
+
+/* Update search and filter section styles */
+.d-flex.justify-content-between {
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    /* Stack search form elements vertically */
+    .d-flex.justify-content-between {
+        flex-direction: column;
+    }
+    
+    form.d-flex {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    form.d-flex input,
+    form.d-flex select,
+    form.d-flex button {
+        width: 100%;
+        margin-right: 0 !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Make create post button full width */
+    .btn-success {
+        width: 100%;
+    }
 }
 	</style>
 	<script>
