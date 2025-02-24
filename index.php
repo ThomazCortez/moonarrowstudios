@@ -42,6 +42,25 @@ function getPostCount($conn) {
         return "many";
     }
 }
+
+// Add these functions at the top with your existing getUserCount function
+function getAssetCount($conn) {
+    try {
+        if (!$conn) {
+            return "many";
+        }
+        $sql = "SELECT COUNT(*) as count FROM assets";
+        $result = $conn->query($sql);
+        if ($result) {
+            $row = $result->fetch_assoc();
+            return number_format($row['count']);
+        }
+        return "many";
+    } catch (Exception $e) {
+        error_log("Error getting asset count: " . $e->getMessage());
+        return "many";
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -431,9 +450,11 @@ function getPostCount($conn) {
         <div class="user-count-container">
     <div class="line-1 anim-typewriter">
         <?php 
-            echo "Coming soon";
+            $assetCount = getAssetCount($conn);
+            echo $assetCount . " copyright free assets to choose from.";
         ?>
     </div>
+</div>
 </div>
     </section>
 
