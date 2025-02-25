@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Feb 25, 2025 at 08:15 PM
+-- Generation Time: Feb 25, 2025 at 08:46 PM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.18
 
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `assets` (
   PRIMARY KEY (`id`),
   KEY `fk_posts_categories` (`category_id`),
   KEY `fk_user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=78 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `assets`
@@ -55,7 +55,8 @@ INSERT INTO `assets` (`id`, `title`, `content`, `category_id`, `hashtags`, `imag
 (74, 'abc', '<p>abc</p>', 1, '#music', NULL, '2025-02-23 19:24:18', NULL, 30, 0, 0, '[\"uploads\\/files\\/amen-break-sequence_91bpm.wav\"]', NULL),
 (75, 'lol', '<p>lol</p>', 11, '#a', '[]', '2025-02-24 19:35:00', '[]', 30, 0, 0, NULL, 'uploads/previews/a0084845941_65.jpg'),
 (76, 'a', '<p>abc</p>', 7, '#ksd', '[]', '2025-02-24 19:48:25', '[]', 30, 0, 0, NULL, 'uploads/previews/gfoyUJWR_400x400.jpg'),
-(77, 'audio1', '<p>audio</p>', 10, '#audio', '[]', '2025-02-24 20:16:06', '[]', 30, 0, 0, NULL, '');
+(77, 'audio1', '<p>audio</p>', 10, '#audio', '[]', '2025-02-24 20:16:06', '[]', 30, 0, 0, NULL, ''),
+(79, 'a', '<p>a</p>', 11, '#zz', '[]', '2025-02-25 20:37:17', '[]', 30, 0, 0, NULL, '');
 
 -- --------------------------------------------------------
 
@@ -149,7 +150,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   KEY `post_id` (`post_id`),
   KEY `user_id` (`user_id`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `comments`
@@ -218,7 +219,8 @@ INSERT INTO `comments` (`id`, `post_id`, `user_id`, `content`, `created_at`, `pa
 (60, 53, 19, '<p>cool!</p><pre class=\"ql-syntax\" spellcheck=\"false\">cool!\n</pre><p><br></p>', '2025-01-28 18:44:16', NULL, 1, 0),
 (61, 54, 19, '<p>Test</p>', '2025-01-28 18:58:12', NULL, 0, 0),
 (62, 54, 19, '<p>test</p>', '2025-01-28 18:58:19', 61, 0, 0),
-(63, 53, 19, '<p>One more reply!</p>', '2025-01-28 23:05:26', 57, 0, 0);
+(63, 53, 19, '<p>One more reply!</p>', '2025-01-28 23:05:26', 57, 0, 0),
+(64, 69, 29, '<p>aa</p>', '2025-02-25 20:31:42', NULL, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -236,7 +238,7 @@ CREATE TABLE IF NOT EXISTS `comment_votes` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_vote` (`user_id`,`comment_id`),
   KEY `comment_id` (`comment_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `comment_votes`
@@ -260,7 +262,7 @@ CREATE TABLE IF NOT EXISTS `follows` (
   `following_id` int NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`follower_id`,`following_id`),
-  KEY `following_id` (`following_id`)
+  KEY `fk_follows_following` (`following_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -284,7 +286,8 @@ CREATE TABLE IF NOT EXISTS `password_resets` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `email` (`email`(250)),
-  KEY `token` (`token`)
+  KEY `token` (`token`),
+  KEY `fk_password_resets_users` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -331,8 +334,8 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `downvotes` int DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `fk_posts_categories` (`category_id`),
-  KEY `fk_user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `posts`
@@ -416,13 +419,10 @@ CREATE TABLE IF NOT EXISTS `users` (
 --
 
 INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `created_at`, `profile_picture`, `banner`, `description`) VALUES
-(17, 'aaa', 'aaa@gmail.com', '$2y$10$tDYT3J4Clw10/WYJbjuSDuSt2FUVHvfwOIErfxxmcGtSYKHwRecuS', 'user', '2024-12-20 11:26:03', NULL, NULL, NULL),
 (19, 'a30743', 'a30743@aemtg.pt', '$2y$10$z1w0K0JJjBOmbKCM66GgL.L8L8ZBwzEzNhHwJi7BV.zGuipDa5xe2', 'user', '2024-12-30 18:01:09', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_19.png', '\\moonarrowstudios\\uploads\\banners\\banner_19.png', 'HI!'),
 (24, 'teste123', 'exemple123123@gmail.com', '$2y$10$UhnjQ/wurSX0ImzToLpZ2eZRpsWGaVmNVcdsAwZpEjfb9B0U9pkDa', 'user', '2024-12-30 22:58:12', NULL, NULL, NULL),
 (25, 'teste2', 'teste2@gmail.com', '$2y$10$edPsuzcunAmj9zbvKt3WSuo/b8t2fSUT.XrXt.wgVE5DpiWu3gosK', 'user', '2024-12-30 23:00:02', NULL, NULL, NULL),
 (27, 'usertest', 'usertest@gmail.com', '$2y$10$Y3uiX24QwkjOkJfYc8xM1emMGCB1FFs6bzEUttd/aEajAXxm2.fwS', 'user', '2025-01-21 22:27:42', NULL, NULL, NULL),
-(28, 'a', 'a@gmail.com', '$2y$10$i4KJ87DSbLJVSTkWbpOMaOS4DtxuLcBknh.A74VI/UmrTbt/SyWXq', 'user', '2025-01-23 20:28:48', NULL, NULL, NULL),
-(29, 'aa', 'aa@gmail.com', '$2y$10$tRgWCWNitt9kQVn8GVOZPedcxbBEbU6FmZ7htZnpaqC8pwojY.1Ey', 'user', '2025-01-23 20:30:41', NULL, NULL, NULL),
 (30, 'Thomaz123', 'thomazbarrago@gmail.com', '$2y$10$EBfSvfNJVS3HrB/j4Kwr/O7kWnufRUKRp.0rzDjZhVDDo37Z7Bwn.', 'user', '2025-01-23 20:59:54', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_30_1738449128.png', '\\moonarrowstudios\\uploads\\banners\\banner_30_1738449823.png', 'Welcome to my profile!');
 
 --
@@ -430,10 +430,37 @@ INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `create
 --
 
 --
+-- Constraints for table `assets`
+--
+ALTER TABLE `assets`
+  ADD CONSTRAINT `fk_assets_categories` FOREIGN KEY (`category_id`) REFERENCES `asset_categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `fk_assets_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `comment_votes`
+--
+ALTER TABLE `comment_votes`
+  ADD CONSTRAINT `comment_votes_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `follows`
+--
+ALTER TABLE `follows`
+  ADD CONSTRAINT `fk_follows_follower` FOREIGN KEY (`follower_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_follows_following` FOREIGN KEY (`following_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD CONSTRAINT `fk_password_resets_users` FOREIGN KEY (`email`) REFERENCES `users` (`email`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Constraints for table `posts`
 --
 ALTER TABLE `posts`
-  ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+  ADD CONSTRAINT `fk_posts_categories` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
