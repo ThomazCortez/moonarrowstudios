@@ -162,6 +162,33 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                 top: 12px;
             }
         }
+        /* Add this to your existing CSS */
+.profile-container {
+    position: absolute;
+    right: 90px;
+    top: 12px;
+    display: flex;
+    align-items: center; /* This ensures vertical centering */
+    justify-content: center;
+    height: 35px; /* Match the height of your profile image */
+}
+
+/* Adjust the button inside the container */
+.profile-container .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+/* Ensure the icon is properly centered */
+.profile-container .bi-person-fill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 35px; /* Match container height */
+    width: 35px; /* Match container width */
+}
     </style>
 </head>
 
