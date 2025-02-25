@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Tempo de geração: 07-Fev-2025 às 11:08
--- Versão do servidor: 8.3.0
--- versão do PHP: 8.2.18
+-- Generation Time: Feb 25, 2025 at 08:15 PM
+-- Server version: 8.3.0
+-- PHP Version: 8.2.18
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,24 +18,93 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Banco de dados: `moonarrowstudios`
+-- Database: `moonarrowstudios`
 --
 
 -- --------------------------------------------------------
 
 --
--- Estrutura da tabela `categories`
+-- Table structure for table `assets`
 --
 
-DROP TABLE IF EXISTS `categories`;
-CREATE TABLE IF NOT EXISTS `categories` (
+DROP TABLE IF EXISTS `assets`;
+CREATE TABLE IF NOT EXISTS `assets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `category_id` int NOT NULL,
+  `hashtags` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `images` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `videos` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `user_id` int NOT NULL,
+  `upvotes` int DEFAULT '0',
+  `downvotes` int DEFAULT '0',
+  `files` text COLLATE utf8mb4_general_ci,
+  `preview_image` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_posts_categories` (`category_id`),
+  KEY `fk_user_id` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=78 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `assets`
+--
+
+INSERT INTO `assets` (`id`, `title`, `content`, `category_id`, `hashtags`, `images`, `created_at`, `videos`, `user_id`, `upvotes`, `downvotes`, `files`, `preview_image`) VALUES
+(74, 'abc', '<p>abc</p>', 1, '#music', NULL, '2025-02-23 19:24:18', NULL, 30, 0, 0, '[\"uploads\\/files\\/amen-break-sequence_91bpm.wav\"]', NULL),
+(75, 'lol', '<p>lol</p>', 11, '#a', '[]', '2025-02-24 19:35:00', '[]', 30, 0, 0, NULL, 'uploads/previews/a0084845941_65.jpg'),
+(76, 'a', '<p>abc</p>', 7, '#ksd', '[]', '2025-02-24 19:48:25', '[]', 30, 0, 0, NULL, 'uploads/previews/gfoyUJWR_400x400.jpg'),
+(77, 'audio1', '<p>audio</p>', 10, '#audio', '[]', '2025-02-24 20:16:06', '[]', 30, 0, 0, NULL, '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `asset_categories`
+--
+
+DROP TABLE IF EXISTS `asset_categories`;
+CREATE TABLE IF NOT EXISTS `asset_categories` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Extraindo dados da tabela `categories`
+-- Dumping data for table `asset_categories`
+--
+
+INSERT INTO `asset_categories` (`id`, `name`) VALUES
+(1, '2D Sprites'),
+(5, '3D Models'),
+(6, 'Textures & Materials'),
+(7, 'UI & Icons'),
+(8, 'Animations & Rigs'),
+(9, 'VFX (Visual Effects)'),
+(10, 'Sound Effects (SFX)'),
+(11, 'Background Music'),
+(12, 'Voiceovers'),
+(14, 'Custom Shaders'),
+(15, 'Particle Effects'),
+(16, 'Post-Processing Effects'),
+(17, 'Game-Specific Fonts'),
+(18, 'HUD Elements');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `categories`
+--
+
+DROP TABLE IF EXISTS `categories`;
+CREATE TABLE IF NOT EXISTS `categories` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `categories`
 --
 
 INSERT INTO `categories` (`id`, `name`) VALUES
@@ -63,7 +132,7 @@ INSERT INTO `categories` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Estrutura da tabela `comments`
+-- Table structure for table `comments`
 --
 
 DROP TABLE IF EXISTS `comments`;
@@ -71,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `id` int NOT NULL AUTO_INCREMENT,
   `post_id` int NOT NULL,
   `user_id` int NOT NULL,
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `content` text COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `parent_id` int DEFAULT NULL,
   `upvotes` int NOT NULL DEFAULT '0',
@@ -80,10 +149,10 @@ CREATE TABLE IF NOT EXISTS `comments` (
   KEY `post_id` (`post_id`),
   KEY `user_id` (`user_id`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Extraindo dados da tabela `comments`
+-- Dumping data for table `comments`
 --
 
 INSERT INTO `comments` (`id`, `post_id`, `user_id`, `content`, `created_at`, `parent_id`, `upvotes`, `downvotes`) VALUES
@@ -149,20 +218,12 @@ INSERT INTO `comments` (`id`, `post_id`, `user_id`, `content`, `created_at`, `pa
 (60, 53, 19, '<p>cool!</p><pre class=\"ql-syntax\" spellcheck=\"false\">cool!\n</pre><p><br></p>', '2025-01-28 18:44:16', NULL, 1, 0),
 (61, 54, 19, '<p>Test</p>', '2025-01-28 18:58:12', NULL, 0, 0),
 (62, 54, 19, '<p>test</p>', '2025-01-28 18:58:19', 61, 0, 0),
-(63, 53, 19, '<p>One more reply!</p>', '2025-01-28 23:05:26', 57, 0, 0),
-(64, 60, 24, '<h1>This is my post!</h1><h1><br></h1><pre class=\"ql-syntax\" spellcheck=\"false\">:)\n</pre>', '2025-01-29 13:37:53', NULL, 0, 0),
-(65, 60, 19, '<h1>This is a comment!</h1><p><br></p><p>Hi!</p>', '2025-01-29 13:38:54', NULL, 2, 0),
-(66, 60, 19, '<p>Another one!</p>', '2025-01-29 13:39:04', NULL, 0, 0),
-(67, 60, 19, '<p>This is a reply to this comment!</p>', '2025-01-29 13:39:23', 65, 0, 0),
-(68, 60, 17, '<p><strong>Nice post!</strong></p>', '2025-01-29 13:40:00', 65, 0, 0),
-(69, 61, 33, '<p>This is a comment!</p>', '2025-01-29 15:50:52', NULL, 1, 0),
-(70, 61, 33, '<p>Hello!</p>', '2025-01-29 15:51:00', NULL, 0, 0),
-(71, 61, 33, '<p>Reply!</p>', '2025-01-29 15:51:19', 69, 0, 0);
+(63, 53, 19, '<p>One more reply!</p>', '2025-01-28 23:05:26', 57, 0, 0);
 
 -- --------------------------------------------------------
 
 --
--- Estrutura da tabela `comment_votes`
+-- Table structure for table `comment_votes`
 --
 
 DROP TABLE IF EXISTS `comment_votes`;
@@ -170,30 +231,27 @@ CREATE TABLE IF NOT EXISTS `comment_votes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `comment_id` int NOT NULL,
-  `vote_type` enum('upvote','downvote') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `vote_type` enum('upvote','downvote') COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_vote` (`user_id`,`comment_id`),
   KEY `comment_id` (`comment_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Extraindo dados da tabela `comment_votes`
+-- Dumping data for table `comment_votes`
 --
 
 INSERT INTO `comment_votes` (`id`, `user_id`, `comment_id`, `vote_type`, `created_at`) VALUES
 (3, 26, 29, 'upvote', '2025-01-21 10:29:18'),
 (17, 26, 50, 'downvote', '2025-01-21 20:17:40'),
 (18, 26, 54, 'upvote', '2025-01-23 20:52:59'),
-(23, 19, 60, 'upvote', '2025-01-28 18:44:33'),
-(28, 19, 65, 'upvote', '2025-01-29 13:39:30'),
-(29, 17, 65, 'upvote', '2025-01-29 13:39:48'),
-(30, 33, 69, 'upvote', '2025-01-29 15:50:54');
+(23, 19, 60, 'upvote', '2025-01-28 18:44:33');
 
 -- --------------------------------------------------------
 
 --
--- Estrutura da tabela `follows`
+-- Table structure for table `follows`
 --
 
 DROP TABLE IF EXISTS `follows`;
@@ -203,20 +261,19 @@ CREATE TABLE IF NOT EXISTS `follows` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`follower_id`,`following_id`),
   KEY `following_id` (`following_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Extraindo dados da tabela `follows`
+-- Dumping data for table `follows`
 --
 
 INSERT INTO `follows` (`follower_id`, `following_id`, `created_at`) VALUES
-(19, 30, '2025-01-28 20:40:30'),
-(33, 24, '2025-01-29 15:48:08');
+(19, 30, '2025-01-30 22:46:19');
 
 -- --------------------------------------------------------
 
 --
--- Estrutura da tabela `password_resets`
+-- Table structure for table `password_resets`
 --
 
 DROP TABLE IF EXISTS `password_resets`;
@@ -228,10 +285,10 @@ CREATE TABLE IF NOT EXISTS `password_resets` (
   PRIMARY KEY (`id`),
   KEY `email` (`email`(250)),
   KEY `token` (`token`)
-) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Extraindo dados da tabela `password_resets`
+-- Dumping data for table `password_resets`
 --
 
 INSERT INTO `password_resets` (`id`, `email`, `token`, `created_at`) VALUES
@@ -256,44 +313,55 @@ INSERT INTO `password_resets` (`id`, `email`, `token`, `created_at`) VALUES
 -- --------------------------------------------------------
 
 --
--- Estrutura da tabela `posts`
+-- Table structure for table `posts`
 --
 
 DROP TABLE IF EXISTS `posts`;
 CREATE TABLE IF NOT EXISTS `posts` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `content` text COLLATE utf8mb4_general_ci NOT NULL,
   `category_id` int NOT NULL,
-  `hashtags` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `images` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `hashtags` text COLLATE utf8mb4_general_ci,
+  `images` text COLLATE utf8mb4_general_ci,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `videos` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `videos` text COLLATE utf8mb4_general_ci,
   `user_id` int NOT NULL,
   `upvotes` int DEFAULT '0',
   `downvotes` int DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `fk_posts_categories` (`category_id`),
   KEY `fk_user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=70 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Extraindo dados da tabela `posts`
+-- Dumping data for table `posts`
 --
 
 INSERT INTO `posts` (`id`, `title`, `content`, `category_id`, `hashtags`, `images`, `created_at`, `videos`, `user_id`, `upvotes`, `downvotes`) VALUES
-(58, 'Lorem Ipsum 1', '<h3>Lorem</h3><p>Lorem ipsum dolor sit amet. Ut voluptas pariatur et velit dicta aut totam nostrum et odio minima et voluptatum inventore ut dignissimos repellendus. In voluptatem voluptates qui porro mollitia sit molestiae quidem? Aut molestiae iusto eum error nihil in internos corporis eum adipisci consequuntur ad sapiente omnis in neque quibusdam et impedit fugit.</p><p><strong>Lorem: abcdefghijklmnopqrstuvwxyz</strong></p><pre class=\"ql-syntax\" spellcheck=\"false\">using System;\r\n\r\n\r\nclass Program\r\n{\r\n&nbsp; &nbsp; static void Main()\r\n&nbsp; &nbsp; {\r\n&nbsp; &nbsp; &nbsp; &nbsp; Random random = new Random();\r\n&nbsp; &nbsp; &nbsp; &nbsp; int randomNumber = random.Next(1, 101);\r\n&nbsp; &nbsp; &nbsp; &nbsp; Console.WriteLine(\"Random number: \" + randomNumber);\r\n&nbsp; &nbsp; }\r\n}\r\n</pre><p><br></p>', 1, '#C #Code #Random', '[]', '2025-01-29 13:29:10', '[]', 17, 0, 0),
-(59, 'Lorem Ipsum 2', '<p>Lorem ipsum dolor sit amet. Ut voluptas accusantium eos nisi enim est repellendus itaque qui odio sint ut saepe internos eum modi maiores. </p><pre class=\"ql-syntax\" spellcheck=\"false\">print(\"Hello World!\")\r\n</pre><p>Non facilis doloribus et repudiandae alias est asperiores animi. Hic quasi quam et illum deserunt et fugit provident ut corrupti dolorem qui explicabo perferendis vel sapiente soluta sit sequi impedit. </p><ul><li>Aut totam expedita qui omnis minima et nemo fugit sed reprehenderit dolores id perferendis assumenda et saepe beatae.</li><li>Aut totam expedita qui omnis minima et nemo fugit sed reprehenderit dolores id perferendis assumenda et saepe beatae.</li><li>Aut totam expedita qui omnis minima et nemo fugit sed reprehenderit dolores id perferendis assumenda et saepe beatae.</li></ul><blockquote>Lorem Ipsum!</blockquote><p><br></p>', 6, '#python #programming #print', '[\"uploads\\/images\\/0ff4118d-8411-4586-97f2-93b794217025.png\"]', '2025-01-29 13:32:39', '[]', 19, 2, 0),
-(60, 'Lorem Ipsum 3', '<h4>Lorem</h4><h3>Ipsum</h3><p>Lorem Ipsum</p><p><strong>Lorem ipsum dolor sit amet.</strong></p><p><em>Lorem ipsum dolor sit amet.</em></p><p><u>Lorem ipsum dolor sit amet.</u></p><blockquote>Lorem ipsum dolor sit amet.</blockquote><pre class=\"ql-syntax\" spellcheck=\"false\">Lorem ipsum dolor sit amet.\r\n</pre><ol><li>Lorem ipsum dolor sit amet.</li><li>Lorem ipsum dolor sit amet.</li></ol><ul><li>Lorem ipsum dolor sit amet.</li><li>Lorem ipsum dolor sit amet.</li></ul><p><a href=\"https://www.aemtg.pt/\" rel=\"noopener noreferrer\" target=\"_blank\">https://www.aemtg.pt/</a></p>', 6, '#example #loremipsum #test', '[\"uploads\\/images\\/\\u2014Pngtree\\u2014arrow shape red simple curved_8186744.png\",\"uploads\\/images\\/banner.png\"]', '2025-01-29 13:36:47', '[\"uploads\\/videos\\/12707805_3840_2160_25fps.mp4\"]', 24, 0, 0),
-(61, 'My Post Title', '<h3>Heading</h3><p>Content</p><pre class=\"ql-syntax\" spellcheck=\"false\">weweew\r\n  wewewe\r\n      wrwrwr\r\n</pre><p><br></p>', 16, '#test', '[\"uploads\\/images\\/0ff4118d-8411-4586-97f2-93b794217025.png\"]', '2025-01-29 15:50:10', '[\"uploads\\/videos\\/12707805_3840_2160_25fps.mp4\"]', 33, 1, 0),
-(62, 'Test', '<p>test</p>', 1, '#wewe #wow', '[]', '2025-01-31 10:55:02', '[]', 33, 0, 0),
-(63, 'Test 2', '<p>aaaa</p>', 9, '#wow #cool #python', '[]', '2025-01-31 10:56:17', '[]', 33, 0, 0),
-(64, 'tags testtt', '<p>a</p>', 14, '', '[]', '2025-01-31 11:12:57', '[]', 33, 0, 0);
+(52, 'a', '<p>a</p>', 1, '#a', '[]', '2025-01-23 22:48:18', '[]', 30, 1, 0),
+(53, 'Woah', '<p>Dark Theme!</p>', 1, '#test', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-01-05 203812.png\"]', '2025-01-27 19:49:55', '[\"uploads\\/videos\\/GABRIEL.mp4\"]', 30, 0, 0),
+(54, 'Test', '<p>Test</p>', 1, '#test', '[]', '2025-01-28 18:45:36', '[]', 19, 1, 0),
+(55, 'a', '<p>a</p>', 18, '#test', '[]', '2025-01-28 19:01:30', '[]', 19, 0, 0),
+(56, 'test attach', '<p>Test for attachments</p>', 1, '#test', '[\"uploads\\/images\\/IMG_20250128_190627.jpg\",\"uploads\\/images\\/IMG_20250128_190418.jpg\"]', '2025-01-28 23:06:26', '[\"uploads\\/videos\\/GABRIEL.mp4\"]', 19, 0, 0),
+(57, 'test hashtag 1', '<p>a</p>', 1, '#test', '[]', '2025-01-31 22:35:01', '[]', 30, 0, 0),
+(58, 'test hastag 2', '<p>aasdasdd</p>', 17, '', '[]', '2025-01-31 22:41:55', '[]', 30, 0, 0),
+(59, 'test hastag 3', '<p>aasddas</p>', 1, '', '[]', '2025-01-31 22:47:49', '[]', 30, 0, 0),
+(60, 'a', '<p>a</p>', 21, '', '[]', '2025-01-31 22:51:30', '[]', 30, 0, 0),
+(61, 'test hash', '<p>a</p>', 22, '', '[]', '2025-01-31 22:55:50', '[]', 30, 0, 0),
+(62, 'a', '<p>a</p>', 19, '#test', '[]', '2025-01-31 22:58:12', '[]', 30, 0, 0),
+(63, 'ad', '<p>asdasd</p>', 21, '#test #wwow #cool', '[]', '2025-01-31 22:58:33', '[]', 30, 0, 0),
+(64, 'asd', '<p>asd</p><pre class=\"ql-syntax\" spellcheck=\"false\">  ~werwerwerwer\r\nwerwer\r\n    werrwe\r\n</pre>', 17, '#123', '[]', '2025-01-31 23:18:13', '[]', 30, 0, 0),
+(65, 'a', '<p>a</p>', 20, '#qwe', '[]', '2025-02-02 11:54:53', '[]', 30, 0, 0),
+(66, 'Lada Li Lada Dao Lada Di Lada Dao', '<p>323</p>', 19, '#cool #skibidi', '[]', '2025-02-05 20:10:14', '[]', 30, 1, 0),
+(67, 'adding hash', '<p>asdasd</p>', 20, '#one #two #three', '[]', '2025-02-09 18:30:57', '[]', 30, 0, 0),
+(68, 'hello', '<p>hi</p>', 1, '#test', '[]', '2025-02-22 12:52:04', '[]', 30, 0, 0),
+(69, 'test', '<p>test</p>', 1, '#123', '[]', '2025-02-23 17:23:07', '[]', 30, 0, 0);
 
 -- --------------------------------------------------------
 
 --
--- Estrutura da tabela `post_votes`
+-- Table structure for table `post_votes`
 --
 
 DROP TABLE IF EXISTS `post_votes`;
@@ -301,32 +369,30 @@ CREATE TABLE IF NOT EXISTS `post_votes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `post_id` int NOT NULL,
-  `vote_type` enum('upvote','downvote') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `vote_type` enum('upvote','downvote') COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`post_id`),
   KEY `post_id` (`post_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=109 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Extraindo dados da tabela `post_votes`
+-- Dumping data for table `post_votes`
 --
 
 INSERT INTO `post_votes` (`id`, `user_id`, `post_id`, `vote_type`) VALUES
-(99, 26, 51, 'upvote'),
-(44, 19, 40, 'downvote'),
 (42, 26, 40, 'downvote'),
+(44, 19, 40, 'downvote'),
 (45, 26, 39, 'upvote'),
 (74, 26, 45, 'upvote'),
+(99, 26, 51, 'upvote'),
 (102, 19, 54, 'upvote'),
 (103, 30, 52, 'upvote'),
-(106, 24, 59, 'upvote'),
-(107, 19, 59, 'upvote'),
-(108, 33, 61, 'upvote');
+(105, 30, 66, 'upvote');
 
 -- --------------------------------------------------------
 
 --
--- Estrutura da tabela `users`
+-- Table structure for table `users`
 --
 
 DROP TABLE IF EXISTS `users`;
@@ -337,30 +403,34 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `role` enum('admin','user') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'user',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `profile_picture` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `banner` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `profile_picture` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `banner` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Extraindo dados da tabela `users`
+-- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `created_at`, `profile_picture`, `banner`, `description`) VALUES
 (17, 'aaa', 'aaa@gmail.com', '$2y$10$tDYT3J4Clw10/WYJbjuSDuSt2FUVHvfwOIErfxxmcGtSYKHwRecuS', 'user', '2024-12-20 11:26:03', NULL, NULL, NULL),
-(19, 'a30743', 'a30743@aemtg.pt', '$2y$10$z1w0K0JJjBOmbKCM66GgL.L8L8ZBwzEzNhHwJi7BV.zGuipDa5xe2', 'user', '2024-12-30 18:01:09', NULL, NULL, 'HI!'),
+(19, 'a30743', 'a30743@aemtg.pt', '$2y$10$z1w0K0JJjBOmbKCM66GgL.L8L8ZBwzEzNhHwJi7BV.zGuipDa5xe2', 'user', '2024-12-30 18:01:09', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_19.png', '\\moonarrowstudios\\uploads\\banners\\banner_19.png', 'HI!'),
 (24, 'teste123', 'exemple123123@gmail.com', '$2y$10$UhnjQ/wurSX0ImzToLpZ2eZRpsWGaVmNVcdsAwZpEjfb9B0U9pkDa', 'user', '2024-12-30 22:58:12', NULL, NULL, NULL),
-(33, 'Thomaz123', 'thomazbarrago@gmail.com', '$2y$10$tOUGkhk4dsJ0rryDlVMDFOfQRw8gKQsEKX1rU94XrBs5wduqANE92', 'user', '2025-01-29 15:43:52', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_33_1738572439.png', '../uploads/banners/banner_33.png', 'This is my description! hhhh');
+(25, 'teste2', 'teste2@gmail.com', '$2y$10$edPsuzcunAmj9zbvKt3WSuo/b8t2fSUT.XrXt.wgVE5DpiWu3gosK', 'user', '2024-12-30 23:00:02', NULL, NULL, NULL),
+(27, 'usertest', 'usertest@gmail.com', '$2y$10$Y3uiX24QwkjOkJfYc8xM1emMGCB1FFs6bzEUttd/aEajAXxm2.fwS', 'user', '2025-01-21 22:27:42', NULL, NULL, NULL),
+(28, 'a', 'a@gmail.com', '$2y$10$i4KJ87DSbLJVSTkWbpOMaOS4DtxuLcBknh.A74VI/UmrTbt/SyWXq', 'user', '2025-01-23 20:28:48', NULL, NULL, NULL),
+(29, 'aa', 'aa@gmail.com', '$2y$10$tRgWCWNitt9kQVn8GVOZPedcxbBEbU6FmZ7htZnpaqC8pwojY.1Ey', 'user', '2025-01-23 20:30:41', NULL, NULL, NULL),
+(30, 'Thomaz123', 'thomazbarrago@gmail.com', '$2y$10$EBfSvfNJVS3HrB/j4Kwr/O7kWnufRUKRp.0rzDjZhVDDo37Z7Bwn.', 'user', '2025-01-23 20:59:54', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_30_1738449128.png', '\\moonarrowstudios\\uploads\\banners\\banner_30_1738449823.png', 'Welcome to my profile!');
 
 --
--- Restrições para despejos de tabelas
+-- Constraints for dumped tables
 --
 
 --
--- Limitadores para a tabela `posts`
+-- Constraints for table `posts`
 --
 ALTER TABLE `posts`
   ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
