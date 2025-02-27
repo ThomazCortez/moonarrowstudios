@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Feb 25, 2025 at 08:46 PM
+-- Generation Time: Feb 27, 2025 at 08:59 AM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.18
 
@@ -40,12 +40,12 @@ CREATE TABLE IF NOT EXISTS `assets` (
   `user_id` int NOT NULL,
   `upvotes` int DEFAULT '0',
   `downvotes` int DEFAULT '0',
-  `files` text COLLATE utf8mb4_general_ci,
-  `preview_image` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `files` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `preview_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_posts_categories` (`category_id`),
   KEY `fk_user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `assets`
@@ -56,7 +56,8 @@ INSERT INTO `assets` (`id`, `title`, `content`, `category_id`, `hashtags`, `imag
 (75, 'lol', '<p>lol</p>', 11, '#a', '[]', '2025-02-24 19:35:00', '[]', 30, 0, 0, NULL, 'uploads/previews/a0084845941_65.jpg'),
 (76, 'a', '<p>abc</p>', 7, '#ksd', '[]', '2025-02-24 19:48:25', '[]', 30, 0, 0, NULL, 'uploads/previews/gfoyUJWR_400x400.jpg'),
 (77, 'audio1', '<p>audio</p>', 10, '#audio', '[]', '2025-02-24 20:16:06', '[]', 30, 0, 0, NULL, ''),
-(79, 'a', '<p>a</p>', 11, '#zz', '[]', '2025-02-25 20:37:17', '[]', 30, 0, 0, NULL, '');
+(79, 'a', '<p>a</p>', 11, '#zz', '[]', '2025-02-25 20:37:17', '[]', 30, 0, 0, NULL, ''),
+(80, 'comment testing', '<p>yes</p>', 14, '#shader', '[]', '2025-02-26 12:32:49', '[]', 30, 0, 1, NULL, '');
 
 -- --------------------------------------------------------
 
@@ -94,13 +95,37 @@ INSERT INTO `asset_categories` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `asset_votes`
+--
+
+DROP TABLE IF EXISTS `asset_votes`;
+CREATE TABLE IF NOT EXISTS `asset_votes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `asset_id` int NOT NULL,
+  `vote_type` enum('upvote','downvote') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`,`asset_id`),
+  KEY `asset_id` (`asset_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=131 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `asset_votes`
+--
+
+INSERT INTO `asset_votes` (`id`, `user_id`, `asset_id`, `vote_type`) VALUES
+(130, 30, 80, 'downvote');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `categories`
 --
 
 DROP TABLE IF EXISTS `categories`;
 CREATE TABLE IF NOT EXISTS `categories` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -141,7 +166,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `id` int NOT NULL AUTO_INCREMENT,
   `post_id` int NOT NULL,
   `user_id` int NOT NULL,
-  `content` text COLLATE utf8mb4_general_ci NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `parent_id` int DEFAULT NULL,
   `upvotes` int NOT NULL DEFAULT '0',
@@ -150,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   KEY `post_id` (`post_id`),
   KEY `user_id` (`user_id`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `comments`
@@ -220,7 +245,73 @@ INSERT INTO `comments` (`id`, `post_id`, `user_id`, `content`, `created_at`, `pa
 (61, 54, 19, '<p>Test</p>', '2025-01-28 18:58:12', NULL, 0, 0),
 (62, 54, 19, '<p>test</p>', '2025-01-28 18:58:19', 61, 0, 0),
 (63, 53, 19, '<p>One more reply!</p>', '2025-01-28 23:05:26', 57, 0, 0),
-(64, 69, 29, '<p>aa</p>', '2025-02-25 20:31:42', NULL, 0, 0);
+(64, 69, 29, '<p>aa</p>', '2025-02-25 20:31:42', NULL, 0, 0),
+(65, 0, 30, '<p>a</p>', '2025-02-26 11:20:11', NULL, 0, 1),
+(66, 0, 30, '<p>asc</p>', '2025-02-26 11:20:14', NULL, 0, 1),
+(67, 69, 30, '<p>a</p>', '2025-02-26 12:24:28', NULL, 1, 0),
+(68, 69, 30, '<p>twe</p>', '2025-02-26 12:24:35', 67, 0, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `comments_asset`
+--
+
+DROP TABLE IF EXISTS `comments_asset`;
+CREATE TABLE IF NOT EXISTS `comments_asset` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `asset_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `parent_id` int DEFAULT NULL,
+  `upvotes` int NOT NULL DEFAULT '0',
+  `downvotes` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `asset_id` (`asset_id`),
+  KEY `user_id` (`user_id`),
+  KEY `idx_parent_id` (`parent_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `comments_asset`
+--
+
+INSERT INTO `comments_asset` (`id`, `asset_id`, `user_id`, `content`, `created_at`, `parent_id`, `upvotes`, `downvotes`) VALUES
+(65, 80, 30, '<p>hello</p>', '2025-02-26 12:33:32', NULL, 0, 0),
+(66, 80, 30, '<p>test</p>', '2025-02-26 12:40:53', NULL, 0, 0),
+(67, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0),
+(68, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0),
+(69, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0),
+(70, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0),
+(71, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0),
+(72, 80, 30, '<p>oh god</p>', '2025-02-27 08:48:39', NULL, 1, 0),
+(73, 80, 30, '<p>sup!</p>', '2025-02-27 08:50:39', 65, 0, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `comment_asset_votes`
+--
+
+DROP TABLE IF EXISTS `comment_asset_votes`;
+CREATE TABLE IF NOT EXISTS `comment_asset_votes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `comment_id` int NOT NULL,
+  `vote_type` enum('upvote','downvote') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_vote` (`user_id`,`comment_id`),
+  KEY `comment_id` (`comment_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `comment_asset_votes`
+--
+
+INSERT INTO `comment_asset_votes` (`id`, `user_id`, `comment_id`, `vote_type`, `created_at`) VALUES
+(29, 30, 72, 'upvote', '2025-02-27 08:56:56');
 
 -- --------------------------------------------------------
 
@@ -233,12 +324,12 @@ CREATE TABLE IF NOT EXISTS `comment_votes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `comment_id` int NOT NULL,
-  `vote_type` enum('upvote','downvote') COLLATE utf8mb4_general_ci NOT NULL,
+  `vote_type` enum('upvote','downvote') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_vote` (`user_id`,`comment_id`),
   KEY `comment_id` (`comment_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `comment_votes`
@@ -248,7 +339,11 @@ INSERT INTO `comment_votes` (`id`, `user_id`, `comment_id`, `vote_type`, `create
 (3, 26, 29, 'upvote', '2025-01-21 10:29:18'),
 (17, 26, 50, 'downvote', '2025-01-21 20:17:40'),
 (18, 26, 54, 'upvote', '2025-01-23 20:52:59'),
-(23, 19, 60, 'upvote', '2025-01-28 18:44:33');
+(23, 19, 60, 'upvote', '2025-01-28 18:44:33'),
+(32, 30, 66, 'downvote', '2025-02-27 08:52:21'),
+(33, 30, 67, 'upvote', '2025-02-27 08:52:22'),
+(34, 30, 68, 'downvote', '2025-02-27 08:52:23'),
+(39, 30, 65, 'downvote', '2025-02-27 08:52:41');
 
 -- --------------------------------------------------------
 
@@ -322,13 +417,13 @@ INSERT INTO `password_resets` (`id`, `email`, `token`, `created_at`) VALUES
 DROP TABLE IF EXISTS `posts`;
 CREATE TABLE IF NOT EXISTS `posts` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `content` text COLLATE utf8mb4_general_ci NOT NULL,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `category_id` int NOT NULL,
-  `hashtags` text COLLATE utf8mb4_general_ci,
-  `images` text COLLATE utf8mb4_general_ci,
+  `hashtags` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `images` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `videos` text COLLATE utf8mb4_general_ci,
+  `videos` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `user_id` int NOT NULL,
   `upvotes` int DEFAULT '0',
   `downvotes` int DEFAULT '0',
@@ -372,11 +467,11 @@ CREATE TABLE IF NOT EXISTS `post_votes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `post_id` int NOT NULL,
-  `vote_type` enum('upvote','downvote') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `vote_type` enum('upvote','downvote') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`post_id`),
   KEY `post_id` (`post_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=108 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `post_votes`
@@ -406,9 +501,9 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `role` enum('admin','user') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'user',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `profile_picture` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `banner` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` text COLLATE utf8mb4_general_ci,
+  `profile_picture` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `banner` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
@@ -423,7 +518,7 @@ INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `create
 (24, 'teste123', 'exemple123123@gmail.com', '$2y$10$UhnjQ/wurSX0ImzToLpZ2eZRpsWGaVmNVcdsAwZpEjfb9B0U9pkDa', 'user', '2024-12-30 22:58:12', NULL, NULL, NULL),
 (25, 'teste2', 'teste2@gmail.com', '$2y$10$edPsuzcunAmj9zbvKt3WSuo/b8t2fSUT.XrXt.wgVE5DpiWu3gosK', 'user', '2024-12-30 23:00:02', NULL, NULL, NULL),
 (27, 'usertest', 'usertest@gmail.com', '$2y$10$Y3uiX24QwkjOkJfYc8xM1emMGCB1FFs6bzEUttd/aEajAXxm2.fwS', 'user', '2025-01-21 22:27:42', NULL, NULL, NULL),
-(30, 'Thomaz123', 'thomazbarrago@gmail.com', '$2y$10$EBfSvfNJVS3HrB/j4Kwr/O7kWnufRUKRp.0rzDjZhVDDo37Z7Bwn.', 'user', '2025-01-23 20:59:54', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_30_1738449128.png', '\\moonarrowstudios\\uploads\\banners\\banner_30_1738449823.png', 'Welcome to my profile!');
+(30, 'Thomaz123', 'thomazbarrago@gmail.com', '$2y$10$EBfSvfNJVS3HrB/j4Kwr/O7kWnufRUKRp.0rzDjZhVDDo37Z7Bwn.', 'user', '2025-01-23 20:59:54', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_30_1740566603.png', '\\moonarrowstudios\\uploads\\banners\\banner_30_1740566603.png', 'Welcome to my profile!');
 
 --
 -- Constraints for dumped tables
@@ -435,6 +530,12 @@ INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `create
 ALTER TABLE `assets`
   ADD CONSTRAINT `fk_assets_categories` FOREIGN KEY (`category_id`) REFERENCES `asset_categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `fk_assets_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `comments_asset`
+--
+ALTER TABLE `comments_asset`
+  ADD CONSTRAINT `comments_asset_ibfk_1` FOREIGN KEY (`asset_id`) REFERENCES `assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `comment_votes`
