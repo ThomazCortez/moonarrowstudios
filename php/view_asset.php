@@ -13,7 +13,7 @@ $result = $stmt->get_result();
 $asset = $result->fetch_assoc();
 
 if (!$asset) {
-    echo "<h1>asset not found</h1>";
+    echo "<h1>Asset not found</h1>";
     exit;
 }
 
@@ -26,20 +26,21 @@ switch ($filter) {
         $order_by = 'c1.created_at DESC';
         break;
     case 'most_replies':
-        $order_by = '(SELECT COUNT(*) FROM comments c2 WHERE c2.parent_id = c1.id) DESC';
+        $order_by = '(SELECT COUNT(*) FROM comments_asset c2 WHERE c2.parent_id = c1.id) DESC';
         break;
     case 'highest_score':
     default:
-        $order_by = '(c1.upvotes - c1.downvotes) DESC'; // Assuming you have upvotes and downvotes columns
+        $order_by = '(c1.upvotes - c1.downvotes) DESC';
         break;
 }
 
+// Fetch top-level comments for the specific asset
 $comments_stmt = $conn->prepare("
     SELECT c1.*, users.username, 
-        (SELECT COUNT(*) FROM comments c2 WHERE c2.parent_id = c1.id) AS reply_count 
-    FROM comments c1 
+        (SELECT COUNT(*) FROM comments_asset c2 WHERE c2.parent_id = c1.id) AS reply_count 
+    FROM comments_asset c1 
     JOIN users ON c1.user_id = users.user_id 
-    WHERE c1.id = ? AND c1.parent_id IS NULL 
+    WHERE c1.asset_id = ? AND c1.parent_id IS NULL 
     ORDER BY $order_by
 ");
 $comments_stmt->bind_param("i", $asset_id);
@@ -51,7 +52,7 @@ while ($row = $comments_result->fetch_assoc()) {
     $row['replies'] = [];
     $reply_stmt = $conn->prepare("
         SELECT replies.*, users.username 
-        FROM comments replies 
+        FROM comments_asset replies 
         JOIN users ON replies.user_id = users.user_id 
         WHERE replies.parent_id = ? 
         ORDER BY replies.created_at ASC
@@ -64,7 +65,6 @@ while ($row = $comments_result->fetch_assoc()) {
     }
     $comments[] = $row;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -74,7 +74,7 @@ while ($row = $comments_result->fetch_assoc()) {
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
-    <title>MoonArrow Studios - asset</title>
+    <title>MoonArrow Studios - Asset</title>
 	<script>
 	document.addEventListener('DOMContentLoaded', () => {
 		hljs.highlightAll();
@@ -592,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				<!-- asset Header -->
 				<div class="text-center mb-4">
 					<h1 class="card-title mb-1"><?= htmlspecialchars($asset['title'] ?? 'No Title') ?></h1>
-					<p class="mb-0"><em>asseted on <?= date('F j, Y, g:i A', strtotime($asset['created_at'])) ?></em></p>
+					<p class="mb-0"><em>Published on <?= date('F j, Y, g:i A', strtotime($asset['created_at'])) ?></em></p>
 					<p class="mb-0">By <strong><a href="profile.php?id=<?= htmlspecialchars($asset['user_id']) ?>"><?= htmlspecialchars($asset['username'] ?? 'Anonymous') ?></a></strong></p>
 					<p><strong>Category:</strong> <?= htmlspecialchars($asset['category_name'] ?? 'Uncategorized') ?></p>
 					<p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($asset['hashtags'] ?? '') ?></p>
