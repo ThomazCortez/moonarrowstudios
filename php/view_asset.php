@@ -6,7 +6,11 @@ require 'db_connect.php';
 
 // Fetch the asset by ID
 $asset_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-$stmt = $conn->prepare("SELECT assets.*, categories.name AS category_name, users.username FROM assets JOIN categories ON assets.category_id = categories.id JOIN users ON assets.user_id = users.user_id WHERE assets.id = ?");
+$stmt = $conn->prepare("SELECT assets.*, categories.name AS category_name, users.username 
+                        FROM assets 
+                        JOIN categories ON assets.category_id = categories.id 
+                        JOIN users ON assets.user_id = users.user_id 
+                        WHERE assets.id = ?");
 $stmt->bind_param("i", $asset_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -602,30 +606,53 @@ document.addEventListener('DOMContentLoaded', () => {
 				<div> <?= $asset['content'] ?> </div> <?php
 			// After decoding the JSON, clean up the paths
 			$images = !empty($asset['images']) ? json_decode($asset['images'], true) : [];
-			$videos = !empty($asset['videos']) ? json_decode($asset['videos'], true) : [];
+$videos = !empty($asset['videos']) ? json_decode($asset['videos'], true) : [];
 
-			// Clean up the paths by replacing escaped slashes
-			$images = array_map(function($path) {
-				return str_replace('\\/', '/', $path);
-			}, $images);
+// Clean up the paths by replacing escaped slashes
+$images = array_map(function($path) {
+    return str_replace('\\/', '/', $path);
+}, $images);
 
-			$videos = array_map(function($path) {
-				return str_replace('\\/', '/', $path);
-			}, $videos);
+$videos = array_map(function($path) {
+    return str_replace('\\/', '/', $path);
+}, $videos);
 
-            // Check if there are any attachments
-            if (!empty($images) || !empty($videos)): ?>
-				<hr>
-				<!-- Display Images and Videos -->
-				<h6 class='text-center'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
-				<div class="media-container"> <?php if (!empty($images)): ?> <?php foreach ($images as $image): ?> <div class="media-item">
-						<img src="<?= htmlspecialchars($image) ?>" alt="asset Image">
-						<button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
-					</div> <?php endforeach; ?> <?php endif; ?> <?php if (!empty($videos)): ?> <?php foreach ($videos as $video_path): ?> <div class="media-item">
-						<video>
-							<source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag. </video>
-						<button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
-					</div> <?php endforeach; ?> <?php endif; ?> </div> <?php endif; ?>
+// Check if there are any attachments (images, videos, or asset_file)
+if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
+    <hr>
+    <!-- Display Images, Videos, and Asset File -->
+    <h6 class='text-center'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
+    <div class="media-container">
+        <?php if (!empty($images)): ?>
+            <?php foreach ($images as $image): ?>
+                <div class="media-item">
+                    <img src="<?= htmlspecialchars($image) ?>" alt="Asset Image">
+                    <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+        <?php if (!empty($videos)): ?>
+            <?php foreach ($videos as $video_path): ?>
+                <div class="media-item">
+                    <video>
+                        <source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag.
+                    </video>
+                    <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+
+    <!-- Download Button for Asset File -->
+    <?php if (!empty($asset['asset_file'])): ?>
+        <div class="text-center mt-3">
+            <a href="<?= htmlspecialchars($asset['asset_file']) ?>" class="btn btn-primary btn-sm" download>
+                <i class="bi bi-download"></i> Download <?= basename($asset['asset_file']) ?>
+            </a>
+        </div>
+    <?php endif; ?>
+<?php endif; ?>
 			</div>
 		</div>
 	</div>

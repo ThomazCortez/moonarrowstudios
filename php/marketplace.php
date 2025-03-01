@@ -44,6 +44,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_asset'])) {
     $hashtags = isset($_POST['hashtags']) ? $_POST['hashtags'] : '';
     $user_id = $_SESSION['user_id']; // Get the logged-in user's ID
 
+    // Handle asset file upload
+    $asset_file_path = '';
+    if (isset($_FILES['asset_file']['name']) && $_FILES['asset_file']['error'] === UPLOAD_ERR_OK) {
+        $upload_dir = 'uploads/assets/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        $asset_file_name = basename($_FILES['asset_file']['name']);
+        $asset_file_path = $upload_dir . $asset_file_name;
+        if (move_uploaded_file($_FILES['asset_file']['tmp_name'], $asset_file_path)) {
+            // File uploaded successfully
+        } else {
+            $_SESSION['error'] = "Failed to upload asset file.";
+            header("Location: marketplace.php");
+            exit;
+        }
+    }
+
     // Handle image uploads
     $image_paths = [];
     if (isset($_FILES['images']['name'][0]) && $_FILES['images']['error'][0] === UPLOAD_ERR_OK) {
@@ -87,17 +105,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_asset'])) {
         }
     }
 
-    // Update the INSERT query to include preview_image
-    $stmt = $conn->prepare("INSERT INTO assets (title, content, category_id, hashtags, images, videos, user_id, preview_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssisssis", $title, $content, $category_id, $hashtags, json_encode($image_paths), json_encode($video_paths), $user_id, $preview_image_path);
+    // Update the INSERT query to include asset_file
+    $stmt = $conn->prepare("INSERT INTO assets (title, content, category_id, hashtags, images, videos, user_id, preview_image, asset_file) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssisssiss", $title, $content, $category_id, $hashtags, json_encode($image_paths), json_encode($video_paths), $user_id, $preview_image_path, $asset_file_path);
     $stmt->execute();
     $stmt->close();
 
     header("Location: marketplace.php");
     exit;
 }
-
-
 
 // Fetch assets
 $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -1368,6 +1384,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <label for="hashtags" class="form-label">Hashtags</label>
                                 <input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #unity, #unrealengine">
                             </div>
+                            <div class="mb-3">
+                            <label for="asset_file" class="form-label">Asset File</label>
+                            <input type="file" name="asset_file" id="asset_file" class="form-control" accept="">
+                        </div>
                             <div class="mb-3">
                                 <label for="preview_image" class="form-label">Preview Image</label>
                                 <input type="file" name="preview_image" id="preview_image" class="form-control" accept="image/*">
