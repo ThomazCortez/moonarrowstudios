@@ -644,14 +644,47 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
         <?php endif; ?>
     </div>
 
-    <!-- Download Button for Asset File -->
     <?php if (!empty($asset['asset_file'])): ?>
-        <div class="text-center mt-3">
-            <a href="<?= htmlspecialchars($asset['asset_file']) ?>" class="btn btn-primary btn-sm" download>
-                <i class="bi bi-download"></i> Download <?= basename($asset['asset_file']) ?>
-            </a>
+    <?php
+    // Construct the file path
+    $filePath = $_SERVER['DOCUMENT_ROOT'] . '/moonarrowstudios/php/' . $asset['asset_file'];
+    
+    // Normalize slashes for Windows compatibility
+    $filePath = str_replace('\\', '/', $filePath);
+    
+    // Debugging: Print the file path
+    echo "<pre>Debug: File Path = " . $filePath . "</pre>";
+
+    // Check if the file exists
+    if (file_exists($filePath)) {
+        $fileHash = hash_file('sha256', $filePath);
+        $fileSize = filesize($filePath);
+    } else {
+        $fileHash = 'File not found';
+        $fileSize = 0;
+    }
+    ?>
+    <div class="text-center mt-3">
+        <a href="<?= htmlspecialchars($asset['asset_file']) ?>" class="btn btn-primary btn-sm me-2" download>
+            <i class="bi bi-download"></i> Download <?= basename($asset['asset_file']) ?>
+        </a>
+        <button class="btn btn-outline-secondary btn-sm" type="button" 
+                data-bs-toggle="collapse" data-bs-target="#securityInfo">
+            <i class="bi bi-shield-check"></i> Security Info
+        </button>
+    </div>
+    <div class="collapse mt-2" id="securityInfo">
+        <div class="card card-body">
+            <?php if (file_exists($filePath)): ?>
+                <small>File Hash (SHA-256): <code><?= $fileHash ?></code></small>
+                <small>File Size: <?= number_format($fileSize / 1024, 2) ?> KB</small>
+                <p class="mb-0 mt-1"><small>You can verify this hash online at <a href="https://www.virustotal.com/gui/home/search" target="_blank">VirusTotal</a> by searching for this hash.</small></p>
+            <?php else: ?>
+                <small>File not found.</small>
+            <?php endif; ?>
         </div>
-    <?php endif; ?>
+    </div>
+<?php endif; ?>
 <?php endif; ?>
 			</div>
 		</div>
