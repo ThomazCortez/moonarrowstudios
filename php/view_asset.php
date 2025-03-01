@@ -651,9 +651,6 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
     
     // Normalize slashes for Windows compatibility
     $filePath = str_replace('\\', '/', $filePath);
-    
-    // Debugging: Print the file path
-    echo "<pre>Debug: File Path = " . $filePath . "</pre>";
 
     // Check if the file exists
     if (file_exists($filePath)) {
