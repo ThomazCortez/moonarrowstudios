@@ -1386,7 +1386,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <div class="mb-3">
                             <label for="asset_file" class="form-label">Asset File</label>
-                            <input type="file" name="asset_file" id="asset_file" class="form-control" accept="">
+                            <input type="file" name="asset_file" id="asset_file" class="form-control" accept="" required>
                         </div>
                             <div class="mb-3">
                                 <label for="preview_image" class="form-label">Preview Image</label>
@@ -1394,7 +1394,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <div class="mb-3">
                                 <label for="images" class="form-label">Images</label>
-                                <input type="file" name="images[]" id="images" class="form-control" accept="image/*" multiple>
+                                <input type="file" name="images[]" id="images" class="form-control" accept="image/*" multiple required>
                             </div>
                             <div class="mb-3">
                                 <label for="videos" class="form-label">Videos</label>
