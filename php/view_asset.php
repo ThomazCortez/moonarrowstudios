@@ -6,9 +6,9 @@ require 'db_connect.php';
 
 // Fetch the asset by ID
 $asset_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-$stmt = $conn->prepare("SELECT assets.*, categories.name AS category_name, users.username 
+$stmt = $conn->prepare("SELECT assets.*, asset_categories.name AS category_name, users.username 
                         FROM assets 
-                        JOIN categories ON assets.category_id = categories.id 
+                        JOIN asset_categories ON assets.category_id = asset_categories.id 
                         JOIN users ON assets.user_id = users.user_id 
                         WHERE assets.id = ?");
 $stmt->bind_param("i", $asset_id);
