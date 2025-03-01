@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Feb 27, 2025 at 08:59 AM
+-- Generation Time: Mar 01, 2025 at 03:54 PM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.18
 
@@ -40,24 +40,34 @@ CREATE TABLE IF NOT EXISTS `assets` (
   `user_id` int NOT NULL,
   `upvotes` int DEFAULT '0',
   `downvotes` int DEFAULT '0',
-  `files` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `preview_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `asset_file` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_posts_categories` (`category_id`),
   KEY `fk_user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `assets`
 --
 
-INSERT INTO `assets` (`id`, `title`, `content`, `category_id`, `hashtags`, `images`, `created_at`, `videos`, `user_id`, `upvotes`, `downvotes`, `files`, `preview_image`) VALUES
-(74, 'abc', '<p>abc</p>', 1, '#music', NULL, '2025-02-23 19:24:18', NULL, 30, 0, 0, '[\"uploads\\/files\\/amen-break-sequence_91bpm.wav\"]', NULL),
-(75, 'lol', '<p>lol</p>', 11, '#a', '[]', '2025-02-24 19:35:00', '[]', 30, 0, 0, NULL, 'uploads/previews/a0084845941_65.jpg'),
-(76, 'a', '<p>abc</p>', 7, '#ksd', '[]', '2025-02-24 19:48:25', '[]', 30, 0, 0, NULL, 'uploads/previews/gfoyUJWR_400x400.jpg'),
-(77, 'audio1', '<p>audio</p>', 10, '#audio', '[]', '2025-02-24 20:16:06', '[]', 30, 0, 0, NULL, ''),
-(79, 'a', '<p>a</p>', 11, '#zz', '[]', '2025-02-25 20:37:17', '[]', 30, 0, 0, NULL, ''),
-(80, 'comment testing', '<p>yes</p>', 14, '#shader', '[]', '2025-02-26 12:32:49', '[]', 30, 0, 1, NULL, '');
+INSERT INTO `assets` (`id`, `title`, `content`, `category_id`, `hashtags`, `images`, `created_at`, `videos`, `user_id`, `upvotes`, `downvotes`, `preview_image`, `asset_file`) VALUES
+(74, 'abc', '<p>abc</p>', 1, '#music', NULL, '2025-02-23 19:24:18', NULL, 30, 0, 0, NULL, NULL),
+(75, 'lol', '<p>lol</p>', 11, '#a', '[]', '2025-02-24 19:35:00', '[]', 30, 0, 0, 'uploads/previews/a0084845941_65.jpg', NULL),
+(76, 'a', '<p>abc</p>', 7, '#ksd', '[]', '2025-02-24 19:48:25', '[]', 30, 0, 0, 'uploads/previews/gfoyUJWR_400x400.jpg', NULL),
+(77, 'audio1', '<p>audio</p>', 10, '#audio', '[]', '2025-02-24 20:16:06', '[]', 30, 0, 0, '', NULL),
+(79, 'a', '<p>a</p>', 11, '#zz', '[]', '2025-02-25 20:37:17', '[]', 30, 0, 0, '', NULL),
+(80, 'comment testing', '<p>yes</p>', 14, '#shader', '[]', '2025-02-26 12:32:49', '[]', 30, 0, 1, '', NULL),
+(81, 'a', '<p>a</p>', 1, '#a', 'null', '2025-03-01 13:18:57', 'null', 30, 0, 0, NULL, ''),
+(82, 'a2', '<p>a2</p>', 11, '#a2', 'null', '2025-03-01 13:23:53', 'null', 30, 0, 0, NULL, 'uploads/assets/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3'),
+(83, 'a3', '<p>a3</p>', 1, '#a3', 'null', '2025-03-01 13:24:31', 'null', 30, 0, 0, NULL, ''),
+(84, 'a4', '<p>a4</p>', 1, '#a4', '[]', '2025-03-01 13:25:39', '[]', 30, 0, 0, '', NULL),
+(85, 'favoravel', '<p>favoravel</p>', 11, '#favoravel', '[]', '2025-03-01 13:40:54', '[]', 30, 0, 0, 'uploads/previews/e6c51864a3d91796e797e764126bb6c8.500x500x1.jpg', 'uploads/assets/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3'),
+(86, 'a', '<p>a</p>', 11, '#a', '[\"uploads\\/images\\/a1903352220_10.jpg\",\"uploads\\/images\\/a0084845941_65.jpg\",\"uploads\\/images\\/e6c51864a3d91796e797e764126bb6c8.500x500x1.jpg\"]', '2025-03-01 13:55:53', '[]', 30, 0, 0, 'uploads/previews/e6c51864a3d91796e797e764126bb6c8.500x500x1.jpg', 'uploads/assets/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3'),
+(87, 'b', '<p>b</p>', 6, '#b', '[\"uploads\\/images\\/particle.png\"]', '2025-03-01 14:09:21', '[]', 30, 0, 0, 'uploads/previews/gfoyUJWR_400x400.jpg', 'uploads/assets/gfoyUJWR_400x400.jpg'),
+(88, 'c', '<p>c</p>', 12, '#c', '[\"uploads\\/images\\/sun.png\"]', '2025-03-01 14:10:38', '[]', 30, 0, 0, 'uploads/previews/a2572949485_65.jpg', 'uploads/assets/ProjetoPSILourenço12F.rar'),
+(89, 'd', '<p>d</p>', 11, '#d', '[]', '2025-03-01 14:11:25', '[]', 30, 0, 0, 'uploads/previews/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3', ''),
+(90, 'VIRUS', '<p>VIRUS</p>', 6, '#virus', '[]', '2025-03-01 15:43:09', '[]', 30, 0, 0, '', 'uploads/assets/eicar_com.zip');
 
 -- --------------------------------------------------------
 
@@ -107,7 +117,7 @@ CREATE TABLE IF NOT EXISTS `asset_votes` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`asset_id`),
   KEY `asset_id` (`asset_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=131 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `asset_votes`
@@ -125,7 +135,7 @@ INSERT INTO `asset_votes` (`id`, `user_id`, `asset_id`, `vote_type`) VALUES
 DROP TABLE IF EXISTS `categories`;
 CREATE TABLE IF NOT EXISTS `categories` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -166,7 +176,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `id` int NOT NULL AUTO_INCREMENT,
   `post_id` int NOT NULL,
   `user_id` int NOT NULL,
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `content` text COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `parent_id` int DEFAULT NULL,
   `upvotes` int NOT NULL DEFAULT '0',
@@ -175,7 +185,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   KEY `post_id` (`post_id`),
   KEY `user_id` (`user_id`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `comments`
@@ -245,11 +255,7 @@ INSERT INTO `comments` (`id`, `post_id`, `user_id`, `content`, `created_at`, `pa
 (61, 54, 19, '<p>Test</p>', '2025-01-28 18:58:12', NULL, 0, 0),
 (62, 54, 19, '<p>test</p>', '2025-01-28 18:58:19', 61, 0, 0),
 (63, 53, 19, '<p>One more reply!</p>', '2025-01-28 23:05:26', 57, 0, 0),
-(64, 69, 29, '<p>aa</p>', '2025-02-25 20:31:42', NULL, 0, 0),
-(65, 0, 30, '<p>a</p>', '2025-02-26 11:20:11', NULL, 0, 1),
-(66, 0, 30, '<p>asc</p>', '2025-02-26 11:20:14', NULL, 0, 1),
-(67, 69, 30, '<p>a</p>', '2025-02-26 12:24:28', NULL, 1, 0),
-(68, 69, 30, '<p>twe</p>', '2025-02-26 12:24:35', 67, 0, 1);
+(64, 69, 29, '<p>aa</p>', '2025-02-25 20:31:42', NULL, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -518,7 +524,7 @@ INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `create
 (24, 'teste123', 'exemple123123@gmail.com', '$2y$10$UhnjQ/wurSX0ImzToLpZ2eZRpsWGaVmNVcdsAwZpEjfb9B0U9pkDa', 'user', '2024-12-30 22:58:12', NULL, NULL, NULL),
 (25, 'teste2', 'teste2@gmail.com', '$2y$10$edPsuzcunAmj9zbvKt3WSuo/b8t2fSUT.XrXt.wgVE5DpiWu3gosK', 'user', '2024-12-30 23:00:02', NULL, NULL, NULL),
 (27, 'usertest', 'usertest@gmail.com', '$2y$10$Y3uiX24QwkjOkJfYc8xM1emMGCB1FFs6bzEUttd/aEajAXxm2.fwS', 'user', '2025-01-21 22:27:42', NULL, NULL, NULL),
-(30, 'Thomaz123', 'thomazbarrago@gmail.com', '$2y$10$EBfSvfNJVS3HrB/j4Kwr/O7kWnufRUKRp.0rzDjZhVDDo37Z7Bwn.', 'user', '2025-01-23 20:59:54', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_30_1740566603.png', '\\moonarrowstudios\\uploads\\banners\\banner_30_1740566603.png', 'Welcome to my profile!');
+(30, 'Thomaz123', 'thomazbarrago@gmail.com', '$2y$10$EBfSvfNJVS3HrB/j4Kwr/O7kWnufRUKRp.0rzDjZhVDDo37Z7Bwn.', 'user', '2025-01-23 20:59:54', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_30_1740833430.png', '\\moonarrowstudios\\uploads\\banners\\banner_30_1740833430.png', 'Welcome to my profile!');
 
 --
 -- Constraints for dumped tables
@@ -538,12 +544,6 @@ ALTER TABLE `comments_asset`
   ADD CONSTRAINT `comments_asset_ibfk_1` FOREIGN KEY (`asset_id`) REFERENCES `assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `comment_votes`
---
-ALTER TABLE `comment_votes`
-  ADD CONSTRAINT `comment_votes_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
 -- Constraints for table `follows`
 --
 ALTER TABLE `follows`
@@ -555,13 +555,6 @@ ALTER TABLE `follows`
 --
 ALTER TABLE `password_resets`
   ADD CONSTRAINT `fk_password_resets_users` FOREIGN KEY (`email`) REFERENCES `users` (`email`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `posts`
---
-ALTER TABLE `posts`
-  ADD CONSTRAINT `fk_posts_categories` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
