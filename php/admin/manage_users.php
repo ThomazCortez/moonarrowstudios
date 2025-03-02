@@ -496,4 +496,4 @@ $user_stats = $result->fetch_assoc();
         ?>
     </script>
 </body>
-</html>
+</html
