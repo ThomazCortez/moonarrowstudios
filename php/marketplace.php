@@ -41,25 +41,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_asset'])) {
     $content = preg_replace('/<code>(.*?)<\/code>/', '<pre><code>$1</code></pre>', $content);
 
     $category_id = $_POST['category'];
-    $hashtags = isset($_POST['hashtags']) ? $_POST['hashtags'] : '';
-    $user_id = $_SESSION['user_id']; // Get the logged-in user's ID
 
-    // Handle asset file upload
-    $asset_file_path = '';
-    if (isset($_FILES['asset_file']['name']) && $_FILES['asset_file']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = 'uploads/assets/';
+    // Handle image uploads
+    $image_paths = [];
+    if (isset($_FILES['images']['name'][0]) && $_FILES['images']['error'][0] === UPLOAD_ERR_OK) {
+        $upload_dir = 'uploads/images/';
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
-        $asset_file_name = basename($_FILES['asset_file']['name']);
-        $asset_file_path = $upload_dir . $asset_file_name;
-        if (move_uploaded_file($_FILES['asset_file']['tmp_name'], $asset_file_path)) {
-            // File uploaded successfully
-        } else {
-            $_SESSION['error'] = "Failed to upload asset file.";
-            header("Location: marketplace.php");
-            exit;
+        foreach ($_FILES['images']['name'] as $key => $name) {
+            $image_path = $upload_dir . basename($name);
+            if (move_uploaded_file($_FILES['images']['tmp_name'][$key], $image_path)) {
+                $image_paths[] = $image_path;
+            }
         }
+    } elseif (!in_array($category_id, [10, 11, 12])) {
+        // If category is not 10, 11, or 12, images are required
+        $_SESSION['error'] = "Images are required for this category.";
+        header("Location: marketplace.php");
+        exit;
     }
 
     // Handle image uploads

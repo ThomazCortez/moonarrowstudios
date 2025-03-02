@@ -652,6 +652,10 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
     // Normalize slashes for Windows compatibility
     $filePath = str_replace('\\', '/', $filePath);
 
+    // Get file extension to determine if it's an audio file
+    $fileExtension = pathinfo($asset['asset_file'], PATHINFO_EXTENSION);
+    $isAudioFile = in_array(strtolower($fileExtension), ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac']);
+    
     // Check if the file exists
     if (file_exists($filePath)) {
         $fileHash = hash_file('sha256', $filePath);
@@ -661,6 +665,17 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
         $fileSize = 0;
     }
     ?>
+    
+    <?php if ($isAudioFile && file_exists($filePath)): ?>
+    <!-- Audio Player -->
+    <div class="audio-player-container text-center mt-3 mb-3">
+        <audio controls class="w-100">
+            <source src="<?= htmlspecialchars($asset['asset_file']) ?>" type="audio/<?= strtolower($fileExtension) ?>">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+    <?php endif; ?>
+    
     <div class="text-center mt-3">
         <a href="<?= htmlspecialchars($asset['asset_file']) ?>" class="btn btn-primary btn-sm me-2" download>
             <i class="bi bi-download"></i> Download <?= basename($asset['asset_file']) ?>
