@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Mar 01, 2025 at 03:54 PM
+-- Generation Time: Mar 02, 2025 at 02:49 PM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.18
 
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `assets` (
   PRIMARY KEY (`id`),
   KEY `fk_posts_categories` (`category_id`),
   KEY `fk_user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `assets`
@@ -67,7 +67,10 @@ INSERT INTO `assets` (`id`, `title`, `content`, `category_id`, `hashtags`, `imag
 (87, 'b', '<p>b</p>', 6, '#b', '[\"uploads\\/images\\/particle.png\"]', '2025-03-01 14:09:21', '[]', 30, 0, 0, 'uploads/previews/gfoyUJWR_400x400.jpg', 'uploads/assets/gfoyUJWR_400x400.jpg'),
 (88, 'c', '<p>c</p>', 12, '#c', '[\"uploads\\/images\\/sun.png\"]', '2025-03-01 14:10:38', '[]', 30, 0, 0, 'uploads/previews/a2572949485_65.jpg', 'uploads/assets/ProjetoPSILourenço12F.rar'),
 (89, 'd', '<p>d</p>', 11, '#d', '[]', '2025-03-01 14:11:25', '[]', 30, 0, 0, 'uploads/previews/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3', ''),
-(90, 'VIRUS', '<p>VIRUS</p>', 6, '#virus', '[]', '2025-03-01 15:43:09', '[]', 30, 0, 0, '', 'uploads/assets/eicar_com.zip');
+(90, 'VIRUS', '<p>VIRUS</p>', 6, '#virus', '[]', '2025-03-01 15:43:09', '[]', 30, 0, 0, '', 'uploads/assets/eicar_com.zip'),
+(91, 'a', '<p>a</p><p><br></p>', 1, '#a', '[\"uploads\\/images\\/a0084845941_65.jpg\"]', '2025-03-01 16:15:48', '[]', 30, 0, 0, '', 'uploads/assets/htmlpurifier-master.zip'),
+(92, 'ZPAX', '<p>YES</p>', 5, '#a', '[\"uploads\\/images\\/IMG_20250128_190627.jpg\"]', '2025-03-02 11:34:46', '[]', 19, 0, 0, 'uploads/previews/gfoyUJWR_400x400.jpg', 'uploads/assets/KawendraZpax2 (2).apk'),
+(93, 'STINGRAY', '<p>yes</p>', 16, '#a', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2024-12-27 233235.png\"]', '2025-03-02 11:41:27', '[]', 19, 0, 0, '', 'uploads/assets/stingray-lnyn.apk');
 
 -- --------------------------------------------------------
 
@@ -117,7 +120,7 @@ CREATE TABLE IF NOT EXISTS `asset_votes` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`asset_id`),
   KEY `asset_id` (`asset_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=134 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `asset_votes`
