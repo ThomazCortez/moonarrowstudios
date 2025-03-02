@@ -113,7 +113,6 @@ $stmt->close();
 $query = "SELECT 
     COUNT(*) as total_users,
     SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admin_count,
-    SUM(CASE WHEN role = 'moderator' THEN 1 ELSE 0 END) as moderator_count,
     SUM(CASE WHEN role = 'user' THEN 1 ELSE 0 END) as regular_user_count,
     SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active_users,
     SUM(CASE WHEN status = 'suspended' THEN 1 ELSE 0 END) as suspended_users
@@ -132,6 +131,8 @@ $user_stats = $result->fetch_assoc();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="icon" href="<?php echo $baseUrl; ?>media/moon.ico" type="image/x-icon" />
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <style>
         .stats-card {
             transition: transform 0.3s ease-in-out;
@@ -161,7 +162,7 @@ $user_stats = $result->fetch_assoc();
                 <h1 class="mb-0">Manage Users</h1>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Manage Users</li>
                     </ol>
                 </nav>
@@ -174,7 +175,7 @@ $user_stats = $result->fetch_assoc();
         </div>
 
         <!-- User Stats -->
-        <div class="row mb-4">
+        <div class="row mb-4 d-flex justify-content-center">
             <div class="col-md-2 mb-3">
                 <div class="card stats-card bg-primary bg-gradient text-white">
                     <div class="card-body text-center">
@@ -192,18 +193,10 @@ $user_stats = $result->fetch_assoc();
                 </div>
             </div>
             <div class="col-md-2 mb-3">
-                <div class="card stats-card bg-warning bg-gradient text-white">
-                    <div class="card-body text-center">
-                        <h3 class="fs-2 mb-0"><?php echo $user_stats['moderator_count']; ?></h3>
-                        <p class="mb-0">Moderators</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2 mb-3">
                 <div class="card stats-card bg-info bg-gradient text-white">
                     <div class="card-body text-center">
                         <h3 class="fs-2 mb-0"><?php echo $user_stats['regular_user_count']; ?></h3>
-                        <p class="mb-0">Regular Users</p>
+                        <p class="mb-0">Users</p>
                     </div>
                 </div>
             </div>
@@ -239,8 +232,7 @@ $user_stats = $result->fetch_assoc();
                         <select class="form-select" name="role">
                             <option value="">All Roles</option>
                             <option value="admin" <?php echo $role_filter === 'admin' ? 'selected' : ''; ?>>Admin</option>
-                            <option value="moderator" <?php echo $role_filter === 'moderator' ? 'selected' : ''; ?>>Moderator</option>
-                            <option value="user" <?php echo $role_filter === 'user' ? 'selected' : ''; ?>>Regular User</option>
+                            <option value="user" <?php echo $role_filter === 'user' ? 'selected' : ''; ?>>User</option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -300,8 +292,6 @@ $user_stats = $result->fetch_assoc();
                                             $badge_class = 'bg-info';
                                             if ($user['role'] === 'admin') {
                                                 $badge_class = 'bg-danger';
-                                            } elseif ($user['role'] === 'moderator') {
-                                                $badge_class = 'bg-warning';
                                             }
                                             ?>
                                             <span class="badge <?php echo $badge_class; ?>"><?php echo ucfirst($user['role']); ?></span>
@@ -392,8 +382,7 @@ $user_stats = $result->fetch_assoc();
                         <div class="mb-3">
                             <label for="role" class="form-label">Role</label>
                             <select class="form-select" id="role" name="role">
-                                <option value="user">Regular User</option>
-                                <option value="moderator">Moderator</option>
+                                <option value="user">User</option>
                                 <option value="admin">Admin</option>
                             </select>
                         </div>
