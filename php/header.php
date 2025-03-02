@@ -207,17 +207,18 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                 // Database connection
                 require_once 'db_connect.php';
                 
-                // Fetch the user's profile picture
+                // Fetch the user's profile picture and role
                 $user_id = $_SESSION['user_id'];
-                $query = "SELECT profile_picture FROM users WHERE user_id = ?";
+                $query = "SELECT profile_picture, role FROM users WHERE user_id = ?";
                 $stmt = $conn->prepare($query);
                 $stmt->bind_param("i", $user_id);
                 $stmt->execute();
-                $stmt->bind_result($profile_picture);
+                $stmt->bind_result($profile_picture, $user_role);
                 $stmt->fetch();
                 $stmt->close();
 
                 $hasProfilePicture = !empty($profile_picture);
+                $isAdmin = ($user_role === 'admin');
                 ?>
                 
                 <div class="dropdown">
@@ -231,6 +232,9 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/profile.php">Profile</a></li>
                         <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/settings.php">Settings</a></li>
+                        <?php if ($isAdmin): ?>
+                        <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/admin/dashboard.php">Dashboard</a></li>
+                        <?php endif; ?>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/sign_out.php">Sign Out</a></li>
                     </ul>
@@ -286,6 +290,9 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/profile.php">Profile</a></li>
                                 <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/settings.php">Settings</a></li>
+                                <?php if ($isAdmin): ?>
+                                <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/admin/dashboard.php">Dashboard</a></li>
+                                <?php endif; ?>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/sign_out.php">Sign Out</a></li>
                             </ul>
