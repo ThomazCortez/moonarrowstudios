@@ -229,7 +229,7 @@ while ($row = $categoriesResult->fetch_assoc()) {
                 <div class="d-flex justify-content-between align-items-center">
                     <span><strong>Total:</strong> <?php echo $totalRecords; ?> posts</span>
                     <div class="btn-group">
-                        <a href="create_post.php" class="btn btn-success btn-sm">
+                        <a href="../forum.php" class="btn btn-success btn-sm">
                             <i class="bi bi-plus-circle me-1"></i>Create New Post
                         </a>
                         <button type="button" class="btn btn-danger btn-sm" id="bulkDeleteBtn" disabled>

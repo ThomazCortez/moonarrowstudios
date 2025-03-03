@@ -152,8 +152,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         updated_at = NOW()
                         WHERE id = ?";
         
+        // Store the JSON-encoded strings in variables
+        $images_json = json_encode($images);
+        $videos_json = json_encode($videos);
+        
         $stmt = $conn->prepare($updateQuery);
-        $stmt->bind_param("ssissssi", $title, $content, $category_id, $status, json_encode($images), json_encode($videos), $hashtags, $post_id);
+        $stmt->bind_param("ssissssi", $title, $content, $category_id, $status, $images_json, $videos_json, $hashtags, $post_id);
         
         if ($stmt->execute()) {
             $success_message = "Post successfully updated.";
@@ -293,7 +297,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div class="mb-3">
                 <label for="images" class="form-label">Images</label>
-                <input type="file" class="form-control" id="images" name="images[]" multiple>
+                <input type="file" class="form-control" id="images" name="images[]" multiple accept="image/*">
                 <?php if (!empty($images)): ?>
                     <div class="mt-2">
                         <strong>Existing Images:</strong>
@@ -308,7 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div class="mb-3">
                 <label for="videos" class="form-label">Videos</label>
-                <input type="file" class="form-control" id="videos" name="videos[]" multiple>
+                <input type="file" class="form-control" id="videos" name="videos[]" multiple accept="video/*">
                 <?php if (!empty($videos)): ?>
                     <div class="mt-2">
                         <strong>Existing Videos:</strong>
