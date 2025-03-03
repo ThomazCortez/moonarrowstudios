@@ -134,6 +134,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $images = array_merge($images, $new_images);
     $videos = array_merge($videos, $new_videos);
     
+    // Handle file deletions
+    if (isset($_POST['delete_images']) && is_array($_POST['delete_images'])) {
+        foreach ($_POST['delete_images'] as $index) {
+            // Optionally delete the physical file
+            //unlink($images[$index]);
+            
+            // Remove from the array
+            unset($images[$index]);
+        }
+        // Re-index array
+        $images = array_values($images);
+    }
+
+    if (isset($_POST['delete_videos']) && is_array($_POST['delete_videos'])) {
+        foreach ($_POST['delete_videos'] as $index) {
+            // Optionally delete the physical file
+            //unlink($videos[$index]);
+            
+            // Remove from the array
+            unset($videos[$index]);
+        }
+        // Re-index array
+        $videos = array_values($videos);
+    }
+
     // Validate input
     if (empty($title)) {
         $error_message = "Title is required.";
@@ -295,6 +320,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" class="form-control" id="hashtags" name="hashtags" value="<?php echo htmlspecialchars($hashtags); ?>" placeholder="e.g., #2025, #unity, #unrealengine">
             </div>
             
+            <!-- Add this before the Images section -->
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>To delete existing files, check the box in the top-right corner of each thumbnail.
+            </div>
+
             <div class="mb-3">
                 <label for="images" class="form-label">Images</label>
                 <input type="file" class="form-control" id="images" name="images[]" multiple accept="image/*">
@@ -302,8 +332,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="mt-2">
                         <strong>Existing Images:</strong>
                         <div class="d-flex flex-wrap gap-2">
-                            <?php foreach ($images as $image): ?>
-                                <img src="<?php echo $image; ?>" alt="Post Image" class="img-thumbnail" style="max-width: 100px;">
+                            <?php foreach ($images as $index => $image): ?>
+                                <div class="position-relative">
+                                    <img src="<?php echo $image; ?>" alt="Post Image" class="img-thumbnail" style="max-width: 100px;">
+                                    <div class="form-check position-absolute top-0 end-0">
+                                        <input class="form-check-input bg-danger" type="checkbox" name="delete_images[]" value="<?php echo $index; ?>" id="delete_image_<?php echo $index; ?>">
+                                    </div>
+                                </div>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -317,8 +352,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="mt-2">
                         <strong>Existing Videos:</strong>
                         <div class="d-flex flex-wrap gap-2">
-                            <?php foreach ($videos as $video): ?>
-                                <video src="<?php echo $video; ?>" controls class="img-thumbnail" style="max-width: 100px;"></video>
+                            <?php foreach ($videos as $index => $video): ?>
+                                <div class="position-relative">
+                                    <video src="<?php echo $video; ?>" controls class="img-thumbnail" style="max-width: 100px;"></video>
+                                    <div class="form-check position-absolute top-0 end-0">
+                                        <input class="form-check-input bg-danger" type="checkbox" name="delete_videos[]" value="<?php echo $index; ?>" id="delete_video_<?php echo $index; ?>">
+                                    </div>
+                                </div>
                             <?php endforeach; ?>
                         </div>
                     </div>
