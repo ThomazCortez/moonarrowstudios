@@ -6,16 +6,25 @@ require 'db_connect.php';
 
 // Fetch the post by ID
 $post_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-$stmt = $conn->prepare("SELECT posts.*, categories.name AS category_name, users.username FROM posts JOIN categories ON posts.category_id = categories.id JOIN users ON posts.user_id = users.user_id WHERE posts.id = ?");
+$stmt = $conn->prepare("SELECT posts.*, categories.name AS category_name, users.username 
+                        FROM posts 
+                        JOIN categories ON posts.category_id = categories.id 
+                        JOIN users ON posts.user_id = users.user_id 
+                        WHERE posts.id = ? AND posts.status = 'published'");
 $stmt->bind_param("i", $post_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $post = $result->fetch_assoc();
 
 if (!$post) {
-    echo "<h1>Post not found</h1>";
+    echo "<h1>Post not found or not published</h1>";
     exit;
 }
+
+// Increment the view count
+$update_views_stmt = $conn->prepare("UPDATE posts SET views = views + 1 WHERE id = ?");
+$update_views_stmt->bind_param("i", $post_id);
+$update_views_stmt->execute();
 
 // Fetch comments and their replies based on the selected filter
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'highest_score';
@@ -64,8 +73,8 @@ while ($row = $comments_result->fetch_assoc()) {
     }
     $comments[] = $row;
 }
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 
@@ -586,49 +595,64 @@ document.addEventListener('DOMContentLoaded', () => {
 </head>
 
 <body>
-	<div class="container mt-5">
-		<div class="card">
-			<div class="card-body">
-				<!-- Post Header -->
-				<div class="text-center mb-4">
-					<h1 class="card-title mb-1"><?= htmlspecialchars($post['title'] ?? 'No Title') ?></h1>
-					<p class="mb-0"><em>Posted on <?= date('F j, Y, g:i A', strtotime($post['created_at'])) ?></em></p>
-					<p class="mb-0">By <strong><a href="profile.php?id=<?= htmlspecialchars($post['user_id']) ?>"><?= htmlspecialchars($post['username'] ?? 'Anonymous') ?></a></strong></p>
-					<p><strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?></p>
-					<p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
-				</div>
-				<hr>
-				<!-- Post Content -->
-				<div> <?= $post['content'] ?> </div> <?php
-			// After decoding the JSON, clean up the paths
-			$images = !empty($post['images']) ? json_decode($post['images'], true) : [];
-			$videos = !empty($post['videos']) ? json_decode($post['videos'], true) : [];
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-body">
+            <!-- Post Header -->
+            <div class="text-center mb-4">
+                <h1 class="card-title mb-1"><?= htmlspecialchars($post['title'] ?? 'No Title') ?></h1>
+                <p class="mb-0"><em>Posted on <?= date('F j, Y, g:i A', strtotime($post['created_at'])) ?></em></p>
+                <p class="mb-0">By <strong><a href="profile.php?id=<?= htmlspecialchars($post['user_id']) ?>"><?= htmlspecialchars($post['username'] ?? 'Anonymous') ?></a></strong></p>
+                <p><strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?></p>
+                <p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
+                <p class="card-text"><strong>Views:</strong> <?= htmlspecialchars($post['views'] ?? '0') ?></p>
+            </div>
+            <hr>
+            <!-- Post Content -->
+            <div> <?= $post['content'] ?> </div>
+            <?php
+            // After decoding the JSON, clean up the paths
+            $images = !empty($post['images']) ? json_decode($post['images'], true) : [];
+            $videos = !empty($post['videos']) ? json_decode($post['videos'], true) : [];
 
-			// Clean up the paths by replacing escaped slashes
-			$images = array_map(function($path) {
-				return str_replace('\\/', '/', $path);
-			}, $images);
+            // Clean up the paths by replacing escaped slashes
+            $images = array_map(function($path) {
+                return str_replace('\\/', '/', $path);
+            }, $images);
 
-			$videos = array_map(function($path) {
-				return str_replace('\\/', '/', $path);
-			}, $videos);
+            $videos = array_map(function($path) {
+                return str_replace('\\/', '/', $path);
+            }, $videos);
 
             // Check if there are any attachments
             if (!empty($images) || !empty($videos)): ?>
-				<hr>
-				<!-- Display Images and Videos -->
-				<h6 class='text-center'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
-				<div class="media-container"> <?php if (!empty($images)): ?> <?php foreach ($images as $image): ?> <div class="media-item">
-						<img src="<?= htmlspecialchars($image) ?>" alt="Post Image">
-						<button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
-					</div> <?php endforeach; ?> <?php endif; ?> <?php if (!empty($videos)): ?> <?php foreach ($videos as $video_path): ?> <div class="media-item">
-						<video>
-							<source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag. </video>
-						<button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
-					</div> <?php endforeach; ?> <?php endif; ?> </div> <?php endif; ?>
-			</div>
-		</div>
-	</div>
+                <hr>
+                <!-- Display Images and Videos -->
+                <h6 class='text-center'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
+                <div class="media-container">
+                    <?php if (!empty($images)): ?>
+                        <?php foreach ($images as $image): ?>
+                            <div class="media-item">
+                                <img src="<?= htmlspecialchars($image) ?>" alt="Post Image">
+                                <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    <?php if (!empty($videos)): ?>
+                        <?php foreach ($videos as $video_path): ?>
+                            <div class="media-item">
+                                <video>
+                                    <source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag.
+                                </video>
+                                <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
 	<div class="text-center mt-3">
 		<button class="btn btn-outline-success me-2 upvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-post-id="<?= $post_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
 			<i class="bi bi-caret-up-fill"></i> <span id="upvote-count"><?= $post['upvotes'] ?></span>
