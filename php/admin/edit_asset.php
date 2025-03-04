@@ -159,37 +159,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $videos = array_values($videos);
     }
 
+    // Handle asset file upload
+$asset_file = $asset['asset_file'] ?? '';
+if (isset($_FILES['asset_file']['name']) && $_FILES['asset_file']['error'] === UPLOAD_ERR_OK) {
+    $upload_dir = 'uploads/asset_files/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
+    }
+    $asset_file_path = $upload_dir . basename($_FILES['asset_file']['name']);
+    if (move_uploaded_file($_FILES['asset_file']['tmp_name'], $asset_file_path)) {
+        $asset_file = $asset_file_path;
+    }
+}
+
+// Handle asset file deletion
+if (isset($_POST['delete_asset_file']) && $_POST['delete_asset_file'] === 'on') {
+    // Optionally delete the physical file
+    //unlink($asset_file);
+    
+    // Clear the asset file path
+    $asset_file = '';
+}
+
     // Validate input
     if (empty($title)) {
         $error_message = "Title is required.";
     } elseif (empty($content)) {
         $error_message = "Content is required.";
     } else {
-        // Update asset in database
+        // Update the asset in the database
         $updateQuery = "UPDATE assets SET 
-                        title = ?, 
-                        content = ?, 
-                        category_id = ?, 
-                        status = ?,
-                        images = ?,
-                        videos = ?,
-                        hashtags = ?,
-                        updated_at = NOW()
-                        WHERE id = ?";
-        
+        title = ?, 
+        content = ?, 
+        category_id = ?, 
+        status = ?,
+        images = ?,
+        videos = ?,
+        hashtags = ?,
+        asset_file = ?,
+        updated_at = NOW()
+        WHERE id = ?";
+
         // Store the JSON-encoded strings in variables
         $images_json = json_encode($images);
         $videos_json = json_encode($videos);
-        
+
         $stmt = $conn->prepare($updateQuery);
-        $stmt->bind_param("ssissssi", $title, $content, $category_id, $status, $images_json, $videos_json, $hashtags, $asset_id);
-        
+        $stmt->bind_param("ssisssssi", $title, $content, $category_id, $status, $images_json, $videos_json, $hashtags, $asset_file, $asset_id);
+
         if ($stmt->execute()) {
-            $success_message = "Asset successfully updated.";
+        $success_message = "Asset successfully updated.";
         } else {
-            $error_message = "Error updating asset: " . $conn->error;
+        $error_message = "Error updating asset: " . $conn->error;
         }
-        
+
         $stmt->close();
     }
 }
@@ -364,6 +387,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 <?php endif; ?>
             </div>
+
+            <div class="mb-3">
+    <label for="asset_file" class="form-label">Asset File</label>
+    <input type="file" class="form-control" id="asset_file" name="asset_file">
+    <?php if (!empty($asset['asset_file'])): ?>
+        <div class="mt-2">
+            <strong>Existing Asset File:</strong>
+            <div class="d-flex flex-wrap gap-2">
+                <div class="position-relative">
+                    <a href="<?php echo $asset['asset_file']; ?>" target="_blank" class="btn btn-outline-light">
+                        <i class="bi bi-file-earmark me-1"></i>Download Asset File
+                    </a>
+                    <div class="form-check position-absolute top-0 end-0">
+                        <input class="form-check-input bg-danger" type="checkbox" name="delete_asset_file" id="delete_asset_file">
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
             
             <div class="mb-3">
                 <label for="editor-container" class="form-label">Content</label>
@@ -401,7 +444,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <form action="delete_asset.php" method="POST">
-                        <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
+                        <input type="hidden" name="asset_id" value="<?php echo $asset_id; ?>">
                         <button type="submit" class="btn btn-danger">Delete Asset</button>
                     </form>
                 </div>
