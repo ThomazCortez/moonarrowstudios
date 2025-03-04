@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-    
+
     // Handle video uploads
     $new_videos = [];
     if (isset($_FILES['videos']['name'][0]) && $_FILES['videos']['error'][0] === UPLOAD_ERR_OK) {
@@ -357,7 +357,8 @@ if (isset($_POST['delete_asset_file']) && $_POST['delete_asset_file'] === 'on') 
                         <div class="d-flex flex-wrap gap-2">
                             <?php foreach ($images as $index => $image): ?>
                                 <div class="position-relative">
-                                    <img src="<?php echo $image; ?>" alt="Asset Image" class="img-thumbnail" style="max-width: 100px;">
+                                    <!-- Modify the image src to use the full path -->
+                                    <img src="<?php echo $baseUrl . 'php/' . $image; ?>" alt="Asset Image" class="img-thumbnail" style="max-width: 100px;">
                                     <div class="form-check position-absolute top-0 end-0">
                                         <input class="form-check-input bg-danger" type="checkbox" name="delete_images[]" value="<?php echo $index; ?>" id="delete_image_<?php echo $index; ?>">
                                     </div>
