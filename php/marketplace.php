@@ -18,6 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_asset'])) {
         exit;
     }
 
+    // Ensure user_id is set from the session
+    $user_id = $_SESSION['user_id'];
+
     $title = $_POST['title'];
     $content = $_POST['content'];
 
@@ -42,6 +45,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_asset'])) {
 
     $category_id = $_POST['category'];
 
+    // Collect and sanitize hashtags
+    $hashtags = isset($_POST['hashtags']) ? trim($_POST['hashtags']) : '';
+    $hashtags = preg_replace('/\s+/', ' ', $hashtags); // Remove extra spaces
+    $hashtags = preg_replace('/#+/', '#', $hashtags); // Ensure proper hashtag formatting
+    $hashtags = strip_tags($hashtags); // Remove any HTML tags
+
+    // Handle asset file upload
+    $asset_file_path = '';
+    if (isset($_FILES['asset_file']['name']) && $_FILES['asset_file']['error'] === UPLOAD_ERR_OK) {
+        $upload_dir = 'uploads/assets/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        $asset_file_name = basename($_FILES['asset_file']['name']);
+        $asset_file_path = $upload_dir . $asset_file_name;
+
+        // Move the uploaded file to the target directory
+        if (move_uploaded_file($_FILES['asset_file']['tmp_name'], $asset_file_path)) {
+            // File uploaded successfully
+        } else {
+            $_SESSION['error'] = "Failed to upload asset file.";
+            header("Location: marketplace.php");
+            exit;
+        }
+    } else {
+        $_SESSION['error'] = "Asset file is required.";
+        header("Location: marketplace.php");
+        exit;
+    }
+
     // Handle image uploads
     $image_paths = [];
     if (isset($_FILES['images']['name'][0]) && $_FILES['images']['error'][0] === UPLOAD_ERR_OK) {
@@ -60,21 +93,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_asset'])) {
         $_SESSION['error'] = "Images are required for this category.";
         header("Location: marketplace.php");
         exit;
-    }
-
-    // Handle image uploads
-    $image_paths = [];
-    if (isset($_FILES['images']['name'][0]) && $_FILES['images']['error'][0] === UPLOAD_ERR_OK) {
-        $upload_dir = 'uploads/images/';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
-        foreach ($_FILES['images']['name'] as $key => $name) {
-            $image_path = $upload_dir . basename($name);
-            if (move_uploaded_file($_FILES['images']['tmp_name'][$key], $image_path)) {
-                $image_paths[] = $image_path;
-            }
-        }
     }
 
     // Handle video uploads

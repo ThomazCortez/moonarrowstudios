@@ -355,7 +355,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="d-flex flex-wrap gap-2">
                             <?php foreach ($videos as $index => $video): ?>
                                 <div class="position-relative">
-                                    <video src="<?php echo $video; ?>" controls class="img-thumbnail" style="max-width: 100px;"></video>
+                                    <video src="<?php echo $baseUrl . 'php/' . $video; ?>" controls class="img-thumbnail" style="max-width: 100px;"></video>
                                     <div class="form-check position-absolute top-0 end-0">
                                         <input class="form-check-input bg-danger" type="checkbox" name="delete_videos[]" value="<?php echo $index; ?>" id="delete_video_<?php echo $index; ?>">
                                     </div>
