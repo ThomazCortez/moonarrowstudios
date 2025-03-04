@@ -9,20 +9,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     if (!empty($username) && !empty($password)) {
-        $stmt = $conn->prepare("SELECT user_id, username, password, role FROM users WHERE username = ?");
+        // Fetch user data including the status field
+        $stmt = $conn->prepare("SELECT user_id, username, password, role, status FROM users WHERE username = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $stmt->store_result();
 
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($id, $db_username, $db_password, $role);
+            $stmt->bind_result($id, $db_username, $db_password, $role, $status);
             $stmt->fetch();
 
+            // Check if the user is suspended
+            if ($status === 'suspended') {
+                // Redirect with suspension alert
+                header("Location: sign_in_html.php?alert=Your+account+has+been+suspended&type=danger");
+                exit();
+            }
+
+            // Verify the password
             if (password_verify($password, $db_password)) {
+                // Set session variables
                 $_SESSION['user_id'] = $id;
                 $_SESSION['username'] = $db_username;
                 $_SESSION['role'] = $role;
 
+                // Redirect to the forum page
                 header("Location: ../forum.php");
                 exit();
             } else {
