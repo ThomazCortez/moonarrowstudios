@@ -376,7 +376,7 @@ if (isset($_SESSION['error_message'])) {
                                             <a href="<?php echo $baseUrl; ?>php/view_asset.php?id=<?php echo $asset['id']; ?>" class="btn btn-primary" title="View">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                            <a href="edit_post.php?id=<?php echo $asset['id']; ?>" class="btn btn-warning" title="Edit">
+                                            <a href="edit_asset.php?id=<?php echo $asset['id']; ?>" class="btn btn-warning" title="Edit">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <button class="btn btn-danger delete-asset" data-bs-toggle="modal" data-bs-target="#deletePostModal" data-asset-id="<?php echo $asset['id']; ?>" data-asset-title="<?php echo htmlspecialchars($asset['title']); ?>" title="Delete">
