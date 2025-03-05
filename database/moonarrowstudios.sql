@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Mar 02, 2025 at 02:49 PM
+-- Generation Time: Mar 05, 2025 at 11:34 PM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.18
 
@@ -42,35 +42,34 @@ CREATE TABLE IF NOT EXISTS `assets` (
   `downvotes` int DEFAULT '0',
   `preview_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `asset_file` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` enum('published','draft','hidden') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'published',
+  `views` int DEFAULT '0',
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `fk_posts_categories` (`category_id`),
   KEY `fk_user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `assets`
 --
 
-INSERT INTO `assets` (`id`, `title`, `content`, `category_id`, `hashtags`, `images`, `created_at`, `videos`, `user_id`, `upvotes`, `downvotes`, `preview_image`, `asset_file`) VALUES
-(74, 'abc', '<p>abc</p>', 1, '#music', NULL, '2025-02-23 19:24:18', NULL, 30, 0, 0, NULL, NULL),
-(75, 'lol', '<p>lol</p>', 11, '#a', '[]', '2025-02-24 19:35:00', '[]', 30, 0, 0, 'uploads/previews/a0084845941_65.jpg', NULL),
-(76, 'a', '<p>abc</p>', 7, '#ksd', '[]', '2025-02-24 19:48:25', '[]', 30, 0, 0, 'uploads/previews/gfoyUJWR_400x400.jpg', NULL),
-(77, 'audio1', '<p>audio</p>', 10, '#audio', '[]', '2025-02-24 20:16:06', '[]', 30, 0, 0, '', NULL),
-(79, 'a', '<p>a</p>', 11, '#zz', '[]', '2025-02-25 20:37:17', '[]', 30, 0, 0, '', NULL),
-(80, 'comment testing', '<p>yes</p>', 14, '#shader', '[]', '2025-02-26 12:32:49', '[]', 30, 0, 1, '', NULL),
-(81, 'a', '<p>a</p>', 1, '#a', 'null', '2025-03-01 13:18:57', 'null', 30, 0, 0, NULL, ''),
-(82, 'a2', '<p>a2</p>', 11, '#a2', 'null', '2025-03-01 13:23:53', 'null', 30, 0, 0, NULL, 'uploads/assets/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3'),
-(83, 'a3', '<p>a3</p>', 1, '#a3', 'null', '2025-03-01 13:24:31', 'null', 30, 0, 0, NULL, ''),
-(84, 'a4', '<p>a4</p>', 1, '#a4', '[]', '2025-03-01 13:25:39', '[]', 30, 0, 0, '', NULL),
-(85, 'favoravel', '<p>favoravel</p>', 11, '#favoravel', '[]', '2025-03-01 13:40:54', '[]', 30, 0, 0, 'uploads/previews/e6c51864a3d91796e797e764126bb6c8.500x500x1.jpg', 'uploads/assets/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3'),
-(86, 'a', '<p>a</p>', 11, '#a', '[\"uploads\\/images\\/a1903352220_10.jpg\",\"uploads\\/images\\/a0084845941_65.jpg\",\"uploads\\/images\\/e6c51864a3d91796e797e764126bb6c8.500x500x1.jpg\"]', '2025-03-01 13:55:53', '[]', 30, 0, 0, 'uploads/previews/e6c51864a3d91796e797e764126bb6c8.500x500x1.jpg', 'uploads/assets/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3'),
-(87, 'b', '<p>b</p>', 6, '#b', '[\"uploads\\/images\\/particle.png\"]', '2025-03-01 14:09:21', '[]', 30, 0, 0, 'uploads/previews/gfoyUJWR_400x400.jpg', 'uploads/assets/gfoyUJWR_400x400.jpg'),
-(88, 'c', '<p>c</p>', 12, '#c', '[\"uploads\\/images\\/sun.png\"]', '2025-03-01 14:10:38', '[]', 30, 0, 0, 'uploads/previews/a2572949485_65.jpg', 'uploads/assets/ProjetoPSILourenço12F.rar'),
-(89, 'd', '<p>d</p>', 11, '#d', '[]', '2025-03-01 14:11:25', '[]', 30, 0, 0, 'uploads/previews/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3', ''),
-(90, 'VIRUS', '<p>VIRUS</p>', 6, '#virus', '[]', '2025-03-01 15:43:09', '[]', 30, 0, 0, '', 'uploads/assets/eicar_com.zip'),
-(91, 'a', '<p>a</p><p><br></p>', 1, '#a', '[\"uploads\\/images\\/a0084845941_65.jpg\"]', '2025-03-01 16:15:48', '[]', 30, 0, 0, '', 'uploads/assets/htmlpurifier-master.zip'),
-(92, 'ZPAX', '<p>YES</p>', 5, '#a', '[\"uploads\\/images\\/IMG_20250128_190627.jpg\"]', '2025-03-02 11:34:46', '[]', 19, 0, 0, 'uploads/previews/gfoyUJWR_400x400.jpg', 'uploads/assets/KawendraZpax2 (2).apk'),
-(93, 'STINGRAY', '<p>yes</p>', 16, '#a', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2024-12-27 233235.png\"]', '2025-03-02 11:41:27', '[]', 19, 0, 0, '', 'uploads/assets/stingray-lnyn.apk');
+INSERT INTO `assets` (`id`, `title`, `content`, `category_id`, `hashtags`, `images`, `created_at`, `videos`, `user_id`, `upvotes`, `downvotes`, `preview_image`, `asset_file`, `status`, `views`, `updated_at`) VALUES
+(74, 'abc', '<p>abc</p>', 1, '#music', NULL, '2025-02-23 19:24:18', NULL, 30, 0, 0, NULL, NULL, 'published', 0, '2025-03-04 14:10:18'),
+(75, 'lol', '<p>lol</p>', 11, '#a', '[]', '2025-02-24 19:35:00', '[]', 30, 0, 0, 'uploads/previews/a0084845941_65.jpg', NULL, 'published', 0, '2025-03-04 14:10:18'),
+(76, 'a', '<p>abc</p>', 7, '#ksd', '[]', '2025-02-24 19:48:25', '[]', 30, 0, 0, 'uploads/previews/gfoyUJWR_400x400.jpg', NULL, 'published', 0, '2025-03-04 14:10:18'),
+(77, 'audio1', '<p>audio</p>', 10, '#audio', '[]', '2025-02-24 20:16:06', '[]', 30, 0, 0, '', NULL, 'published', 0, '2025-03-04 14:10:18'),
+(79, 'a', '<p>a</p>', 11, '#zz', '[]', '2025-02-25 20:37:17', '[]', 30, 0, 0, '', NULL, 'published', 0, '2025-03-04 14:10:18'),
+(80, 'comment testing', '<p>yes</p>', 14, '#shader', '[]', '2025-02-26 12:32:49', '[]', 30, 0, 1, '', NULL, 'published', 0, '2025-03-04 14:10:18'),
+(82, 'a2', '<p>a2</p>', 11, '#a2', 'null', '2025-03-01 13:23:53', 'null', 30, 0, 0, NULL, 'uploads/assets/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3', 'published', 0, '2025-03-04 14:10:18'),
+(83, 'a3', '<p>a3</p>', 1, '#a3', 'null', '2025-03-01 13:24:31', 'null', 30, 0, 0, NULL, '', 'published', 0, '2025-03-04 14:10:18'),
+(84, 'a4', '<p>a4</p>', 1, '#a4', '[]', '2025-03-01 13:25:39', '[]', 30, 0, 0, '', NULL, 'published', 0, '2025-03-04 14:10:18'),
+(85, 'favoravel', '<p>favoravel</p>', 11, '#favoravel', '[]', '2025-03-01 13:40:54', '[]', 30, 0, 0, 'uploads/previews/e6c51864a3d91796e797e764126bb6c8.500x500x1.jpg', 'uploads/assets/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3', 'published', 0, '2025-03-04 14:10:18'),
+(88, 'c', '<p>c</p>', 12, '#c', '[\"uploads\\/images\\/sun.png\"]', '2025-03-01 14:10:38', '[]', 30, 0, 0, 'uploads/previews/a2572949485_65.jpg', 'uploads/assets/ProjetoPSILourenço12F.rar', 'published', 0, '2025-03-04 14:10:18'),
+(90, 'VIRUS', '<p>VIRUS</p>', 6, '#virus', '[]', '2025-03-01 15:43:09', '[]', 30, 0, 0, '', 'uploads/assets/eicar_com.zip', 'published', 0, '2025-03-04 14:10:18'),
+(92, 'ZPAX1', '<p>YES1</p>', 5, '', '[\"uploads\\/images\\/IMG_20250128_190627.jpg\",\"uploads\\/images\\/a0084845941_65.jpg\"]', '2025-03-02 11:34:46', '[]', 19, 0, 0, 'uploads/previews/gfoyUJWR_400x400.jpg', '', 'published', 0, '2025-03-04 16:20:44'),
+(94, 'video', '<p>video</p>', 1, NULL, '[\"uploads\\/images\\/Captura de ecr\\u00e3 2024-11-30 163813.png\"]', '2025-03-04 18:30:30', '[\"uploads\\/videos\\/Roblox VR 2025.03.02 - 23.32.14.02.mp4\"]', 31, 0, 0, 'uploads/previews/Captura de ecrã 2024-11-30 163813.png', NULL, 'published', 0, '2025-03-04 18:32:09'),
+(95, 'abc', '<p>abc</p>', 1, '#abc', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2024-12-03 191655.png\"]', '2025-03-04 18:37:36', '[\"uploads\\/videos\\/Roblox VR 2025.03.02 - 23.32.17.03.DVR.mp4\"]', 31, 0, 0, 'uploads/previews/Captura de ecrã 2024-12-03 191655.png', 'uploads/assets/Captura de ecrã 2024-12-03 191655.png', 'published', 0, '2025-03-04 18:37:36');
 
 -- --------------------------------------------------------
 
@@ -83,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `asset_categories` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `asset_categories`
@@ -120,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `asset_votes` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`asset_id`),
   KEY `asset_id` (`asset_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=134 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=135 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `asset_votes`
@@ -250,14 +249,6 @@ INSERT INTO `comments` (`id`, `post_id`, `user_id`, `content`, `created_at`, `pa
 (53, 50, 26, '<p>cool</p>', '2025-01-22 00:28:09', NULL, 0, 0),
 (54, 51, 26, '<p>test</p>', '2025-01-23 20:52:57', NULL, 1, 0),
 (55, 51, 26, '<p>nice</p>', '2025-01-23 20:53:05', 54, 0, 0),
-(56, 52, 30, '<p>hii</p>', '2025-01-25 14:20:13', NULL, 0, 0),
-(57, 53, 30, '<p>test</p>', '2025-01-27 19:51:02', NULL, 0, 0),
-(58, 53, 30, '<p>Reply!</p>', '2025-01-27 19:51:15', 57, 0, 0),
-(59, 53, 30, '<p>Another Reply!</p>', '2025-01-27 19:51:28', 57, 0, 0),
-(60, 53, 19, '<p>cool!</p><pre class=\"ql-syntax\" spellcheck=\"false\">cool!\n</pre><p><br></p>', '2025-01-28 18:44:16', NULL, 1, 0),
-(61, 54, 19, '<p>Test</p>', '2025-01-28 18:58:12', NULL, 0, 0),
-(62, 54, 19, '<p>test</p>', '2025-01-28 18:58:19', 61, 0, 0),
-(63, 53, 19, '<p>One more reply!</p>', '2025-01-28 23:05:26', 57, 0, 0),
 (64, 69, 29, '<p>aa</p>', '2025-02-25 20:31:42', NULL, 0, 0);
 
 -- --------------------------------------------------------
@@ -436,34 +427,29 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `user_id` int NOT NULL,
   `upvotes` int DEFAULT '0',
   `downvotes` int DEFAULT '0',
+  `status` enum('published','draft','hidden') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'published',
+  `views` int DEFAULT '0',
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `fk_posts_categories` (`category_id`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `posts`
 --
 
-INSERT INTO `posts` (`id`, `title`, `content`, `category_id`, `hashtags`, `images`, `created_at`, `videos`, `user_id`, `upvotes`, `downvotes`) VALUES
-(52, 'a', '<p>a</p>', 1, '#a', '[]', '2025-01-23 22:48:18', '[]', 30, 1, 0),
-(53, 'Woah', '<p>Dark Theme!</p>', 1, '#test', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-01-05 203812.png\"]', '2025-01-27 19:49:55', '[\"uploads\\/videos\\/GABRIEL.mp4\"]', 30, 0, 0),
-(54, 'Test', '<p>Test</p>', 1, '#test', '[]', '2025-01-28 18:45:36', '[]', 19, 1, 0),
-(55, 'a', '<p>a</p>', 18, '#test', '[]', '2025-01-28 19:01:30', '[]', 19, 0, 0),
-(56, 'test attach', '<p>Test for attachments</p>', 1, '#test', '[\"uploads\\/images\\/IMG_20250128_190627.jpg\",\"uploads\\/images\\/IMG_20250128_190418.jpg\"]', '2025-01-28 23:06:26', '[\"uploads\\/videos\\/GABRIEL.mp4\"]', 19, 0, 0),
-(57, 'test hashtag 1', '<p>a</p>', 1, '#test', '[]', '2025-01-31 22:35:01', '[]', 30, 0, 0),
-(58, 'test hastag 2', '<p>aasdasdd</p>', 17, '', '[]', '2025-01-31 22:41:55', '[]', 30, 0, 0),
-(59, 'test hastag 3', '<p>aasddas</p>', 1, '', '[]', '2025-01-31 22:47:49', '[]', 30, 0, 0),
-(60, 'a', '<p>a</p>', 21, '', '[]', '2025-01-31 22:51:30', '[]', 30, 0, 0),
-(61, 'test hash', '<p>a</p>', 22, '', '[]', '2025-01-31 22:55:50', '[]', 30, 0, 0),
-(62, 'a', '<p>a</p>', 19, '#test', '[]', '2025-01-31 22:58:12', '[]', 30, 0, 0),
-(63, 'ad', '<p>asdasd</p>', 21, '#test #wwow #cool', '[]', '2025-01-31 22:58:33', '[]', 30, 0, 0),
-(64, 'asd', '<p>asd</p><pre class=\"ql-syntax\" spellcheck=\"false\">  ~werwerwerwer\r\nwerwer\r\n    werrwe\r\n</pre>', 17, '#123', '[]', '2025-01-31 23:18:13', '[]', 30, 0, 0),
-(65, 'a', '<p>a</p>', 20, '#qwe', '[]', '2025-02-02 11:54:53', '[]', 30, 0, 0),
-(66, 'Lada Li Lada Dao Lada Di Lada Dao', '<p>323</p>', 19, '#cool #skibidi', '[]', '2025-02-05 20:10:14', '[]', 30, 1, 0),
-(67, 'adding hash', '<p>asdasd</p>', 20, '#one #two #three', '[]', '2025-02-09 18:30:57', '[]', 30, 0, 0),
-(68, 'hello', '<p>hi</p>', 1, '#test', '[]', '2025-02-22 12:52:04', '[]', 30, 0, 0),
-(69, 'test', '<p>test</p>', 1, '#123', '[]', '2025-02-23 17:23:07', '[]', 30, 0, 0);
+INSERT INTO `posts` (`id`, `title`, `content`, `category_id`, `hashtags`, `images`, `created_at`, `videos`, `user_id`, `upvotes`, `downvotes`, `status`, `views`, `updated_at`) VALUES
+(58, 'test hastag 2', '<p>aasdasdd</p>', 17, '', '[]', '2025-01-31 22:41:55', '[]', 30, 0, 0, 'published', 1, '2025-03-03 17:41:49'),
+(59, 'test hastag 3', '<p>aasddas</p>', 1, '', '[]', '2025-01-31 22:47:49', '[]', 30, 0, 0, 'published', 4, '2025-03-04 15:13:51'),
+(60, 'a', '<p>a</p>', 21, '', '[]', '2025-01-31 22:51:30', '[]', 30, 0, 0, 'published', 8, '2025-03-03 17:41:45'),
+(61, 'test hash', '<p>a</p>', 22, '', '[]', '2025-01-31 22:55:50', '[]', 30, 0, 0, 'published', 0, '2025-03-03 17:45:54'),
+(74, 'Hello, and Wecome to MoonArrow Studios!', '<p>Here</p>', 1, '', '[]', '2025-03-03 20:16:47', '[]', 31, 0, 0, 'published', 1, '2025-03-03 20:17:46'),
+(75, 'a', '<p>a</p>', 9, '#a', '[]', '2025-03-03 20:19:26', '[]', 31, 0, 0, 'published', 1, '2025-03-03 20:20:03'),
+(76, 'bla', '<p>blabla</p>', 21, '#blablabla', '[]', '2025-03-03 20:20:27', '[]', 31, 0, 0, 'published', 1, '2025-03-04 15:13:53'),
+(77, 'a', '<p>a</p>', 14, '#a', '[\"uploads\\/images\\/vfx.png\"]', '2025-03-04 15:14:24', '[]', 31, 0, 0, 'published', 1, '2025-03-04 15:14:26'),
+(78, 'image', '<p>image</p>', 5, '#image', '[\"uploads\\/images\\/coding-background-9izlympnd0ovmpli.jpg\"]', '2025-03-04 18:04:38', '[]', 31, 0, 0, 'published', 0, '2025-03-04 18:04:38'),
+(79, 'video', '<p>video</p>', 20, '#bideo', '[]', '2025-03-04 18:10:34', '[\"uploads\\/videos\\/GABRIEL.mp4\"]', 31, 0, 0, 'published', 5, '2025-03-04 18:31:27');
 
 -- --------------------------------------------------------
 
@@ -513,21 +499,22 @@ CREATE TABLE IF NOT EXISTS `users` (
   `profile_picture` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `banner` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `status` enum('active','suspended') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'active',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `created_at`, `profile_picture`, `banner`, `description`) VALUES
-(19, 'a30743', 'a30743@aemtg.pt', '$2y$10$z1w0K0JJjBOmbKCM66GgL.L8L8ZBwzEzNhHwJi7BV.zGuipDa5xe2', 'user', '2024-12-30 18:01:09', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_19.png', '\\moonarrowstudios\\uploads\\banners\\banner_19.png', 'HI!'),
-(24, 'teste123', 'exemple123123@gmail.com', '$2y$10$UhnjQ/wurSX0ImzToLpZ2eZRpsWGaVmNVcdsAwZpEjfb9B0U9pkDa', 'user', '2024-12-30 22:58:12', NULL, NULL, NULL),
-(25, 'teste2', 'teste2@gmail.com', '$2y$10$edPsuzcunAmj9zbvKt3WSuo/b8t2fSUT.XrXt.wgVE5DpiWu3gosK', 'user', '2024-12-30 23:00:02', NULL, NULL, NULL),
-(27, 'usertest', 'usertest@gmail.com', '$2y$10$Y3uiX24QwkjOkJfYc8xM1emMGCB1FFs6bzEUttd/aEajAXxm2.fwS', 'user', '2025-01-21 22:27:42', NULL, NULL, NULL),
-(30, 'Thomaz123', 'thomazbarrago@gmail.com', '$2y$10$EBfSvfNJVS3HrB/j4Kwr/O7kWnufRUKRp.0rzDjZhVDDo37Z7Bwn.', 'user', '2025-01-23 20:59:54', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_30_1740833430.png', '\\moonarrowstudios\\uploads\\banners\\banner_30_1740833430.png', 'Welcome to my profile!');
+INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `created_at`, `profile_picture`, `banner`, `description`, `status`) VALUES
+(19, 'a30743', 'a30743@aemtg.pt', '$2y$10$z1w0K0JJjBOmbKCM66GgL.L8L8ZBwzEzNhHwJi7BV.zGuipDa5xe2', 'user', '2024-12-30 18:01:09', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_19.png', '\\moonarrowstudios\\uploads\\banners\\banner_19.png', 'HI!', 'active'),
+(24, 'teste123', 'exemple123123@gmail.com', '$2y$10$UhnjQ/wurSX0ImzToLpZ2eZRpsWGaVmNVcdsAwZpEjfb9B0U9pkDa', 'user', '2024-12-30 22:58:12', NULL, NULL, NULL, 'active'),
+(27, 'usertest123', 'usertest@gmail.com', '$2y$10$Y3uiX24QwkjOkJfYc8xM1emMGCB1FFs6bzEUttd/aEajAXxm2.fwS', 'user', '2025-01-21 22:27:42', NULL, NULL, NULL, 'suspended'),
+(30, 'Thomaz123', 'thomazbarrago@gmail.com', '$2y$10$EBfSvfNJVS3HrB/j4Kwr/O7kWnufRUKRp.0rzDjZhVDDo37Z7Bwn.', 'user', '2025-01-23 20:59:54', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_30_1740833430.png', '\\moonarrowstudios\\uploads\\banners\\banner_30_1740833430.png', 'Welcome to my profile!', 'active'),
+(31, 'moonarrowstudios', 'moonarrowstudios@gmail.com', '$2y$10$IABFpbOSzkTphuW2qAYd2OhgM/G.YgQuzEU0E80bs3L8cNC.kPC4y', 'admin', '2025-03-02 16:53:11', NULL, NULL, NULL, 'active');
 
 --
 -- Constraints for dumped tables
