@@ -210,7 +210,7 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 	<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-	<title>MoonArrow Studios - Forum</title>
+	<title>MoonArrow Studios - Marketplace</title>
 	<style>
 	/* Style for Quill placeholder */
 	.ql-editor.ql-blank::before {
