@@ -309,42 +309,42 @@ $comment_stats = $statsResult->fetch_assoc();
                     <tbody>
                         <?php if (count($comments) > 0): ?>
                             <?php foreach ($comments as $comment): ?>
-                                <tr>
-                                    <td>
-                                        <div class="form-check">
-                                            <input class="form-check-input comment-select" type="checkbox" value="<?php echo $comment['id']; ?>">
-                                        </div>
-                                    </td>
-                                    <td><?php echo $comment['id']; ?></td>
-                                    <td class="truncate-text"><?php echo htmlspecialchars($comment['content']); ?></td>
-                                    <td><?php echo htmlspecialchars($comment['username']); ?></td>
-                                    <td><?php echo htmlspecialchars($comment['post_title']); ?></td>
-                                    <td><?php echo $comment['upvotes']; ?></td>
-                                    <td><?php echo $comment['downvotes']; ?></td>
-                                    <td><?php echo date('M d, Y', strtotime($comment['created_at'])); ?></td>
-                                    <td><?php echo $comment['reported_count']; ?></td>
-                                    <td>
-                                        <?php if ($comment['status'] === 'published'): ?>
-                                            <span class="badge bg-success">Visible</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-secondary">Hidden</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="actions-column">
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="<?php echo $baseUrl; ?>php/view_comment.php?id=<?php echo $comment['id']; ?>" class="btn btn-primary" title="View">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="edit_comment.php?id=<?php echo $comment['id']; ?>" class="btn btn-warning" title="Edit">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <button class="btn btn-danger delete-comment" data-bs-toggle="modal" data-bs-target="#deleteCommentModal" data-comment-id="<?php echo $comment['id']; ?>" data-comment-content="<?php echo htmlspecialchars($comment['content']); ?>" title="Delete">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
+    <tr>
+        <td>
+            <div class="form-check">
+                <input class="form-check-input comment-select" type="checkbox" value="<?php echo $comment['id']; ?>">
+            </div>
+        </td>
+        <td><?php echo $comment['id']; ?></td>
+        <td class="truncate-text"><?php echo htmlspecialchars($comment['content']); ?></td>
+        <td><?php echo htmlspecialchars($comment['username']); ?></td>
+        <td><?php echo htmlspecialchars($comment['post_title']); ?></td>
+        <td><?php echo $comment['upvotes']; ?></td>
+        <td><?php echo $comment['downvotes']; ?></td>
+        <td><?php echo date('M d, Y', strtotime($comment['created_at'])); ?></td>
+        <td><?php echo $comment['reported_count']; ?></td>
+        <td>
+            <?php if ($comment['status'] === 'published'): ?>
+                <span class="badge bg-success">Visible</span>
+            <?php else: ?>
+                <span class="badge bg-secondary">Hidden</span>
+            <?php endif; ?>
+        </td>
+        <td class="actions-column">
+            <div class="btn-group btn-group-sm">
+                <a href="<?php echo $baseUrl; ?>php/admin/view_comment.php?id=<?php echo $comment['id']; ?>" class="btn btn-primary" title="View">
+                    <i class="bi bi-eye"></i>
+                </a>
+                <a href="edit_comment.php?id=<?php echo $comment['id']; ?>" class="btn btn-warning" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <button class="btn btn-danger delete-comment" data-bs-toggle="modal" data-bs-target="#deleteCommentModal" data-comment-id="<?php echo $comment['id']; ?>" data-comment-content="<?php echo htmlspecialchars($comment['content']); ?>" title="Delete">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+<?php endforeach; ?>
                         <?php else: ?>
                             <tr>
                                 <td colspan="12" class="text-center py-4">No comments found matching your criteria.</td>

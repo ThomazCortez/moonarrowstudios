@@ -676,38 +676,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     <option value="most_replies" <?= isset($_GET['filter']) && $_GET['filter'] == 'most_replies' ? 'selected' : '' ?>>Most Replies</option>
                 </select>
             </div>
-			<div id="comments-container"> <?php foreach ($comments as $comment): ?> <div class="card mb-3" style="max-width: 100%;">
-					<div class="card-body">
-						<!-- Comment Content -->
-						<h6 class="card-subtitle mb-2"><a href="profile.php?id=<?= htmlspecialchars($comment['user_id']) ?>"><?= htmlspecialchars($comment['username']) ?></a> - <?= date('F j, Y, g:i A', strtotime($comment['created_at'])) ?></h6>
-						<p class="card-text"><?= $comment['content'] ?></p>
-						<!-- Upvote and Downvote Buttons for Comments -->
-						<button class="btn btn-outline-success me-2 upvote-comment-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-comment-id="<?= $comment['id'] ?>">
-							<i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?= $comment['upvotes'] ?? 0 ?></span>
-						</button>
-						<button class="btn btn-outline-danger downvote-comment-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-comment-id="<?= $comment['id'] ?>">
-							<i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?= $comment['downvotes'] ?? 0 ?></span>
-						</button>
-						<a class="btn btn-link text-decoration-none reply-btn" data-comment-id="<?= $comment['id'] ?>">Reply</a>
-						<!-- Hide/Show Replies Button -->
-						<a class="btn btn-link text-decoration-none toggle-replies-btn" data-comment-id="<?= $comment['id'] ?>" data-reply-count="<?= $comment['reply_count'] ?>"> Show Replies (<?= $comment['reply_count'] ?>) </a>
-						<!-- Replies Section -->
-						<div class="replies ms-4 mt-3" style="display: none;"> <?php foreach ($comment['replies'] as $reply): ?> <div class="card mb-2" style="max-width: 100%;">
-								<div class="card-body">
-									<!-- Reply Content -->
-									<h6 class="card-subtitle mb-2 text-muted"><a href="profile.php?id=<?= htmlspecialchars($reply['user_id']) ?>"><?= htmlspecialchars($reply['username']) ?></a> - <?= date('F j, Y, g:i A', strtotime($reply['created_at'])) ?></h6>
-									<p class="card-text"><?= $reply['content'] ?></p>
-									<!-- Upvote and Downvote Buttons for Replies -->
-									<button class="btn btn-outline-success me-3 upvote-reply-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-comment-id="<?= $reply['id'] ?>">
-										<i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?= $reply['upvotes'] ?? 0 ?></span>
-									</button>
-									<button class="btn btn-outline-danger me-3 downvote-reply-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-comment-id="<?= $reply['id'] ?>">
-										<i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?= $reply['downvotes'] ?? 0 ?></span>
-									</button>
-								</div>
-							</div> <?php endforeach; ?> </div>
-					</div>
-				</div> <?php endforeach; ?> </div>
+			<div id="comments-container"> <?php foreach ($comments as $comment): ?>
+    <div class="card mb-3" id="comment-<?php echo $comment['id']; ?>" style="max-width: 100%;">
+        <div class="card-body">
+            <!-- Comment Content -->
+            <h6 class="card-subtitle mb-2"><a href="profile.php?id=<?php echo htmlspecialchars($comment['user_id']); ?>"><?php echo htmlspecialchars($comment['username']); ?></a> - <?php echo date('F j, Y, g:i A', strtotime($comment['created_at'])); ?></h6>
+            <p class="card-text"><?php echo $comment['content']; ?></p>
+            <!-- Upvote and Downvote Buttons for Comments -->
+            <button class="btn btn-outline-success me-2 upvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
+                <i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?php echo $comment['upvotes'] ?? 0; ?></span>
+            </button>
+            <button class="btn btn-outline-danger downvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
+                <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $comment['downvotes'] ?? 0; ?></span>
+            </button>
+            <a class="btn btn-link text-decoration-none reply-btn" data-comment-id="<?php echo $comment['id']; ?>">Reply</a>
+            <!-- Hide/Show Replies Button -->
+            <a class="btn btn-link text-decoration-none toggle-replies-btn" data-comment-id="<?php echo $comment['id']; ?>" data-reply-count="<?php echo $comment['reply_count']; ?>"> Show Replies (<?php echo $comment['reply_count']; ?>) </a>
+            <!-- Replies Section -->
+            <div class="replies ms-4 mt-3" style="display: none;">
+                <?php foreach ($comment['replies'] as $reply): ?>
+                    <div class="card mb-2" id="reply-<?php echo $reply['id']; ?>" style="max-width: 100%;">
+                        <div class="card-body">
+                            <!-- Reply Content -->
+                            <h6 class="card-subtitle mb-2 text-muted"><a href="profile.php?id=<?php echo htmlspecialchars($reply['user_id']); ?>"><?php echo htmlspecialchars($reply['username']); ?></a> - <?php echo date('F j, Y, g:i A', strtotime($reply['created_at'])); ?></h6>
+                            <p class="card-text"><?php echo $reply['content']; ?></p>
+                            <!-- Upvote and Downvote Buttons for Replies -->
+                            <button class="btn btn-outline-success me-3 upvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
+                                <i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?php echo $reply['upvotes'] ?? 0; ?></span>
+                            </button>
+                            <button class="btn btn-outline-danger me-3 downvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
+                                <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $reply['downvotes'] ?? 0; ?></span>
+                            </button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+<?php endforeach; ?> </div>
 		</div>
 	</div>
 	<br> <?php $conn->close(); ?> <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
@@ -1071,6 +1077,37 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+});
+document.addEventListener('DOMContentLoaded', () => {
+    // Parse URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const commentId = urlParams.get('comment');
+    const replyId = urlParams.get('reply');
+
+    if (commentId) {
+        // Find the parent comment
+        const parentComment = document.getElementById(`comment-${commentId}`);
+        if (parentComment) {
+            // Scroll to the parent comment
+            parentComment.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // If there's a reply ID, open the replies section and scroll to the reply
+            if (replyId) {
+                const toggleRepliesBtn = parentComment.querySelector('.toggle-replies-btn');
+                const repliesSection = parentComment.querySelector('.replies');
+
+                if (toggleRepliesBtn && repliesSection && repliesSection.style.display === 'none') {
+                    toggleRepliesBtn.click(); // Simulate click to open replies
+                }
+
+                // Scroll to the specific reply
+                const replyElement = document.getElementById(`reply-${replyId}`);
+                if (replyElement) {
+                    replyElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+    }
 });
 	</script>
 </body>
