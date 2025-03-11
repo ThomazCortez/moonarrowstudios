@@ -35,7 +35,7 @@ switch ($filter) {
         $order_by = 'c1.created_at DESC';
         break;
     case 'most_replies':
-        $order_by = '(SELECT COUNT(*) FROM comments c2 WHERE c2.parent_id = c1.id) DESC';
+        $order_by = '(SELECT COUNT(*) FROM comments c2 WHERE c2.parent_id = c1.id AND c2.status != "hidden") DESC';
         break;
     case 'highest_score':
     default:
@@ -45,10 +45,10 @@ switch ($filter) {
 
 $comments_stmt = $conn->prepare("
     SELECT c1.*, users.username, 
-        (SELECT COUNT(*) FROM comments c2 WHERE c2.parent_id = c1.id) AS reply_count 
+        (SELECT COUNT(*) FROM comments c2 WHERE c2.parent_id = c1.id AND c2.status != 'hidden') AS reply_count 
     FROM comments c1 
     JOIN users ON c1.user_id = users.user_id 
-    WHERE c1.post_id = ? AND c1.parent_id IS NULL 
+    WHERE c1.post_id = ? AND c1.parent_id IS NULL AND c1.status != 'hidden' 
     ORDER BY $order_by
 ");
 $comments_stmt->bind_param("i", $post_id);
@@ -62,7 +62,7 @@ while ($row = $comments_result->fetch_assoc()) {
         SELECT replies.*, users.username 
         FROM comments replies 
         JOIN users ON replies.user_id = users.user_id 
-        WHERE replies.parent_id = ? 
+        WHERE replies.parent_id = ? AND replies.status != 'hidden' 
         ORDER BY replies.created_at ASC
     ");
     $reply_stmt->bind_param("i", $row['id']);
