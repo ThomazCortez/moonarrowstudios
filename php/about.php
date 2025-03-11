@@ -20,8 +20,7 @@ require 'db_connect.php';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <!-- AOS (Animate On Scroll) Library -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
     <style>
         .section {
             padding: 60px 0;
@@ -193,7 +192,7 @@ require 'db_connect.php';
             <!-- Lines of Code Written -->
             <div class="col-md-3 mb-4" data-aos="zoom-in" data-aos-delay="300">
                 <div class="counter">
-                    <h2 class="display-4 count" data-count="25436">0</h2>
+                    <h2 class="display-4 count" data-count="2543">0</h2>
                     <p>Lines of Code</p>
                 </div>
             </div>
