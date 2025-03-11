@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Mar 05, 2025 at 11:34 PM
+-- Generation Time: Mar 11, 2025 at 12:20 AM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.18
 
@@ -183,73 +183,76 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `parent_id` int DEFAULT NULL,
   `upvotes` int NOT NULL DEFAULT '0',
   `downvotes` int NOT NULL DEFAULT '0',
+  `status` enum('published','draft','hidden') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'published',
+  `reported_count` int NOT NULL DEFAULT '0',
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `post_id` (`post_id`),
   KEY `user_id` (`user_id`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `comments`
 --
 
-INSERT INTO `comments` (`id`, `post_id`, `user_id`, `content`, `created_at`, `parent_id`, `upvotes`, `downvotes`) VALUES
-(1, 48, 26, '<p>Test Comment</p>', '2025-01-19 15:42:46', NULL, 0, 0),
-(2, 48, 26, 'Test Comment', '2025-01-19 15:50:52', NULL, 0, 0),
-(3, 48, 26, 'Test Heading 1Test Heading2Test Normal', '2025-01-19 15:51:28', NULL, 0, 0),
-(4, 48, 26, '<h1>Test Heading</h1><p><br></p>', '2025-01-19 15:53:11', NULL, 0, 0),
-(5, 48, 26, '<p>Test</p>', '2025-01-19 15:55:18', NULL, 0, 0),
-(6, 48, 26, '<p>Test</p>', '2025-01-19 15:55:39', NULL, 0, 0),
-(7, 48, 26, '<p>test3</p>', '2025-01-19 15:55:42', NULL, 0, 0),
-(8, 48, 26, '<p>a</p>', '2025-01-19 15:56:01', NULL, 0, 0),
-(9, 48, 26, '<p>aaa</p>', '2025-01-19 16:00:05', NULL, 0, 0),
-(10, 48, 26, '<p>aa</p>', '2025-01-19 16:01:03', NULL, 0, 0),
-(11, 48, 26, '<h1>HEADING1</h1><h2>HEADING2</h2><h3>HEADING3</h3>', '2025-01-19 16:15:47', NULL, 0, 0),
-(12, 48, 26, '<h3>Test</h3><p><br></p><pre class=\"ql-syntax\" spellcheck=\"false\">skibidi\ndop dop dop\nyes\n  yes\n    yes\n</pre><p><br></p>', '2025-01-19 16:23:55', NULL, 0, 0),
-(13, 48, 26, '<p>hello</p>', '2025-01-19 20:51:59', NULL, 0, 0),
-(14, 49, 26, '<p>hi</p>', '2025-01-19 20:55:38', NULL, 0, 0),
-(15, 49, 26, '<p>This comment is super duper cool!</p>', '2025-01-19 20:56:51', NULL, 0, 0),
-(16, 49, 26, '<h1>AAAAAAAAA</h1>', '2025-01-19 20:56:56', NULL, 0, 0),
-(17, 40, 26, '<p>Test</p>', '2025-01-19 21:09:03', NULL, 0, 0),
-(18, 40, 26, '<p>Test 2</p>', '2025-01-19 21:11:07', NULL, 0, 0),
-(19, 40, 26, '<h1>HEADING</h1>', '2025-01-19 21:13:03', NULL, 0, 0),
-(20, 40, 26, '<p>aaaa</p>', '2025-01-19 21:17:16', NULL, 0, 0),
-(21, 40, 26, '<p>aaaa</p>', '2025-01-19 21:27:27', NULL, 0, 0),
-(22, 40, 26, '<p>asdasd</p>', '2025-01-19 21:27:30', NULL, 0, 0),
-(23, 40, 26, '<p>test</p>', '2025-01-19 21:33:35', 19, 0, 0),
-(24, 40, 26, '<p>TEST1</p>', '2025-01-19 21:39:51', NULL, 0, 0),
-(25, 40, 26, '<pre class=\"ql-syntax\" spellcheck=\"false\">TEST2\n</pre>', '2025-01-19 21:40:01', 24, 0, 0),
-(26, 40, 26, '<p>TEST3</p>', '2025-01-19 21:40:34', 24, 0, 0),
-(27, 49, 26, '<h1>This is a comment</h1><p>Lorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;</p><pre class=\"ql-syntax\" spellcheck=\"false\">Lorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;\n</pre><p>Thanks!</p>', '2025-01-19 22:17:13', NULL, 0, 0),
-(28, 49, 26, '<p>Lorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;</p><p><br></p><pre class=\"ql-syntax\" spellcheck=\"false\">Lorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;\nLorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;\nLorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;\n</pre><p><br></p>', '2025-01-19 22:17:37', 27, 0, 0),
-(29, 50, 26, '<p>Hello!</p>', '2025-01-21 10:29:11', NULL, 1, 0),
-(30, 50, 26, '<p>Hiii!</p>', '2025-01-21 10:29:27', 29, 0, 0),
-(31, 50, 26, '<p>TEST</p>', '2025-01-21 10:51:50', NULL, 0, 0),
-(32, 50, 26, '<p>woah</p>', '2025-01-21 10:56:12', NULL, 0, 0),
-(33, 50, 26, '<p>aaa</p>', '2025-01-21 17:31:30', NULL, 0, 0),
-(34, 50, 26, '<p>test</p>', '2025-01-21 17:31:34', 32, 0, 0),
-(35, 50, 26, '<p>a</p>', '2025-01-21 17:45:32', NULL, 0, 0),
-(36, 50, 26, '<p>abc</p>', '2025-01-21 17:49:30', NULL, 0, 0),
-(37, 50, 26, '<p>yest</p>', '2025-01-21 17:57:37', NULL, 0, 0),
-(38, 50, 26, '<p>test</p>', '2025-01-21 17:57:44', 37, 0, 0),
-(39, 50, 26, '<p>test</p>', '2025-01-21 17:58:02', 36, 0, 0),
-(40, 50, 26, '<p>a</p>', '2025-01-21 18:00:48', 37, 0, 0),
-(41, 50, 26, '<p>test</p>', '2025-01-21 19:07:37', 35, 0, 0),
-(42, 50, 26, '<p>test</p>', '2025-01-21 19:09:50', 37, 0, 0),
-(43, 50, 26, '<p>test</p>', '2025-01-21 19:12:44', 37, 0, 0),
-(44, 50, 26, '<p>hi</p>', '2025-01-21 19:19:34', NULL, 0, 0),
-(45, 50, 26, '<p>woah!</p>', '2025-01-21 19:19:41', 44, 0, 0),
-(46, 50, 26, '<p>asd</p>', '2025-01-21 19:23:06', 31, 0, 0),
-(47, 50, 26, '<p>a</p>', '2025-01-21 19:25:46', 44, 0, 0),
-(48, 50, 26, '<p>TESTTT</p>', '2025-01-21 19:25:54', 31, 0, 0),
-(49, 50, 26, '<p>woah</p>', '2025-01-21 20:17:30', NULL, 0, 0),
-(50, 50, 26, '<p>cool!</p>', '2025-01-21 20:17:35', 49, 0, 1),
-(51, 50, 26, '<p>works!?</p>', '2025-01-22 00:25:45', 49, 0, 0),
-(52, 50, 26, '<p>DOES</p>', '2025-01-22 00:25:56', 49, 0, 0),
-(53, 50, 26, '<p>cool</p>', '2025-01-22 00:28:09', NULL, 0, 0),
-(54, 51, 26, '<p>test</p>', '2025-01-23 20:52:57', NULL, 1, 0),
-(55, 51, 26, '<p>nice</p>', '2025-01-23 20:53:05', 54, 0, 0),
-(64, 69, 29, '<p>aa</p>', '2025-02-25 20:31:42', NULL, 0, 0);
+INSERT INTO `comments` (`id`, `post_id`, `user_id`, `content`, `created_at`, `parent_id`, `upvotes`, `downvotes`, `status`, `reported_count`, `updated_at`) VALUES
+(1, 48, 26, '<p>Test Comment</p>', '2025-01-19 15:42:46', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(2, 48, 26, 'Test Comment', '2025-01-19 15:50:52', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(3, 48, 26, 'Test Heading 1Test Heading2Test Normal', '2025-01-19 15:51:28', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(4, 48, 26, '<h1>Test Heading</h1><p><br></p>', '2025-01-19 15:53:11', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(5, 48, 26, '<p>Test</p>', '2025-01-19 15:55:18', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(6, 48, 26, '<p>Test</p>', '2025-01-19 15:55:39', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(7, 48, 26, '<p>test3</p>', '2025-01-19 15:55:42', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(8, 48, 26, '<p>a</p>', '2025-01-19 15:56:01', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(9, 48, 26, '<p>aaa</p>', '2025-01-19 16:00:05', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(10, 48, 26, '<p>aa</p>', '2025-01-19 16:01:03', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(11, 48, 26, '<h1>HEADING1</h1><h2>HEADING2</h2><h3>HEADING3</h3>', '2025-01-19 16:15:47', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(12, 48, 26, '<h3>Test</h3><p><br></p><pre class=\"ql-syntax\" spellcheck=\"false\">skibidi\ndop dop dop\nyes\n  yes\n    yes\n</pre><p><br></p>', '2025-01-19 16:23:55', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(13, 48, 26, '<p>hello</p>', '2025-01-19 20:51:59', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(14, 49, 26, '<p>hi</p>', '2025-01-19 20:55:38', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(15, 49, 26, '<p>This comment is super duper cool!</p>', '2025-01-19 20:56:51', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(16, 49, 26, '<h1>AAAAAAAAA</h1>', '2025-01-19 20:56:56', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(17, 40, 26, '<p>Test</p>', '2025-01-19 21:09:03', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(18, 40, 26, '<p>Test 2</p>', '2025-01-19 21:11:07', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(19, 40, 26, '<h1>HEADING</h1>', '2025-01-19 21:13:03', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(20, 40, 26, '<p>aaaa</p>', '2025-01-19 21:17:16', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(21, 40, 26, '<p>aaaa</p>', '2025-01-19 21:27:27', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(22, 40, 26, '<p>asdasd</p>', '2025-01-19 21:27:30', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(23, 40, 26, '<p>test</p>', '2025-01-19 21:33:35', 19, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(24, 40, 26, '<p>TEST1</p>', '2025-01-19 21:39:51', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(25, 40, 26, '<pre class=\"ql-syntax\" spellcheck=\"false\">TEST2\n</pre>', '2025-01-19 21:40:01', 24, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(26, 40, 26, '<p>TEST3</p>', '2025-01-19 21:40:34', 24, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(27, 49, 26, '<h1>This is a comment</h1><p>Lorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;</p><pre class=\"ql-syntax\" spellcheck=\"false\">Lorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;\n</pre><p>Thanks!</p>', '2025-01-19 22:17:13', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(28, 49, 26, '<p>Lorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;</p><p><br></p><pre class=\"ql-syntax\" spellcheck=\"false\">Lorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;\nLorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;\nLorem ipsum dolor sit amet. Ut placeat quibusdam sit omnis autem id praesentium dignissimos sit repellat consequatur nam ratione doloribus. Et deserunt reiciendis non possimus dolorum 33 voluptates voluptatibus aut nihil asperiores!&nbsp;\n</pre><p><br></p>', '2025-01-19 22:17:37', 27, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(29, 50, 26, '<p>Hello!</p>', '2025-01-21 10:29:11', NULL, 1, 0, 'published', 0, '2025-03-10 23:27:25'),
+(30, 50, 26, '<p>Hiii!</p>', '2025-01-21 10:29:27', 29, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(31, 50, 26, '<p>TEST</p>', '2025-01-21 10:51:50', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(32, 50, 26, '<p>woah</p>', '2025-01-21 10:56:12', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(33, 50, 26, '<p>aaa</p>', '2025-01-21 17:31:30', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(34, 50, 26, '<p>test</p>', '2025-01-21 17:31:34', 32, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(35, 50, 26, '<p>a</p>', '2025-01-21 17:45:32', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(36, 50, 26, '<p>abc</p>', '2025-01-21 17:49:30', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(37, 50, 26, '<p>yest</p>', '2025-01-21 17:57:37', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(38, 50, 26, '<p>test</p>', '2025-01-21 17:57:44', 37, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(39, 50, 26, '<p>test</p>', '2025-01-21 17:58:02', 36, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(40, 50, 26, '<p>a</p>', '2025-01-21 18:00:48', 37, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(41, 50, 26, '<p>test</p>', '2025-01-21 19:07:37', 35, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(42, 50, 26, '<p>test</p>', '2025-01-21 19:09:50', 37, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(43, 50, 26, '<p>test</p>', '2025-01-21 19:12:44', 37, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(44, 50, 26, '<p>hi</p>', '2025-01-21 19:19:34', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(45, 50, 26, '<p>woah!</p>', '2025-01-21 19:19:41', 44, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(46, 50, 26, '<p>asd</p>', '2025-01-21 19:23:06', 31, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(47, 50, 26, '<p>a</p>', '2025-01-21 19:25:46', 44, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(48, 50, 26, '<p>TESTTT</p>', '2025-01-21 19:25:54', 31, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(49, 50, 26, '<p>woah</p>', '2025-01-21 20:17:30', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(50, 50, 26, '<p>cool!</p>', '2025-01-21 20:17:35', 49, 0, 1, 'published', 0, '2025-03-10 23:27:25'),
+(51, 50, 26, '<p>works!?</p>', '2025-01-22 00:25:45', 49, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(52, 50, 26, '<p>DOES</p>', '2025-01-22 00:25:56', 49, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(53, 50, 26, '<p>cool</p>', '2025-01-22 00:28:09', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(54, 51, 26, '<p>test</p>', '2025-01-23 20:52:57', NULL, 1, 0, 'published', 0, '2025-03-10 23:27:25'),
+(55, 51, 26, '<p>nice</p>', '2025-01-23 20:53:05', 54, 0, 0, 'published', 0, '2025-03-10 23:27:25'),
+(64, 69, 29, '<p>aa</p>', '2025-02-25 20:31:42', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:25');
 
 -- --------------------------------------------------------
 
@@ -267,26 +270,30 @@ CREATE TABLE IF NOT EXISTS `comments_asset` (
   `parent_id` int DEFAULT NULL,
   `upvotes` int NOT NULL DEFAULT '0',
   `downvotes` int NOT NULL DEFAULT '0',
+  `status` enum('published','draft','hidden') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'published',
+  `reported_count` int NOT NULL DEFAULT '0',
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `asset_id` (`asset_id`),
   KEY `user_id` (`user_id`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `comments_asset`
 --
 
-INSERT INTO `comments_asset` (`id`, `asset_id`, `user_id`, `content`, `created_at`, `parent_id`, `upvotes`, `downvotes`) VALUES
-(65, 80, 30, '<p>hello</p>', '2025-02-26 12:33:32', NULL, 0, 0),
-(66, 80, 30, '<p>test</p>', '2025-02-26 12:40:53', NULL, 0, 0),
-(67, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0),
-(68, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0),
-(69, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0),
-(70, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0),
-(71, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0),
-(72, 80, 30, '<p>oh god</p>', '2025-02-27 08:48:39', NULL, 1, 0),
-(73, 80, 30, '<p>sup!</p>', '2025-02-27 08:50:39', 65, 0, 0);
+INSERT INTO `comments_asset` (`id`, `asset_id`, `user_id`, `content`, `created_at`, `parent_id`, `upvotes`, `downvotes`, `status`, `reported_count`, `updated_at`) VALUES
+(65, 80, 30, '<p>hello</p>', '2025-02-26 12:33:32', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:44'),
+(66, 80, 30, '<p>test</p>', '2025-02-26 12:40:53', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:44'),
+(67, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:44'),
+(68, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:44'),
+(69, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:44'),
+(70, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:44'),
+(71, 80, 30, '<p>ye</p>', '2025-02-27 08:48:28', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:44'),
+(72, 80, 30, '<p>oh god</p>', '2025-02-27 08:48:39', NULL, 1, 0, 'published', 0, '2025-03-10 23:27:44'),
+(73, 80, 30, '<p>sup!</p>', '2025-02-27 08:50:39', 65, 0, 0, 'published', 0, '2025-03-10 23:27:44'),
+(74, 95, 31, '<p>a</p>', '2025-03-10 22:13:28', NULL, 0, 0, 'published', 0, '2025-03-10 23:27:44');
 
 -- --------------------------------------------------------
 
@@ -449,7 +456,7 @@ INSERT INTO `posts` (`id`, `title`, `content`, `category_id`, `hashtags`, `image
 (76, 'bla', '<p>blabla</p>', 21, '#blablabla', '[]', '2025-03-03 20:20:27', '[]', 31, 0, 0, 'published', 1, '2025-03-04 15:13:53'),
 (77, 'a', '<p>a</p>', 14, '#a', '[\"uploads\\/images\\/vfx.png\"]', '2025-03-04 15:14:24', '[]', 31, 0, 0, 'published', 1, '2025-03-04 15:14:26'),
 (78, 'image', '<p>image</p>', 5, '#image', '[\"uploads\\/images\\/coding-background-9izlympnd0ovmpli.jpg\"]', '2025-03-04 18:04:38', '[]', 31, 0, 0, 'published', 0, '2025-03-04 18:04:38'),
-(79, 'video', '<p>video</p>', 20, '#bideo', '[]', '2025-03-04 18:10:34', '[\"uploads\\/videos\\/GABRIEL.mp4\"]', 31, 0, 0, 'published', 5, '2025-03-04 18:31:27');
+(79, 'video', '<p>video</p>', 20, '#bideo', '[]', '2025-03-04 18:10:34', '[\"uploads\\/videos\\/GABRIEL.mp4\"]', 31, 0, 0, 'published', 32, '2025-03-11 00:01:54');
 
 -- --------------------------------------------------------
 
