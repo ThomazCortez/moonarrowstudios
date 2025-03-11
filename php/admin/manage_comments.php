@@ -50,6 +50,7 @@ $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
 $offset = ($page - 1) * $limit;
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $status = isset($_GET['status']) ? $_GET['status'] : '';
+$commentType = isset($_GET['type']) ? $_GET['type'] : 'post'; // Default to post comments
 $sortBy = isset($_GET['sort']) ? $_GET['sort'] : 'created_at';
 $sortOrder = isset($_GET['order']) ? $_GET['order'] : 'DESC';
 
@@ -64,20 +65,37 @@ if (!in_array(strtoupper($sortOrder), $allowedSortOrders)) {
     $sortOrder = 'DESC';
 }
 
-// Prepare base query
-$query = "SELECT c.id, c.content, c.status, c.upvotes, c.downvotes, c.created_at, c.reported_count,
-                 u.user_id, u.username, p.title as post_title
-          FROM comments c
-          JOIN users u ON c.user_id = u.user_id
-          JOIN posts p ON c.post_id = p.id
-          WHERE 1=1";
+// Prepare query based on comment type
+if ($commentType === 'asset') {
+    // Query for asset comments
+    $query = "SELECT c.id, c.content, c.status, c.upvotes, c.downvotes, c.created_at, c.reported_count,
+                    u.user_id, u.username, a.title as asset_title, c.parent_id,
+                    'asset' as comment_type
+             FROM comments_asset c
+             JOIN users u ON c.user_id = u.user_id
+             JOIN assets a ON c.asset_id = a.id
+             WHERE 1=1";
+} else {
+    // Query for post comments
+    $query = "SELECT c.id, c.content, c.status, c.upvotes, c.downvotes, c.created_at, c.reported_count,
+                    u.user_id, u.username, p.title as post_title, NULL as parent_id,
+                    'post' as comment_type
+             FROM comments c
+             JOIN users u ON c.user_id = u.user_id
+             JOIN posts p ON c.post_id = p.id
+             WHERE 1=1";
+}
 
 // Add filters
 $params = [];
 $types = "";
 
 if (!empty($search)) {
-    $query .= " AND (c.content LIKE ? OR u.username LIKE ? OR p.title LIKE ?)";
+    if ($commentType === 'asset') {
+        $query .= " AND (c.content LIKE ? OR u.username LIKE ? OR a.title LIKE ?)";
+    } else {
+        $query .= " AND (c.content LIKE ? OR u.username LIKE ? OR p.title LIKE ?)";
+    }
     $searchParam = "%$search%";
     $params[] = $searchParam;
     $params[] = $searchParam;
@@ -92,9 +110,7 @@ if (!empty($status)) {
 }
 
 // Count total records for pagination
-$countQuery = str_replace("SELECT c.id, c.content, c.status, c.upvotes, c.downvotes, c.created_at, c.reported_count,
-                 u.user_id, u.username, p.title as post_title", 
-                "SELECT COUNT(*) as total", $query);
+$countQuery = preg_replace('/SELECT.*?FROM/is', "SELECT COUNT(*) as total FROM", $query, 1);
 
 $stmt = $conn->prepare($countQuery);
 if (!empty($types)) {
@@ -123,16 +139,26 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-// Get comment statistics
+// Get combined comment statistics
 $statsQuery = "SELECT 
-    COUNT(*) as total_comments,
-    SUM(CASE WHEN status = 'published' THEN 1 ELSE 0 END) as published_count,
-    SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END) as draft_count,
-    SUM(CASE WHEN status = 'hidden' THEN 1 ELSE 0 END) as hidden_count,
-    SUM(reported_count) as total_reports
-    FROM comments";
+    (SELECT COUNT(*) FROM comments) + (SELECT COUNT(*) FROM comments_asset) as total_comments,
+    (SELECT COUNT(*) FROM comments WHERE status = 'published') + 
+    (SELECT COUNT(*) FROM comments_asset WHERE status = 'published') as published_count,
+    (SELECT COUNT(*) FROM comments WHERE status = 'draft') + 
+    (SELECT COUNT(*) FROM comments_asset WHERE status = 'draft') as draft_count,
+    (SELECT COUNT(*) FROM comments WHERE status = 'hidden') + 
+    (SELECT COUNT(*) FROM comments_asset WHERE status = 'hidden') as hidden_count,
+    (SELECT SUM(reported_count) FROM comments) + 
+    (SELECT COALESCE(SUM(reported_count), 0) FROM comments_asset) as total_reports";
 $statsResult = $conn->query($statsQuery);
 $comment_stats = $statsResult->fetch_assoc();
+
+// Get comment type count
+$typeCountQuery = "SELECT 
+    (SELECT COUNT(*) FROM comments) as post_comments_count,
+    (SELECT COUNT(*) FROM comments_asset) as asset_comments_count";
+$typeCountResult = $conn->query($typeCountQuery);
+$comment_type_count = $typeCountResult->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -169,6 +195,11 @@ $comment_stats = $statsResult->fetch_assoc();
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        .reply-comment {
+            margin-left: 20px;
+            border-left: 3px solid #6c757d;
+            padding-left: 10px;
         }
     </style>
 </head>
@@ -237,12 +268,26 @@ $comment_stats = $statsResult->fetch_assoc();
                 </div>
             </div>
         </div>
+        
+        <!-- Comment Type Tabs -->
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+                <a class="nav-link <?php echo $commentType === 'post' ? 'active' : ''; ?>" href="?type=post">
+                    Post Comments <span class="badge bg-primary"><?php echo $comment_type_count['post_comments_count']; ?></span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $commentType === 'asset' ? 'active' : ''; ?>" href="?type=asset">
+                    Asset Comments <span class="badge bg-primary"><?php echo $comment_type_count['asset_comments_count']; ?></span>
+                </a>
+            </li>
+        </ul>
 
         <!-- Search and Filter -->
         <div class="card mb-4">
             <div class="card-body">
                 <form method="GET" class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-5">
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
                             <input type="text" class="form-control" placeholder="Search comments..." name="search" value="<?php echo htmlspecialchars($search); ?>">
@@ -259,6 +304,7 @@ $comment_stats = $statsResult->fetch_assoc();
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">Filter</button>
                     </div>
+                    <input type="hidden" name="type" value="<?php echo htmlspecialchars($commentType); ?>">
                     <input type="hidden" name="sort" value="<?php echo htmlspecialchars($sortBy); ?>">
                     <input type="hidden" name="order" value="<?php echo htmlspecialchars($sortOrder); ?>">
                 </form>
@@ -268,7 +314,10 @@ $comment_stats = $statsResult->fetch_assoc();
         <!-- Comment Table -->
         <div class="card mb-4">
             <div class="card-header bg-dark bg-gradient">
-                <h5 class="mb-0"><i class="bi bi-chat-left-text-fill me-2"></i>All Comments</h5>
+                <h5 class="mb-0">
+                    <i class="bi bi-chat-left-text-fill me-2"></i>
+                    <?php echo ($commentType === 'asset') ? 'Asset Comments' : 'Post Comments'; ?>
+                </h5>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -289,7 +338,12 @@ $comment_stats = $statsResult->fetch_assoc();
                             <th class="cursor-pointer" onclick="changeSort('username')">
                                 Author <?php echo getSortIcon('username'); ?>
                             </th>
-                            <th>Post Title</th>
+                            <th>
+                                <?php echo ($commentType === 'asset') ? 'Asset Title' : 'Post Title'; ?>
+                            </th>
+                            <?php if ($commentType === 'asset'): ?>
+                            <th>Parent ID</th>
+                            <?php endif; ?>
                             <th class="cursor-pointer" onclick="changeSort('upvotes')">
                                 Upvotes <?php echo getSortIcon('upvotes'); ?>
                             </th>
@@ -309,45 +363,69 @@ $comment_stats = $statsResult->fetch_assoc();
                     <tbody>
                         <?php if (count($comments) > 0): ?>
                             <?php foreach ($comments as $comment): ?>
-    <tr>
-        <td>
-            <div class="form-check">
-                <input class="form-check-input comment-select" type="checkbox" value="<?php echo $comment['id']; ?>">
-            </div>
-        </td>
-        <td><?php echo $comment['id']; ?></td>
-        <td class="truncate-text"><?php echo htmlspecialchars($comment['content']); ?></td>
-        <td><?php echo htmlspecialchars($comment['username']); ?></td>
-        <td><?php echo htmlspecialchars($comment['post_title']); ?></td>
-        <td><?php echo $comment['upvotes']; ?></td>
-        <td><?php echo $comment['downvotes']; ?></td>
-        <td><?php echo date('M d, Y', strtotime($comment['created_at'])); ?></td>
-        <td><?php echo $comment['reported_count']; ?></td>
-        <td>
-            <?php if ($comment['status'] === 'published'): ?>
-                <span class="badge bg-success">Visible</span>
-            <?php else: ?>
-                <span class="badge bg-secondary">Hidden</span>
-            <?php endif; ?>
-        </td>
-        <td class="actions-column">
-            <div class="btn-group btn-group-sm">
-                <a href="<?php echo $baseUrl; ?>php/admin/view_comment.php?id=<?php echo $comment['id']; ?>" class="btn btn-primary" title="View">
-                    <i class="bi bi-eye"></i>
-                </a>
-                <a href="edit_comment.php?id=<?php echo $comment['id']; ?>" class="btn btn-warning" title="Edit">
-                    <i class="bi bi-pencil"></i>
-                </a>
-                <button class="btn btn-danger delete-comment" data-bs-toggle="modal" data-bs-target="#deleteCommentModal" data-comment-id="<?php echo $comment['id']; ?>" data-comment-content="<?php echo htmlspecialchars($comment['content']); ?>" title="Delete">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-        </td>
-    </tr>
-<?php endforeach; ?>
+                                <tr<?php echo ($commentType === 'asset' && $comment['parent_id']) ? ' class="reply-comment"' : ''; ?>>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input comment-select" type="checkbox" 
+                                                data-type="<?php echo $comment['comment_type']; ?>"
+                                                value="<?php echo $comment['id']; ?>">
+                                        </div>
+                                    </td>
+                                    <td><?php echo $comment['id']; ?></td>
+                                    <td class="truncate-text"><?php echo htmlspecialchars($comment['content']); ?></td>
+                                    <td><?php echo htmlspecialchars($comment['username']); ?></td>
+                                    <td>
+                                        <?php if ($commentType === 'asset'): ?>
+                                            <?php echo htmlspecialchars($comment['asset_title']); ?>
+                                        <?php else: ?>
+                                            <?php echo htmlspecialchars($comment['post_title']); ?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <?php if ($commentType === 'asset'): ?>
+                                    <td>
+                                        <?php if ($comment['parent_id']): ?>
+                                            <a href="php/admin/view_comment.php?id=<?php echo $comment['parent_id']; ?>&type=asset" class="badge bg-info">
+                                                <?php echo $comment['parent_id']; ?>
+                                            </a>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </td>
+                                    <?php endif; ?>
+                                    <td><?php echo $comment['upvotes']; ?></td>
+                                    <td><?php echo $comment['downvotes']; ?></td>
+                                    <td><?php echo date('M d, Y', strtotime($comment['created_at'])); ?></td>
+                                    <td><?php echo $comment['reported_count']; ?></td>
+                                    <td>
+                                        <?php if ($comment['status'] === 'published'): ?>
+                                            <span class="badge bg-success">Visible</span>
+                                        <?php elseif ($comment['status'] === 'draft'): ?>
+                                            <span class="badge bg-warning text-dark">Draft</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary">Hidden</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="actions-column">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="<?php echo $baseUrl; ?>php/admin/view_comment.php?id=<?php echo $comment['id']; ?>&type=<?php echo $comment['comment_type']; ?>" class="btn btn-primary" title="View">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="edit_comment.php?id=<?php echo $comment['id']; ?>&type=<?php echo $comment['comment_type']; ?>" class="btn btn-warning" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button class="btn btn-danger delete-comment" data-bs-toggle="modal" data-bs-target="#deleteCommentModal" 
+                                                data-comment-id="<?php echo $comment['id']; ?>" 
+                                                data-comment-type="<?php echo $comment['comment_type']; ?>"
+                                                data-comment-content="<?php echo htmlspecialchars($comment['content']); ?>" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="12" class="text-center py-4">No comments found matching your criteria.</td>
+                                <td colspan="<?php echo ($commentType === 'asset') ? '13' : '12'; ?>" class="text-center py-4">No comments found matching your criteria.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -363,19 +441,19 @@ $comment_stats = $statsResult->fetch_assoc();
                         <nav aria-label="Comments pagination">
                             <ul class="pagination mb-0">
                                 <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $page - 1; ?>&limit=<?php echo $limit; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&sort=<?php echo $sortBy; ?>&order=<?php echo $sortOrder; ?>" aria-label="Previous">
+                                    <a class="page-link" href="?page=<?php echo $page - 1; ?>&limit=<?php echo $limit; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&sort=<?php echo $sortBy; ?>&order=<?php echo $sortOrder; ?>&type=<?php echo $commentType; ?>" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
                                 <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
                                     <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                        <a class="page-link" href="?page=<?php echo $i; ?>&limit=<?php echo $limit; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&sort=<?php echo $sortBy; ?>&order=<?php echo $sortOrder; ?>">
+                                        <a class="page-link" href="?page=<?php echo $i; ?>&limit=<?php echo $limit; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&sort=<?php echo $sortBy; ?>&order=<?php echo $sortOrder; ?>&type=<?php echo $commentType; ?>">
                                             <?php echo $i; ?>
                                         </a>
                                     </li>
                                 <?php endfor; ?>
                                 <li class="page-item <?php echo $page >= $totalPages ? 'disabled' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $page + 1; ?>&limit=<?php echo $limit; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&sort=<?php echo $sortBy; ?>&order=<?php echo $sortOrder; ?>" aria-label="Next">
+                                    <a class="page-link" href="?page=<?php echo $page + 1; ?>&limit=<?php echo $limit; ?>&search=<?php echo urlencode($search); ?>&status=<?php echo urlencode($status); ?>&sort=<?php echo $sortBy; ?>&order=<?php echo $sortOrder; ?>&type=<?php echo $commentType; ?>" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
                                     </a>
                                 </li>
@@ -403,6 +481,7 @@ $comment_stats = $statsResult->fetch_assoc();
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <form action="delete_comment.php" method="POST">
                         <input type="hidden" name="comment_id" id="deleteCommentId">
+                        <input type="hidden" name="comment_type" id="deleteCommentType">
                         <button type="submit" class="btn btn-danger">Delete Comment</button>
                     </form>
                 </div>
@@ -411,136 +490,144 @@ $comment_stats = $statsResult->fetch_assoc();
     </div>
 
     <!-- Bulk Delete Modal -->
-<div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="bulkDeleteModalLabel">Delete Multiple Comments</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the selected comments?</p>
-                <p class="text-danger">This action cannot be undone.</p>
-                <p>Number of comments selected: <strong id="selectedCount">0</strong></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form action="bulk_delete_comments.php" method="POST">
-                    <input type="hidden" name="comment_ids" id="bulkDeleteCommentIds">
-                    <button type="submit" class="btn btn-danger">Delete Selected Comments</button>
-                </form>
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="bulkDeleteModalLabel">Delete Multiple Comments</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the selected comments?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                    <p>Number of comments selected: <strong id="selectedCount">0</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="bulk_delete_comments.php" method="POST">
+                        <input type="hidden" name="comment_ids" id="bulkDeleteCommentIds">
+                        <input type="hidden" name="comment_types" id="bulkDeleteCommentTypes">
+                        <button type="submit" class="btn btn-danger">Delete Selected Comments</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-    // Single delete modal functionality
-    const deleteCommentModal = document.getElementById('deleteCommentModal');
-    if (deleteCommentModal) {
-        deleteCommentModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const commentId = button.getAttribute('data-comment-id');
-            const commentContent = button.getAttribute('data-comment-content');
+            // Single delete modal functionality
+            const deleteCommentModal = document.getElementById('deleteCommentModal');
+            if (deleteCommentModal) {
+                deleteCommentModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const commentId = button.getAttribute('data-comment-id');
+                    const commentType = button.getAttribute('data-comment-type');
+                    const commentContent = button.getAttribute('data-comment-content');
+                    
+                    document.getElementById('deleteCommentId').value = commentId;
+                    document.getElementById('deleteCommentType').value = commentType;
+                    document.getElementById('commentContentToDelete').textContent = commentContent;
+                });
+            }
             
-            document.getElementById('deleteCommentId').value = commentId;
-            document.getElementById('commentContentToDelete').textContent = commentContent;
-        });
-    }
-    
-    // Select all checkbox functionality
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const commentCheckboxes = document.querySelectorAll('.comment-select');
-    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-    
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function() {
-            const isChecked = this.checked;
-            
-            commentCheckboxes.forEach(checkbox => {
-                checkbox.checked = isChecked;
-            });
-            
-            updateBulkDeleteButton();
-        });
-    }
-    
-    // Individual checkbox functionality
-    commentCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            updateBulkDeleteButton();
-            
-            // Update "select all" checkbox state
-            const allChecked = [...commentCheckboxes].every(cb => cb.checked);
-            const someChecked = [...commentCheckboxes].some(cb => cb.checked);
+            // Select all checkbox functionality
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const commentCheckboxes = document.querySelectorAll('.comment-select');
+            const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
             
             if (selectAllCheckbox) {
-                selectAllCheckbox.checked = allChecked;
-                selectAllCheckbox.indeterminate = someChecked && !allChecked;
+                selectAllCheckbox.addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    
+                    commentCheckboxes.forEach(checkbox => {
+                        checkbox.checked = isChecked;
+                    });
+                    
+                    updateBulkDeleteButton();
+                });
             }
-        });
-    });
-    
-    // Bulk delete button functionality
-    if (bulkDeleteBtn) {
-        bulkDeleteBtn.addEventListener('click', function() {
-            const selectedComments = [...document.querySelectorAll('.comment-select:checked')].map(cb => cb.value);
-            document.getElementById('bulkDeleteCommentIds').value = JSON.stringify(selectedComments);
-            document.getElementById('selectedCount').textContent = selectedComments.length;
             
-            const bulkDeleteModal = new bootstrap.Modal(document.getElementById('bulkDeleteModal'));
-            bulkDeleteModal.show();
-        });
-    }
-    
-    // Function to update bulk delete button state
-    function updateBulkDeleteButton() {
-        const selectedCount = document.querySelectorAll('.comment-select:checked').length;
-        bulkDeleteBtn.disabled = selectedCount === 0;
-        bulkDeleteBtn.textContent = selectedCount > 0 ? 
-            `Delete Selected (${selectedCount})` : 'Delete Selected';
-    }
-    
-    // Sorting functionality
-    function changeSort(column) {
-        let currentSort = '<?php echo $sortBy; ?>';
-        let currentOrder = '<?php echo $sortOrder; ?>';
-        let newOrder = 'ASC';
-        
-        if (column === currentSort) {
-            newOrder = currentOrder === 'ASC' ? 'DESC' : 'ASC';
-        }
-        
-        const form = document.createElement('form');
-        form.method = 'GET';
-        form.action = 'manage_comments.php';
-        
-        const inputs = {
-            'search': '<?php echo htmlspecialchars($search); ?>',
-            'status': '<?php echo htmlspecialchars($status); ?>',
-            'sort': column,
-            'order': newOrder,
-            'page': '<?php echo $page; ?>',
-            'limit': '<?php echo $limit; ?>'
-        };
-        
-        for (const [name, value] of Object.entries(inputs)) {
-            if (value) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = name;
-                input.value = value;
-                form.appendChild(input);
+            // Individual checkbox functionality
+            commentCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateBulkDeleteButton();
+                    
+                    // Update "select all" checkbox state
+                    const allChecked = [...commentCheckboxes].every(cb => cb.checked);
+                    const someChecked = [...commentCheckboxes].some(cb => cb.checked);
+                    
+                    if (selectAllCheckbox) {
+                        selectAllCheckbox.checked = allChecked;
+                        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+                    }
+                });
+            });
+            
+            // Bulk delete button functionality
+            if (bulkDeleteBtn) {
+                bulkDeleteBtn.addEventListener('click', function() {
+                    const selectedComments = [...document.querySelectorAll('.comment-select:checked')].map(cb => ({ 
+                        id: cb.value,
+                        type: cb.getAttribute('data-type')
+                    }));
+                    
+                    const commentIds = selectedComments.map(item => item.id);
+                    const commentTypes = selectedComments.map(item => item.type);
+                    
+                    document.getElementById('bulkDeleteCommentIds').value = JSON.stringify(commentIds);
+                    document.getElementById('bulkDeleteCommentTypes').value = JSON.stringify(commentTypes);
+                    document.getElementById('selectedCount').textContent = selectedComments.length;
+                    
+                    const bulkDeleteModal = new bootstrap.Modal(document.getElementById('bulkDeleteModal'));
+                    bulkDeleteModal.show();
+                });
             }
-        }
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-});
+            
+            // Function to update bulk delete button state
+            function updateBulkDeleteButton() {
+                const selectedCount = document.querySelectorAll('.comment-select:checked').length;
+                bulkDeleteBtn.disabled = selectedCount === 0;
+                bulkDeleteBtn.textContent = selectedCount > 0 ? 
+                    `Delete Selected (${selectedCount})` : 'Delete Selected';
+            }
+            
+            // Make the changeSort function available globally
+            window.changeSort = function(column) {
+                let currentSort = '<?php echo $sortBy; ?>';
+                let currentOrder = '<?php echo $sortOrder; ?>';
+                let newOrder = 'ASC';
+                
+                if (column === currentSort) {
+                    newOrder = currentOrder === 'ASC' ? 'DESC' : 'ASC';
+                }
+                
+                const form = document.createElement('form');
+                form.method = 'GET';
+                form.action = 'manage_comments.php';
+                
+                const inputs = {
+                    'search': '<?php echo htmlspecialchars($search); ?>',
+                    'status': '<?php echo htmlspecialchars($status); ?>',
+                    'type': '<?php echo htmlspecialchars($commentType); ?>',
+                    'sort': column,
+                    'order': newOrder,
+                    'page': '<?php echo $page; ?>',
+                    'limit': '<?php echo $limit; ?>'
+                };
+                
+                for (const [key, value] of Object.entries(inputs)) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+            };
+        });
     </script>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
