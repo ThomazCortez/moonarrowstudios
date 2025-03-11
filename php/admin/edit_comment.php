@@ -36,9 +36,11 @@ $content = '';
 $status = '';
 $error_message = '';
 $success_message = '';
+$comment_type = ''; // To track whether the comment is from `comments` or `comments_asset`
 
 // Check if comment exists
 if ($comment_id > 0) {
+    // First, check the `comments` table (for post comments)
     $query = "SELECT c.*, u.username, p.title as post_title 
               FROM comments c 
               JOIN users u ON c.user_id = u.user_id 
@@ -49,20 +51,40 @@ if ($comment_id > 0) {
     $stmt->execute();
     $result = $stmt->get_result();
     
-    if ($result->num_rows === 0) {
-        // Comment not found
-        header("Location: manage_comments.php");
-        exit();
+    if ($result->num_rows > 0) {
+        // Comment found in `comments` table
+        $comment = $result->fetch_assoc();
+        $comment_type = 'post';
+    } else {
+        // If not found in `comments`, check the `comments_asset` table (for asset comments)
+        $query = "SELECT c.*, u.username, a.title as asset_title 
+                  FROM comments_asset c 
+                  JOIN users u ON c.user_id = u.user_id 
+                  JOIN assets a ON c.asset_id = a.id 
+                  WHERE c.id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("i", $comment_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            // Comment found in `comments_asset` table
+            $comment = $result->fetch_assoc();
+            $comment_type = 'asset';
+        } else {
+            // Comment not found in either table
+            header("Location: manage_comments.php");
+            exit();
+        }
     }
     
-    $comment = $result->fetch_assoc();
     $stmt->close();
     
     // Populate variables with comment data
     $content = $comment['content'];
     $status = $comment['status'];
     $author = $comment['username'];
-    $post_title = $comment['post_title'];
+    $post_title = $comment['post_title'] ?? $comment['asset_title'] ?? 'Unknown'; // Handle both post and asset titles
     $created_at = $comment['created_at'];
     $upvotes = $comment['upvotes'];
     $downvotes = $comment['downvotes'];
@@ -83,12 +105,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($content)) {
         $error_message = "Content is required.";
     } else {
-        // Update comment in database
-        $updateQuery = "UPDATE comments SET 
-                        content = ?, 
-                        status = ?, 
-                        updated_at = NOW()
-                        WHERE id = ?";
+        // Update comment in the appropriate table
+        if ($comment_type === 'post') {
+            $updateQuery = "UPDATE comments SET 
+                            content = ?, 
+                            status = ?, 
+                            updated_at = NOW()
+                            WHERE id = ?";
+        } else {
+            $updateQuery = "UPDATE comments_asset SET 
+                            content = ?, 
+                            status = ?, 
+                            updated_at = NOW()
+                            WHERE id = ?";
+        }
         
         $stmt = $conn->prepare($updateQuery);
         $stmt->bind_param("ssi", $content, $status, $comment_id);
@@ -195,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="card-body comment-form">
                 <form method="POST" action="" id="commentForm">
                     <div class="mb-3">
-                        <label for="post_title" class="form-label">Post Title</label>
+                        <label for="post_title" class="form-label"><?php echo $comment_type === 'post' ? 'Post Title' : 'Asset Title'; ?></label>
                         <input type="text" class="form-control" id="post_title" value="<?php echo htmlspecialchars($post_title); ?>" readonly>
                     </div>
                     

@@ -1412,7 +1412,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <div class="mb-3">
                                 <label for="images" class="form-label">Images</label>
-                                <input type="file" name="images[]" id="images" class="form-control" accept="image/*" multiple required>
+                                <input type="file" name="images[]" id="images" class="form-control" accept="image/*" multiple>
                             </div>
                             <div class="mb-3">
                                 <label for="videos" class="form-label">Videos</label>
