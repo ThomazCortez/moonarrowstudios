@@ -19,7 +19,6 @@ $user_id = $_SESSION['user_id'];
 $query = "SELECT role FROM users WHERE user_id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $user_id);
-
 $stmt->execute();
 $stmt->bind_result($user_role);
 $stmt->fetch();
@@ -40,17 +39,45 @@ if (!isset($_POST['comment_id']) || empty($_POST['comment_id'])) {
 
 $comment_id = (int)$_POST['comment_id'];
 
-// First, get post_id to maintain referential integrity (if needed for logging or notifications)
-$getPostIdQuery = "SELECT post_id FROM comments WHERE id = ?";
-$stmt = $conn->prepare($getPostIdQuery);
+// Determine which table the comment belongs to
+$comment_type = ''; // To track whether the comment is from `comments` or `comments_asset`
+
+// First, check the `comments` table (for post comments)
+$query = "SELECT id FROM comments WHERE id = ?";
+$stmt = $conn->prepare($query);
 $stmt->bind_param("i", $comment_id);
 $stmt->execute();
-$stmt->bind_result($post_id);
-$stmt->fetch();
+$stmt->store_result();
+
+if ($stmt->num_rows > 0) {
+    $comment_type = 'post';
+} else {
+    // If not found in `comments`, check the `comments_asset` table (for asset comments)
+    $query = "SELECT id FROM comments_asset WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $comment_id);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        $comment_type = 'asset';
+    } else {
+        // Comment not found in either table
+        $_SESSION['error_message'] = "Comment not found.";
+        header("Location: manage_comments.php");
+        exit();
+    }
+}
+
 $stmt->close();
 
-// Delete comment
-$deleteQuery = "DELETE FROM comments WHERE id = ?";
+// Delete comment from the appropriate table
+if ($comment_type === 'post') {
+    $deleteQuery = "DELETE FROM comments WHERE id = ?";
+} else {
+    $deleteQuery = "DELETE FROM comments_asset WHERE id = ?";
+}
+
 $stmt = $conn->prepare($deleteQuery);
 $stmt->bind_param("i", $comment_id);
 

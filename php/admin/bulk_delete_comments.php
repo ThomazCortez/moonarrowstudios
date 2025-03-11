@@ -19,7 +19,6 @@ $user_id = $_SESSION['user_id'];
 $query = "SELECT role FROM users WHERE user_id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $user_id);
-
 $stmt->execute();
 $stmt->bind_result($user_role);
 $stmt->fetch();
@@ -47,35 +46,47 @@ if (!is_array($comment_ids) || empty($comment_ids)) {
     exit();
 }
 
-// First, get affected post IDs to update their comment counts later
-$post_ids = [];
+// Prepare placeholders and types for SQL queries
 $placeholders = implode(',', array_fill(0, count($comment_ids), '?'));
 $types = str_repeat('i', count($comment_ids));
 
-$getPostIdsQuery = "SELECT DISTINCT post_id FROM comments WHERE id IN ($placeholders)";
-$stmt = $conn->prepare($getPostIdsQuery);
-$stmt->bind_param($types, ...$comment_ids);
-$stmt->execute();
-$result = $stmt->get_result();
+// Initialize counters for deleted comments
+$deleted_count = 0;
+$error_message = '';
 
-while ($row = $result->fetch_assoc()) {
-    $post_ids[] = $row['post_id'];
-}
-$stmt->close();
-
-// Delete comments in bulk
-$deleteQuery = "DELETE FROM comments WHERE id IN ($placeholders)";
-$stmt = $conn->prepare($deleteQuery);
+// Delete comments from the `comments` table (for post comments)
+$deletePostCommentsQuery = "DELETE FROM comments WHERE id IN ($placeholders)";
+$stmt = $conn->prepare($deletePostCommentsQuery);
 $stmt->bind_param($types, ...$comment_ids);
 
 if ($stmt->execute()) {
-    $deleted_count = $stmt->affected_rows;
-    $_SESSION['success_message'] = "Successfully deleted $deleted_count comments.";
+    $deleted_count += $stmt->affected_rows;
 } else {
-    $_SESSION['error_message'] = "Failed to delete comments: " . $conn->error;
+    $error_message .= "Failed to delete post comments: " . $conn->error . " ";
 }
 
 $stmt->close();
+
+// Delete comments from the `comments_asset` table (for asset comments)
+$deleteAssetCommentsQuery = "DELETE FROM comments_asset WHERE id IN ($placeholders)";
+$stmt = $conn->prepare($deleteAssetCommentsQuery);
+$stmt->bind_param($types, ...$comment_ids);
+
+if ($stmt->execute()) {
+    $deleted_count += $stmt->affected_rows;
+} else {
+    $error_message .= "Failed to delete asset comments: " . $conn->error . " ";
+}
+
+$stmt->close();
+
+// Set success or error message
+if ($deleted_count > 0) {
+    $_SESSION['success_message'] = "Successfully deleted $deleted_count comments.";
+} else {
+    $_SESSION['error_message'] = $error_message ?: "No comments were deleted.";
+}
+
 $conn->close();
 
 // Redirect back to comments management page
