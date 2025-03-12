@@ -157,6 +157,27 @@ $user_stats = $result->fetch_assoc();
     <?php include('../header.php'); ?>
 
     <div class="container py-4">
+        <!-- Display error messages -->
+<?php if (isset($_SESSION['error_messages'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <ul class="mb-0">
+            <?php foreach ($_SESSION['error_messages'] as $error): ?>
+                <li><?php echo htmlspecialchars($error); ?></li>
+            <?php endforeach; ?>
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error_messages']); ?>
+<?php endif; ?>
+
+<!-- Display success message -->
+<?php if (isset($_SESSION['success_message'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <?php echo htmlspecialchars($_SESSION['success_message']); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['success_message']); ?>
+<?php endif; ?>
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h1 class="mb-0">Manage Users</h1>
