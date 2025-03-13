@@ -10,13 +10,14 @@ $stmt = $conn->prepare("SELECT assets.*, asset_categories.name AS category_name,
                         FROM assets 
                         JOIN asset_categories ON assets.category_id = asset_categories.id 
                         JOIN users ON assets.user_id = users.user_id 
-                        WHERE assets.id = ?");
+                        WHERE assets.id = ? AND assets.status != 'hidden'"); // Add condition to exclude hidden assets
 $stmt->bind_param("i", $asset_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $asset = $result->fetch_assoc();
 
-if (!$asset) {
+// If the asset is hidden or not found, display "Asset not found" and exit
+if (!$asset || $asset['status'] === 'hidden') {
     echo "<h1>Asset not found</h1>";
     exit;
 }
@@ -73,17 +74,18 @@ while ($row = $comments_result->fetch_assoc()) {
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 
-<head> <?php include 'header.php'; ?>
-	<!-- Include Highlight.js -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-	<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
+<head> 
+    <?php include 'header.php'; ?>
+    <!-- Include Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
     <title>MoonArrow Studios - Asset</title>
-	<script>
-	document.addEventListener('DOMContentLoaded', () => {
-		hljs.highlightAll();
-	});
-	</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            hljs.highlightAll();
+        });
+    </script>
 	<style>
 	:root {
     /* Base colors from previous styles */
@@ -590,132 +592,141 @@ document.addEventListener('DOMContentLoaded', () => {
 </head>
 
 <body>
-	<div class="container mt-5">
-		<div class="card">
-			<div class="card-body">
-				<!-- asset Header -->
-				<div class="text-center mb-4">
-					<h1 class="card-title mb-1"><?= htmlspecialchars($asset['title'] ?? 'No Title') ?></h1>
-					<p class="mb-0"><em>Published on <?= date('F j, Y, g:i A', strtotime($asset['created_at'])) ?></em></p>
-					<p class="mb-0">By <strong><a href="profile.php?id=<?= htmlspecialchars($asset['user_id']) ?>"><?= htmlspecialchars($asset['username'] ?? 'Anonymous') ?></a></strong></p>
-					<p><strong>Category:</strong> <?= htmlspecialchars($asset['category_name'] ?? 'Uncategorized') ?></p>
-					<p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($asset['hashtags'] ?? '') ?></p>
-				</div>
-				<hr>
-				<!-- asset Content -->
-				<div> <?= $asset['content'] ?> </div> <?php
-			// After decoding the JSON, clean up the paths
-			$images = !empty($asset['images']) ? json_decode($asset['images'], true) : [];
-$videos = !empty($asset['videos']) ? json_decode($asset['videos'], true) : [];
-
-// Clean up the paths by replacing escaped slashes
-$images = array_map(function($path) {
-    return str_replace('\\/', '/', $path);
-}, $images);
-
-$videos = array_map(function($path) {
-    return str_replace('\\/', '/', $path);
-}, $videos);
-
-// Check if there are any attachments (images, videos, or asset_file)
-if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
-    <hr>
-    <!-- Display Images, Videos, and Asset File -->
-    <h6 class='text-center'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
-    <div class="media-container">
-        <?php if (!empty($images)): ?>
-            <?php foreach ($images as $image): ?>
-                <div class="media-item">
-                    <img src="<?= htmlspecialchars($image) ?>" alt="Asset Image">
-                    <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-body">
+                <!-- Asset Header -->
+                <div class="text-center mb-4">
+                    <h1 class="card-title mb-1"><?= htmlspecialchars($asset['title'] ?? 'No Title') ?></h1>
+                    <p class="mb-0"><em>Published on <?= date('F j, Y, g:i A', strtotime($asset['created_at'])) ?></em></p>
+                    <p class="mb-0">By <strong><a href="profile.php?id=<?= htmlspecialchars($asset['user_id']) ?>"><?= htmlspecialchars($asset['username'] ?? 'Anonymous') ?></a></strong></p>
+                    <p><strong>Category:</strong> <?= htmlspecialchars($asset['category_name'] ?? 'Uncategorized') ?></p>
+                    <p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($asset['hashtags'] ?? '') ?></p>
                 </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
+                <hr>
+                <!-- Asset Content -->
+                <div> <?= $asset['content'] ?> </div>
+                <?php
+                // After decoding the JSON, clean up the paths
+                $images = !empty($asset['images']) ? json_decode($asset['images'], true) : [];
+                $videos = !empty($asset['videos']) ? json_decode($asset['videos'], true) : [];
 
-        <?php if (!empty($videos)): ?>
-            <?php foreach ($videos as $video_path): ?>
-                <div class="media-item">
-                    <video>
-                        <source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag.
-                    </video>
-                    <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </div>
+                // Clean up the paths by replacing escaped slashes
+                $images = array_map(function($path) {
+                    return str_replace('\\/', '/', $path);
+                }, $images);
 
-    <?php if (!empty($asset['asset_file'])): ?>
-    <?php
-    // Construct the file path
-    $filePath = $_SERVER['DOCUMENT_ROOT'] . '/moonarrowstudios/php/' . $asset['asset_file'];
-    
-    // Normalize slashes for Windows compatibility
-    $filePath = str_replace('\\', '/', $filePath);
+                $videos = array_map(function($path) {
+                    return str_replace('\\/', '/', $path);
+                }, $videos);
 
-    // Get file extension to determine if it's an audio file
-    $fileExtension = pathinfo($asset['asset_file'], PATHINFO_EXTENSION);
-    $isAudioFile = in_array(strtolower($fileExtension), ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac']);
-    
-    // Check if the file exists
-    if (file_exists($filePath)) {
-        $fileHash = hash_file('sha256', $filePath);
-        $fileSize = filesize($filePath);
-    } else {
-        $fileHash = 'File not found';
-        $fileSize = 0;
-    }
-    ?>
-    
-    <?php if ($isAudioFile && file_exists($filePath)): ?>
-    <!-- Audio Player -->
-    <div class="audio-player-container text-center mt-3 mb-3">
-        <audio controls class="w-100">
-            <source src="<?= htmlspecialchars($asset['asset_file']) ?>" type="audio/<?= strtolower($fileExtension) ?>">
-            Your browser does not support the audio element.
-        </audio>
-    </div>
-    <?php endif; ?>
-    
-    <div class="text-center mt-3">
-        <a href="<?= htmlspecialchars($asset['asset_file']) ?>" class="btn btn-primary btn-sm me-2" download>
-            <i class="bi bi-download"></i> Download <?= basename($asset['asset_file']) ?>
-        </a>
-        <button class="btn btn-outline-secondary btn-sm" type="button" 
-                data-bs-toggle="collapse" data-bs-target="#securityInfo">
-            <i class="bi bi-shield-check"></i> Security Info
-        </button>
-    </div>
-    <div class="collapse mt-2" id="securityInfo">
-        <div class="card card-body">
-            <?php if (file_exists($filePath)): ?>
-                <small>File Hash (SHA-256): <code><?= $fileHash ?></code></small>
-                <small>File Size: <?= number_format($fileSize / 1024, 2) ?> KB</small>
-                <p class="mb-0 mt-1"><small>You can verify this hash online at <a href="https://www.virustotal.com/gui/home/search" target="_blank">VirusTotal</a> by searching for this hash.</small></p>
-            <?php else: ?>
-                <small>File not found.</small>
-            <?php endif; ?>
+                // Check if there are any attachments (images, videos, or asset_file)
+                if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
+                    <hr>
+                    <!-- Display Images, Videos, and Asset File -->
+                    <h6 class='text-center'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
+                    <div class="media-container">
+                        <?php if (!empty($images)): ?>
+                            <?php foreach ($images as $image): ?>
+                                <div class="media-item">
+                                    <img src="<?= htmlspecialchars($image) ?>" alt="Asset Image">
+                                    <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+
+                        <?php if (!empty($videos)): ?>
+                            <?php foreach ($videos as $video_path): ?>
+                                <div class="media-item">
+                                    <video>
+                                        <source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag.
+                                    </video>
+                                    <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php if (!empty($asset['asset_file'])): ?>
+                        <?php
+                        // Construct the file path
+                        $filePath = $_SERVER['DOCUMENT_ROOT'] . '/moonarrowstudios/php/' . $asset['asset_file'];
+                        
+                        // Normalize slashes for Windows compatibility
+                        $filePath = str_replace('\\', '/', $filePath);
+
+                        // Get file extension to determine if it's an audio file
+                        $fileExtension = pathinfo($asset['asset_file'], PATHINFO_EXTENSION);
+                        $isAudioFile = in_array(strtolower($fileExtension), ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac']);
+                        
+                        // Check if the file exists
+                        if (file_exists($filePath)) {
+                            $fileHash = hash_file('sha256', $filePath);
+                            $fileSize = filesize($filePath);
+                        } else {
+                            $fileHash = 'File not found';
+                            $fileSize = 0;
+                        }
+                        ?>
+                        
+                        <?php if ($isAudioFile && file_exists($filePath)): ?>
+                            <!-- Audio Player -->
+                            <div class="audio-player-container text-center mt-3 mb-3">
+                                <audio controls class="w-100">
+                                    <source src="<?= htmlspecialchars($asset['asset_file']) ?>" type="audio/<?= strtolower($fileExtension) ?>">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <div class="text-center mt-3">
+                            <a href="<?= htmlspecialchars($asset['asset_file']) ?>" class="btn btn-primary btn-sm me-2" download>
+                                <i class="bi bi-download"></i> Download <?= basename($asset['asset_file']) ?>
+                            </a>
+                            <button class="btn btn-outline-secondary btn-sm" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#securityInfo">
+                                <i class="bi bi-shield-check"></i> Security Info
+                            </button>
+                        </div>
+                        <div class="collapse mt-2" id="securityInfo">
+                            <div class="card card-body">
+                                <?php if (file_exists($filePath)): ?>
+                                    <small>File Hash (SHA-256): <code><?= $fileHash ?></code></small>
+                                    <small>File Size: <?= number_format($fileSize / 1024, 2) ?> KB</small>
+                                    <p class="mb-0 mt-1"><small>You can verify this hash online at <a href="https://www.virustotal.com/gui/home/search" target="_blank">VirusTotal</a> by searching for this hash.</small></p>
+                                <?php else: ?>
+                                    <small>File not found.</small>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
-<?php endif; ?>
-<?php endif; ?>
-			</div>
-		</div>
-	</div>
-	<div class="text-center mt-3">
-		<button class="btn btn-outline-success me-2 upvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-asset-id="<?= $asset_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
-			<i class="bi bi-caret-up-fill"></i> <span id="upvote-count"><?= $asset['upvotes'] ?></span>
-		</button>
-		<button class="btn btn-outline-danger downvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-asset-id="<?= $asset_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
-			<i class="bi bi-caret-down-fill"></i> <span id="downvote-count"><?= $asset['downvotes'] ?></span>
-		</button>
-		<p class="mt-2">Score: <span id="score"><?= $asset['upvotes'] - $asset['downvotes'] ?></span></p>
-	</div> <?php if (!isset($_SESSION['user_id'])): ?> <p class="text-center">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p> <?php endif; ?>
-	<!-- Comment Section -->
-	<div class="card container">
-		<div class="card-body">
-			<h4>Comments</h4> <?php if (isset($_SESSION['user_id'])): ?> <div id="comment-editor" class="mb-3"></div>
-			<button class="btn btn-primary" id="submit-comment" data-asset-id="<?= $asset_id ?>">Submit Comment</button> <?php else: ?> <p class="">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p> <?php endif; ?>
-			<hr>
+    <div class="text-center mt-3">
+        <button class="btn btn-outline-success me-2 upvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-asset-id="<?= $asset_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
+            <i class="bi bi-caret-up-fill"></i> <span id="upvote-count"><?= $asset['upvotes'] ?></span>
+        </button>
+        <button class="btn btn-outline-danger downvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-asset-id="<?= $asset_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
+            <i class="bi bi-caret-down-fill"></i> <span id="downvote-count"><?= $asset['downvotes'] ?></span>
+        </button>
+        <p class="mt-2">Score: <span id="score"><?= $asset['upvotes'] - $asset['downvotes'] ?></span></p>
+    </div>
+    <?php if (!isset($_SESSION['user_id'])): ?>
+        <p class="text-center">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p>
+    <?php endif; ?>
+    <!-- Comment Section -->
+    <div class="card container">
+        <div class="card-body">
+            <h4>Comments</h4>
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <div id="comment-editor" class="mb-3"></div>
+                <button class="btn btn-primary" id="submit-comment" data-asset-id="<?= $asset_id ?>">Submit Comment</button>
+            <?php else: ?>
+                <p class="">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p>
+            <?php endif; ?>
+            <hr>
             <div class="mb-3">
                 <label for="filter" class="form-label">Filter Comments:</label>
                 <select name="filter" id="filter" class="form-select me-2 bg-dark text-light">
@@ -724,47 +735,51 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
                     <option value="most_replies" <?= isset($_GET['filter']) && $_GET['filter'] == 'most_replies' ? 'selected' : '' ?>>Most Replies</option>
                 </select>
             </div>
-			<div id="comments-container"> <?php foreach ($comments as $comment): ?>
-    <div class="card mb-3" id="comment-<?php echo $comment['id']; ?>" style="max-width: 100%;">
-        <div class="card-body">
-            <!-- Comment Content -->
-            <h6 class="card-subtitle mb-2"><a href="profile.php?id=<?php echo htmlspecialchars($comment['user_id']); ?>"><?php echo htmlspecialchars($comment['username']); ?></a> - <?php echo date('F j, Y, g:i A', strtotime($comment['created_at'])); ?></h6>
-            <p class="card-text"><?php echo $comment['content']; ?></p>
-            <!-- Upvote and Downvote Buttons for Comments -->
-            <button class="btn btn-outline-success me-2 upvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
-                <i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?php echo $comment['upvotes'] ?? 0; ?></span>
-            </button>
-            <button class="btn btn-outline-danger downvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
-                <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $comment['downvotes'] ?? 0; ?></span>
-            </button>
-            <a class="btn btn-link text-decoration-none reply-btn" data-comment-id="<?php echo $comment['id']; ?>">Reply</a>
-            <!-- Hide/Show Replies Button -->
-            <a class="btn btn-link text-decoration-none toggle-replies-btn" data-comment-id="<?php echo $comment['id']; ?>" data-reply-count="<?php echo $comment['reply_count']; ?>"> Show Replies (<?php echo $comment['reply_count']; ?>) </a>
-            <!-- Replies Section -->
-            <div class="replies ms-4 mt-3" style="display: none;">
-                <?php foreach ($comment['replies'] as $reply): ?>
-                    <div class="card mb-2" id="reply-<?php echo $reply['id']; ?>" style="max-width: 100%;">
+            <div id="comments-container">
+                <?php foreach ($comments as $comment): ?>
+                    <div class="card mb-3" id="comment-<?php echo $comment['id']; ?>" style="max-width: 100%;">
                         <div class="card-body">
-                            <!-- Reply Content -->
-                            <h6 class="card-subtitle mb-2 text-muted"><a href="profile.php?id=<?php echo htmlspecialchars($reply['user_id']); ?>"><?php echo htmlspecialchars($reply['username']); ?></a> - <?php echo date('F j, Y, g:i A', strtotime($reply['created_at'])); ?></h6>
-                            <p class="card-text"><?php echo $reply['content']; ?></p>
-                            <!-- Upvote and Downvote Buttons for Replies -->
-                            <button class="btn btn-outline-success me-3 upvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
-                                <i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?php echo $reply['upvotes'] ?? 0; ?></span>
+                            <!-- Comment Content -->
+                            <h6 class="card-subtitle mb-2"><a href="profile.php?id=<?php echo htmlspecialchars($comment['user_id']); ?>"><?php echo htmlspecialchars($comment['username']); ?></a> - <?php echo date('F j, Y, g:i A', strtotime($comment['created_at'])); ?></h6>
+                            <p class="card-text"><?php echo $comment['content']; ?></p>
+                            <!-- Upvote and Downvote Buttons for Comments -->
+                            <button class="btn btn-outline-success me-2 upvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
+                                <i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?php echo $comment['upvotes'] ?? 0; ?></span>
                             </button>
-                            <button class="btn btn-outline-danger me-3 downvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
-                                <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $reply['downvotes'] ?? 0; ?></span>
+                            <button class="btn btn-outline-danger downvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
+                                <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $comment['downvotes'] ?? 0; ?></span>
                             </button>
+                            <a class="btn btn-link text-decoration-none reply-btn" data-comment-id="<?php echo $comment['id']; ?>">Reply</a>
+                            <!-- Hide/Show Replies Button -->
+                            <a class="btn btn-link text-decoration-none toggle-replies-btn" data-comment-id="<?php echo $comment['id']; ?>" data-reply-count="<?php echo $comment['reply_count']; ?>"> Show Replies (<?php echo $comment['reply_count']; ?>) </a>
+                            <!-- Replies Section -->
+                            <div class="replies ms-4 mt-3" style="display: none;">
+                                <?php foreach ($comment['replies'] as $reply): ?>
+                                    <div class="card mb-2" id="reply-<?php echo $reply['id']; ?>" style="max-width: 100%;">
+                                        <div class="card-body">
+                                            <!-- Reply Content -->
+                                            <h6 class="card-subtitle mb-2 text-muted"><a href="profile.php?id=<?php echo htmlspecialchars($reply['user_id']); ?>"><?php echo htmlspecialchars($reply['username']); ?></a> - <?php echo date('F j, Y, g:i A', strtotime($reply['created_at'])); ?></h6>
+                                            <p class="card-text"><?php echo $reply['content']; ?></p>
+                                            <!-- Upvote and Downvote Buttons for Replies -->
+                                            <button class="btn btn-outline-success me-3 upvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
+                                                <i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?php echo $reply['upvotes'] ?? 0; ?></span>
+                                            </button>
+                                            <button class="btn btn-outline-danger me-3 downvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
+                                                <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $reply['downvotes'] ?? 0; ?></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
     </div>
-<?php endforeach; ?> </div> </div>
-		</div>
-	</div>
-	<br> <?php $conn->close(); ?> <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <br>
+    <?php $conn->close(); ?>
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 	<script>
 	function toggleFullscreen(event) {
 		const media = event.target.parentElement.querySelector('img, video');
