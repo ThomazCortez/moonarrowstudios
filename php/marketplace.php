@@ -156,7 +156,7 @@ $count_sql = "SELECT COUNT(DISTINCT assets.id) as total_count
               FROM assets 
               JOIN asset_categories ON assets.category_id = asset_categories.id
               JOIN users ON assets.user_id = users.user_id
-              WHERE 1";
+              WHERE assets.status != 'hidden'"; // Add this condition
 
 if ($search) {
     $count_sql .= " AND (assets.title LIKE '%$search%' OR assets.content LIKE '%$search%' OR assets.hashtags LIKE '%$search%')";
@@ -186,7 +186,7 @@ $sql = "SELECT assets.*, asset_categories.name AS category_name,
         FROM assets 
         JOIN asset_categories ON assets.category_id = asset_categories.id
         JOIN users ON assets.user_id = users.user_id
-        WHERE 1";
+        WHERE assets.status != 'hidden'"; // Add this condition
 
 if ($search) {
     $sql .= " AND (assets.title LIKE '%$search%' OR assets.content LIKE '%$search%' OR assets.hashtags LIKE '%$search%')";
@@ -1255,7 +1255,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="leaderboard-section">
                         <h3 class="leaderboard-section-title">Top Assets Today</h3>
                         <?php
-                        $top_assets = $conn->query("SELECT * FROM assets ORDER BY upvotes DESC LIMIT 5");
+                        $top_assets = $conn->query("SELECT * FROM assets WHERE status != 'hidden' ORDER BY upvotes DESC LIMIT 5");
                         $rank = 1;
                         while ($asset = $top_assets->fetch_assoc()): ?>
                             <a href="view_asset.php?id=<?= $asset['id'] ?>" class="leaderboard-item">
@@ -1291,29 +1291,29 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="trending-tags">
                             <?php
                             $top_hashtags = $conn->query("
-                                WITH RECURSIVE split_hashtags AS (
-                                    SELECT 
-                                        SUBSTRING_INDEX(SUBSTRING_INDEX(hashtags, ' ', 1), ' ', -1) AS hashtag,
-                                        SUBSTRING(hashtags, LENGTH(SUBSTRING_INDEX(hashtags, ' ', 1)) + 2) AS remaining_string,
-                                        created_at
-                                    FROM assets
-                                    WHERE hashtags != '' AND created_at >= NOW() - INTERVAL 7 DAY
-                                    UNION ALL
-                                    SELECT 
-                                        SUBSTRING_INDEX(SUBSTRING_INDEX(remaining_string, ' ', 1), ' ', -1),
-                                        SUBSTRING(remaining_string, LENGTH(SUBSTRING_INDEX(remaining_string, ' ', 1)) + 2),
-                                        created_at
-                                    FROM split_hashtags
-                                    WHERE remaining_string != ''
-                                )
+                            WITH RECURSIVE split_hashtags AS (
                                 SELECT 
-                                    hashtag,
-                                    COUNT(*) as count
+                                    SUBSTRING_INDEX(SUBSTRING_INDEX(hashtags, ' ', 1), ' ', -1) AS hashtag,
+                                    SUBSTRING(hashtags, LENGTH(SUBSTRING_INDEX(hashtags, ' ', 1)) + 2) AS remaining_string,
+                                    created_at
+                                FROM assets
+                                WHERE hashtags != '' AND created_at >= NOW() - INTERVAL 7 DAY AND status != 'hidden' -- Add this condition
+                                UNION ALL
+                                SELECT 
+                                    SUBSTRING_INDEX(SUBSTRING_INDEX(remaining_string, ' ', 1), ' ', -1),
+                                    SUBSTRING(remaining_string, LENGTH(SUBSTRING_INDEX(remaining_string, ' ', 1)) + 2),
+                                    created_at
                                 FROM split_hashtags
-                                GROUP BY hashtag
-                                ORDER BY count DESC, hashtag ASC
-                                LIMIT 5
-                            ");
+                                WHERE remaining_string != ''
+                            )
+                            SELECT 
+                                hashtag,
+                                COUNT(*) as count
+                            FROM split_hashtags
+                            GROUP BY hashtag
+                            ORDER BY count DESC, hashtag ASC
+                            LIMIT 5
+                        ");
                             while ($hashtag = $top_hashtags->fetch_assoc()): ?>
                                 <a href="?search=<?= urlencode($hashtag['hashtag']) ?>" class="tag-badge">
                                     <?= htmlspecialchars($hashtag['hashtag']) ?>
