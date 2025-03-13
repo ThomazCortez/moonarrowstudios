@@ -85,7 +85,7 @@ require 'db_connect.php';
             <div class="row align-items-center">
                 <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
                     <h2 class="mb-4">About Me</h2>
-                    <p class="lead">Hello! I'm Thomaz, a student at Escola Manuel Teixeira Gomes.</p>
+                    <p class="lead">Hello! I'm Thomaz, a student at Escola Secundária Manuel Teixeira Gomes.</p>
                     <p>I was born in Portugal, and I can both speak English and Portuguese easily. In my free time, I like to play videogames, watch videos, listen to music and even play piano. I plan on getting a computer engieer degree in the future.</p>
                 </div>
                 <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
@@ -101,7 +101,7 @@ require 'db_connect.php';
             <div class="row align-items-center">
                 <div class="col-lg-6 order-lg-2" data-aos="fade-left" data-aos-delay="100">
                     <h2 class="mb-4">My School</h2>
-                    <p class="lead">Escola Manuel Teixeira Gomes - Where My Journey Began</p>
+                    <p class="lead">Escola Secundária Manuel Teixeira Gomes - Where My Journey Began</p>
                     <p>I had a really good experience in that school, even though it's quite old, I still enjoyed my time there. I learnt a lot about programming, databases, etc, and improved my autonomy in the way I work.  The teachers were always nice and liked doing their job, and I made lots of friends during my time in the school.</p>
                 </div>
                 <div class="col-lg-6 order-lg-1" data-aos="fade-right" data-aos-delay="200">
