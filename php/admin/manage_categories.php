@@ -219,10 +219,15 @@ $asset_category_count = $asset_category_count_result->fetch_assoc()['count'];
 
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="mb-0">Manage Categories</h1>
-            <div>
-                <span class="badge bg-primary fs-6">Admin: <?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></span>
-            </div>
+        <div>
+        <h1 class="mb-0">Manage Categories</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Manage Categories</li>
+            </ol>
+        </nav>
+    </div>
         </div>
 
         <!-- Stats Overview Cards -->
