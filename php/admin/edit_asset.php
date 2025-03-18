@@ -277,11 +277,17 @@ if (isset($_POST['delete_asset_file']) && $_POST['delete_asset_file'] === 'on') 
     <div class="container py-4">
         <div class="admin-header">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h1 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Edit Asset</h1>
+            <div>
+                <h1 class="mb-0">Edit Asset</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="manage_assets.php">Manage Assets</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Edit Asset</li>
+                    </ol>
+                </nav>
+            </div>
                 <div>
-                    <a href="manage_assets.php" class="btn btn-outline-light me-2">
-                        <i class="bi bi-arrow-left me-1"></i>Back to Assets
-                    </a>
                     <a href="<?php echo $baseUrl; ?>php/view_asset.php?id=<?php echo $asset_id; ?>" class="btn btn-primary" target="_blank">
                         <i class="bi bi-eye me-1"></i>View Asset
                     </a>
