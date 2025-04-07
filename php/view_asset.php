@@ -711,6 +711,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <button class="btn btn-outline-danger downvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-asset-id="<?= $asset_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
             <i class="bi bi-caret-down-fill"></i> <span id="downvote-count"><?= $asset['downvotes'] ?></span>
         </button>
+        <button class="btn btn-outline-warning report-btn" data-content-type="asset" data-content-id="<?= $asset_id ?>">
+    <i class="bi bi-flag"></i> Report
+</button>
         <p class="mt-2">Score: <span id="score"><?= $asset['upvotes'] - $asset['downvotes'] ?></span></p>
     </div>
     <?php if (!isset($_SESSION['user_id'])): ?>
@@ -749,6 +752,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="btn btn-outline-danger downvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
                                 <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $comment['downvotes'] ?? 0; ?></span>
                             </button>
+                            <!-- Add near comment vote buttons -->
+<button class="btn btn-link text-danger report-btn" data-content-type="comment" data-content-id="<?= $comment['id'] ?>">
+    <i class="bi bi-flag"></i>
+</button>
                             <a class="btn btn-link text-decoration-none reply-btn" data-comment-id="<?php echo $comment['id']; ?>">Reply</a>
                             <!-- Hide/Show Replies Button -->
                             <a class="btn btn-link text-decoration-none toggle-replies-btn" data-comment-id="<?php echo $comment['id']; ?>" data-reply-count="<?php echo $comment['reply_count']; ?>"> Show Replies (<?php echo $comment['reply_count']; ?>) </a>
@@ -767,6 +774,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                             <button class="btn btn-outline-danger me-3 downvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
                                                 <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $reply['downvotes'] ?? 0; ?></span>
                                             </button>
+                                            <!-- Add near reply vote buttons -->
+<button class="btn btn-link text-danger report-btn" data-content-type="reply" data-content-id="<?= $reply['id'] ?>">
+    <i class="bi bi-flag"></i>
+</button>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -778,6 +789,44 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
     </div>
     <br>
+    <!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Report Content</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="reportForm">
+                <div class="modal-body">
+                    <input type="hidden" id="reportContentType" name="content_type">
+                    <input type="hidden" id="reportContentId" name="content_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Reason</label>
+                        <select class="form-select" name="reason" required>
+                            <option value="">Select a reason</option>
+                            <option value="Swearing">Swearing</option>
+                            <option value="NSFW">NSFW Content</option>
+                            <option value="Harassment">Harassment</option>
+                            <option value="Spam">Spam</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Additional Details</label>
+                        <textarea class="form-control" name="details" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
     <?php $conn->close(); ?>
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 	<script>
@@ -1171,6 +1220,72 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+});
+
+// Report button handling
+document.querySelectorAll('.report-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        if (!<?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>) {
+            alert('Please login to report content');
+            return;
+        }
+        
+        const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+        document.getElementById('reportContentType').value = btn.dataset.contentType;
+        document.getElementById('reportContentId').value = btn.dataset.contentId;
+        modal.show();
+    });
+});
+
+// Handle report form submission
+document.getElementById('reportForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    formData.append('reporter_id', <?= $_SESSION['user_id'] ?? 'null' ?>);
+    
+    fetch('report.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Show success message with Bootstrap alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
+            alertDiv.textContent = 'Report submitted successfully!';
+            document.body.appendChild(alertDiv);
+            
+            // Remove alert after 3 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
+        } else {
+            throw new Error(data.error || 'Unknown error occurred');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Show error message with Bootstrap alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger position-fixed top-0 start-50 translate-middle-x mt-3';
+        alertDiv.textContent = 'Error submitting report: ' + error.message;
+        document.body.appendChild(alertDiv);
+        
+        // Remove alert after 5 seconds
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    });
 });
 	</script>
 </body>
