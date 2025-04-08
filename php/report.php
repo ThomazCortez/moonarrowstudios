@@ -101,7 +101,14 @@ try {
         'reply' => 'comments'
     ];
     
-    $table = $tableMap[$contentType];
+    // Adjust table for comments/replies based on asset_id presence
+    if (in_array($contentType, ['comment', 'reply'])) {
+        $table = isset($contentInfo['asset_id']) ? 'comments_asset' : $tableMap[$contentType];
+    } else {
+        $table = $tableMap[$contentType];
+    }
+    
+    // Execute the update
     $conn->query("UPDATE $table SET reported_count = reported_count + 1 WHERE id = $contentId");
 
     // Send email
