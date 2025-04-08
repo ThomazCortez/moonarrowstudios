@@ -660,10 +660,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		<button class="btn btn-outline-danger downvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-post-id="<?= $post_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
 			<i class="bi bi-caret-down-fill"></i> <span id="downvote-count"><?= $post['downvotes'] ?></span>
 		</button>
-        <button class="btn btn-outline-warning report-btn" data-content-type="post" data-content-id="<?= $post_id ?>">
-    <i class="bi bi-flag"></i> Report
-</button>
 		<p class="mt-2">Score: <span id="score"><?= $post['upvotes'] - $post['downvotes'] ?></span></p>
+        <button class="btn  text-danger report-btn mb-3" data-content-type="post" data-content-id="<?= $post_id ?>">
+    <i class="bi bi-flag"></i> Report Post
+</button>
 	</div> <?php if (!isset($_SESSION['user_id'])): ?> <p class="text-center">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p> <?php endif; ?>
 	<!-- Comment Section -->
 	<div class="card container">
@@ -693,12 +693,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $comment['downvotes'] ?? 0; ?></span>
             </button>
             <!-- Add near comment vote buttons -->
-<button class="btn btn-link text-danger report-btn" data-content-type="comment" data-content-id="<?= $comment['id'] ?>">
-    <i class="bi bi-flag"></i>
-</button>
             <a class="btn btn-link text-decoration-none reply-btn" data-comment-id="<?php echo $comment['id']; ?>">Reply</a>
             <!-- Hide/Show Replies Button -->
             <a class="btn btn-link text-decoration-none toggle-replies-btn" data-comment-id="<?php echo $comment['id']; ?>" data-reply-count="<?php echo $comment['reply_count']; ?>"> Show Replies (<?php echo $comment['reply_count']; ?>) </a>
+            <button class="btn  text-danger report-btn" data-content-type="comment" data-content-id="<?= $comment['id'] ?>">
+    <i class="bi bi-flag"></i> Report Comment
+</button>
             <!-- Replies Section -->
             <div class="replies ms-4 mt-3" style="display: none;">
                 <?php foreach ($comment['replies'] as $reply): ?>
@@ -715,8 +715,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $reply['downvotes'] ?? 0; ?></span>
                             </button>
                             <!-- Add near reply vote buttons -->
-<button class="btn btn-link text-danger report-btn" data-content-type="reply" data-content-id="<?= $reply['id'] ?>">
-    <i class="bi bi-flag"></i>
+<button class="btn text-danger report-btn" data-content-type="reply" data-content-id="<?= $reply['id'] ?>">
+    <i class="bi bi-flag"></i> Report Reply
 </button>
                         </div>
                     </div>
