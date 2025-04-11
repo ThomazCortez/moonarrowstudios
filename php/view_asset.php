@@ -712,7 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <i class="bi bi-caret-down-fill"></i> <span id="downvote-count"><?= $asset['downvotes'] ?></span>
         </button>
         <p class="mt-2">Score: <span id="score"><?= $asset['upvotes'] - $asset['downvotes'] ?></span></p>
-        <button class="btn  text-danger report-btn mb-3" data-content-type="post" data-content-id="<?= $asset_id ?>">
+        <button class="btn text-danger report-btn mb-3" data-content-type="asset" data-content-id="<?= $asset_id ?>">
     <i class="bi bi-flag"></i> Report Asset
 </button>
     </div>

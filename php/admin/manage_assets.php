@@ -54,7 +54,7 @@ $sortBy = isset($_GET['sort']) ? $_GET['sort'] : 'created_at';
 $sortOrder = isset($_GET['order']) ? $_GET['order'] : 'DESC';
 
 // Validate sort parameters
-$allowedSortFields = ['id', 'title', 'username', 'created_at', 'updated_at', 'category_name', 'views', 'comments_count'];
+$allowedSortFields = ['id', 'title', 'username', 'created_at', 'updated_at', 'category_name', 'views', 'comments_count', 'reported_count'];
 if (!in_array($sortBy, $allowedSortFields)) {
     $sortBy = 'created_at';
 }
@@ -65,9 +65,9 @@ if (!in_array(strtoupper($sortOrder), $allowedSortOrders)) {
 }
 
 // Prepare base query
-$query = "SELECT p.id, p.title, p.content, p.status, p.views, p.created_at, p.updated_at,
+$query = "SELECT p.id, p.title, p.content, p.status, p.views, p.created_at, p.updated_at, p.reported_count,
                  u.user_id, u.username, c.id as category_id, c.name as category_name,
-                 (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count
+                 (SELECT COUNT(*) FROM comments_asset WHERE asset_id = p.id) as comments_count
           FROM assets p
           JOIN users u ON p.user_id = u.user_id
           LEFT JOIN categories c ON p.category_id = c.id
@@ -99,10 +99,24 @@ if (!empty($status)) {
 }
 
 // Count total records for pagination
-$countQuery = str_replace("SELECT p.id, p.title, p.content, p.status, p.views, p.created_at, p.updated_at,
-                 u.user_id, u.username, c.id as category_id, c.name as category_name,
-                 (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as comments_count", 
-                "SELECT COUNT(*) as total", $query);
+$countQuery = "SELECT COUNT(*) as total 
+               FROM assets p
+               JOIN users u ON p.user_id = u.user_id
+               LEFT JOIN categories c ON p.category_id = c.id
+               WHERE 1=1";
+
+// Add the same filters as the main query
+if (!empty($search)) {
+    $countQuery .= " AND (p.title LIKE ? OR p.content LIKE ? OR u.username LIKE ?)";
+}
+
+if ($category > 0) {
+    $countQuery .= " AND p.category_id = ?";
+}
+
+if (!empty($status)) {
+    $countQuery .= " AND p.status = ?";
+}
 
 $stmt = $conn->prepare($countQuery);
 if (!empty($types)) {
@@ -144,7 +158,8 @@ $statsQuery = "SELECT
     COUNT(*) as total_posts,
     SUM(CASE WHEN status = 'published' THEN 1 ELSE 0 END) as published_count,
     SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END) as draft_count,
-    SUM(CASE WHEN status = 'hidden' THEN 1 ELSE 0 END) as hidden_count
+    SUM(CASE WHEN status = 'hidden' THEN 1 ELSE 0 END) as hidden_count,
+    SUM(reported_count) as total_reports
     FROM assets";
 $statsResult = $conn->query($statsQuery);
 $post_stats = $statsResult->fetch_assoc();
@@ -265,6 +280,14 @@ if (isset($_SESSION['error_message'])) {
                     </div>
                 </div>
             </div>
+            <div class="col-md-2 mb-3">
+            <div class="card stats-card bg-danger bg-gradient text-white">
+                <div class="card-body text-center">
+                    <h3 class="fs-2 mb-0"><?php echo $post_stats['total_reports']; ?></h3>
+                    <p class="mb-0">Reports</p>
+                </div>
+            </div>
+</div>
         </div>
 
         <!-- Search and Filter -->
@@ -343,6 +366,9 @@ if (isset($_SESSION['error_message'])) {
                             <th class="cursor-pointer" onclick="changeSort('updated_at')">
                                 Updated At <?php echo getSortIcon('updated_at'); ?>
                             </th>
+                            <th class="cursor-pointer" onclick="changeSort('reported_count')">
+                                Reports <?php echo getSortIcon('reported_count'); ?>
+                            </th>
                             <th>Status</th>
                             <th class="actions-column">Actions</th>
                         </tr>
@@ -364,6 +390,7 @@ if (isset($_SESSION['error_message'])) {
                                     <td><?php echo $asset['comments_count']; ?></td>
                                     <td><?php echo date('M d, Y', strtotime($asset['created_at'])); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($asset['updated_at'])); ?></td>
+                                    <td><?php echo $asset['reported_count']; ?></td>
                                     <td>
                                         <?php if ($asset['status'] === 'published'): ?>
                                             <span class="badge bg-success">Visible</span>
