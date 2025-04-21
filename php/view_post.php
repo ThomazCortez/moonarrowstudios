@@ -748,6 +748,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <option value="NSFW">NSFW Content</option>
                             <option value="Harassment">Harassment</option>
                             <option value="Spam">Spam</option>
+                            <option value="Malicious Link/File">Malicious Link/File</option>
                             <option value="Other">Other</option>
                         </select>
                     </div>

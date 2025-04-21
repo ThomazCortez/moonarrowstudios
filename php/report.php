@@ -111,6 +111,39 @@ try {
     // Execute the update
     $conn->query("UPDATE $table SET reported_count = reported_count + 1 WHERE id = $contentId");
 
+    // Get reporter's username
+    $stmt = $conn->prepare("SELECT username FROM users WHERE user_id = ?");
+    $stmt->bind_param('i', $reporterId);
+    $stmt->execute();
+    $reporterResult = $stmt->get_result();
+    $reporterData = $reporterResult->fetch_assoc();
+    $reporterUsername = $reporterData['username'] ?? 'Unknown';
+
+    // Get author's user_id based on content type
+    $authorId = null;
+    if (in_array($contentType, ['post', 'asset'])) {
+        $table = ($contentType === 'post') ? 'posts' : 'assets';
+        $stmt = $conn->prepare("SELECT user_id FROM $table WHERE id = ?");
+        $stmt->bind_param('i', $contentId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $authorId = $row['user_id'] ?? null;
+    } elseif (in_array($contentType, ['comment', 'reply'])) {
+        $authorId = $contentInfo['user_id'] ?? null;
+    }
+
+    // Get author's username
+    $authorUsername = 'Unknown';
+    if ($authorId) {
+        $stmt = $conn->prepare("SELECT username FROM users WHERE user_id = ?");
+        $stmt->bind_param('i', $authorId);
+        $stmt->execute();
+        $authorResult = $stmt->get_result();
+        $authorData = $authorResult->fetch_assoc();
+        $authorUsername = $authorData['username'] ?? 'Unknown';
+    }
+
     // Send email
     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
     try {
@@ -123,7 +156,7 @@ try {
         $mail->Port = 587;
 
         $mail->setFrom('noreply@moonarrowstudios.com', 'Reporting System');
-        $mail->addAddress('moonarrowstudios@gmail.com');
+        $mail->addAddress('moonarrowstudiosreports@gmail.com');
         
         $mail->isHTML(true);
         $mail->Subject = "New Content Report";
@@ -140,6 +173,18 @@ try {
                 <h2 style="font-size: 20px; color: #FFFFFF; margin-bottom: 10px;">New Content Report</h2>
                 <div style="text-align: left; background-color: #2C2A32; padding: 15px; border-radius: 5px; margin: 15px 0;">
                     <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6; margin: 7px 0;">
+                        <strong>Reporter ID:</strong> ' . $reporterId . '
+                    </p>
+                    <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6; margin: 7px 0;">
+                        <strong>Reporter Username:</strong> ' . htmlspecialchars($reporterUsername) . '
+                    </p>
+                    <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6; margin: 7px 0;">
+                        <strong>Reported User ID:</strong> ' . htmlspecialchars($authorId) . '
+                    </p>
+                    <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6; margin: 7px 0;">
+                        <strong>Reported Username:</strong> ' . htmlspecialchars($authorUsername) . '
+                    </p>
+                    <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6; margin: 7px 0;">
                         <strong>Type:</strong> ' . ucfirst($contentType) . '
                     </p>
                     <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6; margin: 7px 0;">
@@ -147,9 +192,6 @@ try {
                     </p>
                     <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6; margin: 7px 0;">
                         <strong>Details:</strong><br>' . nl2br($details) . '
-                    </p>
-                    <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6; margin: 7px 0;">
-                        <strong>Reporter ID:</strong> ' . $reporterId . '
                     </p>';
 
         if ($contentLink) {
@@ -176,10 +218,13 @@ try {
 
         // Plain text fallback
         $textContent = "New Content Report\n\n"
+            . "Reporter ID: $reporterId\n"
+            . "Reporter Username: $reporterUsername\n"
+            . "Reported User ID: $authorId\n"
+            . "Reported Username: $authorUsername\n"
             . "Type: " . ucfirst($contentType) . "\n"
             . "Reason: $reason\n"
-            . "Details: $details\n"
-            . "Reporter ID: $reporterId\n";
+            . "Details: $details\n";
             
         if ($contentLink) {
             $textContent .= "Link: $contentLink";
