@@ -181,6 +181,7 @@ if (isset($_GET['tab'])) {
     <title>MoonArrow Studios - Settings</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         .profile-picture-preview,
         .banner-preview {
@@ -890,6 +891,28 @@ if (isset($_GET['tab'])) {
                 alert('Password must be at least 8 characters long!');
             }
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+    function positionSocialIcons() {
+        document.querySelectorAll('.social-icon').forEach(icon => {
+            const input = icon.nextElementSibling;
+            if (input && input.classList.contains('form-control')) {
+                const group = icon.closest('.social-input-group');
+                const label = group.querySelector('.form-label');
+                const labelHeight = label.offsetHeight + parseInt(window.getComputedStyle(label).marginBottom);
+                const inputHeight = input.offsetHeight;
+                icon.style.top = `${labelHeight + (inputHeight / 2)}px`;
+                icon.style.transform = 'translateY(-50%)';
+            }
+        });
+    }
+
+    // Initial positioning
+    positionSocialIcons();
+    
+    // Reposition on window resize
+    window.addEventListener('resize', positionSocialIcons);
+});
     </script>
 </body>
 </html>
