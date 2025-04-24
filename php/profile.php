@@ -232,7 +232,7 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
         }
 
         .card-title {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
             margin-bottom: 8px;
         }
@@ -427,8 +427,8 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                 <div class="tab-pane fade <?= $active_tab === 'posts' ? 'show active' : '' ?>" id="posts">
                     <form method="GET" action="profile.php" class="d-flex gap-2 mb-4 flex-wrap">
                     <?php if(isset($_GET['id'])): ?>
-        <input type="hidden" name="id" value="<?= (int)$_GET['id'] ?>">
-    <?php endif; ?>
+                        <input type="hidden" name="id" value="<?= (int)$_GET['id'] ?>">
+                    <?php endif; ?>
                         <!-- Preserve asset filter values -->
                         <input type="hidden" name="asset_search" value="<?= htmlspecialchars($asset_search) ?>">
                         <input type="hidden" name="asset_category" value="<?= htmlspecialchars($asset_category_filter) ?>">
@@ -471,10 +471,13 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                                                 <?= htmlspecialchars($post['title']) ?>
                                             </a>
                                         </h3>
-                                        <p class="card-text text-muted">
-                                            <em>Posted on <?= $post['created_at'] ?></em>
+                                        <p class="card-text">
+                                            <em>Posted on <?= date('F j, Y, g:i A', strtotime($post['created_at'])) ?></em>
                                         </p>
-                                        <div class="hashtags">
+                                        <p class="card-text text-muted">
+                                            <strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?>
+                                        </p>
+                                        <div class="hashtags card-text text-muted mb-2"><strong>Hashtags:</strong> 
                                             <?php if (!empty($post['hashtags'])): ?>
                                                 <?php $tags = explode(' ', $post['hashtags']); ?>
                                                 <?php foreach ($tags as $tag): ?>
@@ -482,7 +485,7 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </div>
-                                        <p class="card-text mt-2">
+                                        <p class="card-text text-muted"><strong>Rating:</strong> 
                                             <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> 
                                             <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> 
                                             Score: <?= $post['score'] ?? 0 ?>
@@ -501,8 +504,8 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                     <form method="GET" action="profile.php" class="d-flex gap-2 mb-4 flex-wrap">
                         <!-- Always include the explicit user_id from URL, not from session -->
                         <?php if(isset($_GET['id'])): ?>
-        <input type="hidden" name="id" value="<?= (int)$_GET['id'] ?>">
-    <?php endif; ?>
+                            <input type="hidden" name="id" value="<?= (int)$_GET['id'] ?>">
+                        <?php endif; ?>
                         <!-- Preserve post filter values -->
                         <input type="hidden" name="post_search" value="<?= htmlspecialchars($post_search) ?>">
                         <input type="hidden" name="post_category" value="<?= htmlspecialchars($post_category_filter) ?>">
@@ -545,10 +548,13 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                                                 <?= htmlspecialchars($asset['title']) ?>
                                             </a>
                                         </h3>
-                                        <p class="card-text text-muted">
-                                            <em>Posted on <?= $asset['created_at'] ?></em>
+                                        <p class="card-text">
+                                            <em>Posted on <?= date('F j, Y, g:i A', strtotime($asset['created_at'])) ?></em>
                                         </p>
-                                        <div class="hashtags">
+                                        <p class="card-text text-muted">
+                                            <strong>Category:</strong> <?= htmlspecialchars($asset['category_name'] ?? 'Uncategorized') ?>
+                                        </p>
+                                        <div class="hashtags card-text text-muted mb-2"><strong>Hashtags:</strong>
                                             <?php if (!empty($asset['hashtags'])): ?>
                                                 <?php $tags = explode(' ', $asset['hashtags']); ?>
                                                 <?php foreach ($tags as $tag): ?>
@@ -556,7 +562,7 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </div>
-                                        <p class="card-text mt-2">
+                                        <p class="card-text text-muted"><strong>Rating:</strong>
                                             <i class="bi bi-caret-up-fill"></i><?= $asset['upvotes'] ?> 
                                             <i class="bi bi-caret-down-fill"></i><?= $asset['downvotes'] ?>
                                             Score: <?= $asset['score'] ?>
