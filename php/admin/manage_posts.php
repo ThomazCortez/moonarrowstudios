@@ -262,13 +262,13 @@ $post_stats = $statsResult->fetch_assoc();
                 </div>
             </div>
             <div class="col-md-2 mb-3">
-            <div class="card stats-card bg-danger bg-gradient text-white">
-                <div class="card-body text-center">
-                    <h3 class="fs-2 mb-0"><?php echo $post_stats['total_reports']; ?></h3>
-                    <p class="mb-0">Reports</p>
+                <div class="card stats-card bg-danger bg-gradient text-white">
+                    <div class="card-body text-center">
+                        <h3 class="fs-2 mb-0"><?php echo $post_stats['total_reports']; ?></h3>
+                        <p class="mb-0">Reports</p>
+                    </div>
                 </div>
             </div>
-        </div>
         </div>
 
         <!-- Search and Filter -->
