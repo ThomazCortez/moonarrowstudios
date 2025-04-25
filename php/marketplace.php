@@ -1400,7 +1400,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <div class="mb-3">
                                 <label for="hashtags" class="form-label">Hashtags</label>
-                                <input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #unity, #unrealengine">
+                                <input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #grass, #car">
                             </div>
                             <div class="mb-3">
                             <label for="asset_file" class="form-label">Asset File</label>

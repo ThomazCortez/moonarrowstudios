@@ -226,7 +226,6 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
         }
 
         .card:hover {
-            border-color: var(--color-accent-fg);
             transform: translateY(-2px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }

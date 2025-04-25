@@ -16,11 +16,15 @@ $stmt->execute();
 $result = $stmt->get_result();
 $asset = $result->fetch_assoc();
 
-// If the asset is hidden or not found, display "Asset not found" and exit
 if (!$asset || $asset['status'] === 'hidden') {
     echo "<h1>Asset not found</h1>";
     exit;
 }
+
+// Increment the view count - ADD THIS SECTION
+$update_views_stmt = $conn->prepare("UPDATE assets SET views = views + 1 WHERE id = ?");
+$update_views_stmt->bind_param("i", $asset_id);
+$update_views_stmt->execute();
 
 // Fetch comments and their replies based on the selected filter
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'highest_score';
@@ -601,7 +605,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="mb-0"><em>Published on <?= date('F j, Y, g:i A', strtotime($asset['created_at'])) ?></em></p>
                     <p class="mb-0">By <strong><a href="profile.php?id=<?= htmlspecialchars($asset['user_id']) ?>"><?= htmlspecialchars($asset['username'] ?? 'Anonymous') ?></a></strong></p>
                     <p><strong>Category:</strong> <?= htmlspecialchars($asset['category_name'] ?? 'Uncategorized') ?></p>
-                    <p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($asset['hashtags'] ?? '') ?></p>
+<p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($asset['hashtags'] ?? '') ?></p>
+<!-- Add views display -->
+<p class="card-text"><strong>Views:</strong> <?= htmlspecialchars($asset['views'] ?? '0') ?></p>
                 </div>
                 <hr>
                 <!-- Asset Content -->
