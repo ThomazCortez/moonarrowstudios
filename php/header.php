@@ -197,7 +197,7 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
         <div class="container-fluid">
             <!-- Logo -->
             <a class="navbar-brand" href="<?php echo $baseUrl; ?>">
-                <img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" alt="Moon Arrow Studios">
+                <img src="https://i.ibb.co/Q2djKKj/horizontal-logo-transformed.png" alt="Moon Arrow Studios">
             </a>
 
             <!-- Profile picture for mobile/tablet (when logged in) -->

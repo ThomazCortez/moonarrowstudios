@@ -901,7 +901,7 @@ function getAssetCount($conn) {
                         </div>
                     </div>
                 </div>
-                        <div class="col-lg-6 join-content">
+                        <div class="col-lg-6 ">
                             <h2>Join The Community</h2>
                             <div class="features-list">
                                 <div class="feature-item">
@@ -942,8 +942,7 @@ function getAssetCount($conn) {
                                 </div>
                             </div>
                             <div class="join-actions">
-                                <button class="btn btn-custom pulse-btn" onclick="location.href='php/sign_up/sign_up_html.php';">Sign Up Now</button>
-                                <button class="btn btn-outline-custom" onclick="location.href='php/sign_in/sign_in_html.php';">Already have an account? Sign In</button>
+                                <button class="btn btn-custom" onclick="location.href='php/sign_up/sign_up_html.php';">Sign Up Now</button>
                             </div>
                         </div>
                     </div>
