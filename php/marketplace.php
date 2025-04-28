@@ -181,7 +181,7 @@ $offset = ($page - 1) * $assets_per_page;
 // Main query for assets with LIMIT and OFFSET
 $sql = "SELECT assets.*, asset_categories.name AS category_name, 
                users.username, users.user_id,
-               assets.upvotes, assets.downvotes, 
+               assets.upvotes, assets.downvotes, assets.views,
                (assets.upvotes - assets.downvotes) AS score 
         FROM assets 
         JOIN asset_categories ON assets.category_id = asset_categories.id
@@ -1361,6 +1361,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <i class="bi bi-caret-up-fill"></i><?= $asset['upvotes'] ?? 0 ?> 
                 <i class="bi bi-caret-down-fill"></i><?= $asset['downvotes'] ?? 0 ?> 
                 Score: <?= $asset['score'] ?? 0 ?>
+                <span class="ms-3"><i class="bi bi-eye-fill"></i> <?= $asset['views'] ?? 0 ?> views</span>
             </p>
         </div>
     </div>

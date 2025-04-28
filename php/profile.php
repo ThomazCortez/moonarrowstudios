@@ -52,7 +52,7 @@ $asset_order_by = match($asset_sort_order) {
 
 // Fetch posts
 $post_sql = "SELECT posts.*, categories.name AS category_name, 
-            (posts.upvotes - posts.downvotes) AS score 
+            (posts.upvotes - posts.downvotes - posts.views) AS score 
             FROM posts 
             JOIN categories ON posts.category_id = categories.id 
             WHERE posts.user_id = ?";
@@ -78,7 +78,7 @@ $posts = $post_stmt->get_result();
 
 // Fetch assets
 $asset_sql = "SELECT assets.*, asset_categories.name AS category_name, 
-             (assets.upvotes - assets.downvotes) AS score 
+             (assets.upvotes - assets.downvotes - assets.views) AS score 
              FROM assets 
              JOIN asset_categories ON assets.category_id = asset_categories.id 
              WHERE assets.user_id = ? AND assets.status != 'hidden'";
@@ -488,6 +488,7 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                                             <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> 
                                             <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> 
                                             Score: <?= $post['score'] ?? 0 ?>
+                                            <span class="ms-3"><i class="bi bi-eye-fill"></i> <?= $post['views'] ?? 0 ?> views</span>
                                         </p>
                                     </div>
                                 </div>
@@ -565,6 +566,7 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                                             <i class="bi bi-caret-up-fill"></i><?= $asset['upvotes'] ?> 
                                             <i class="bi bi-caret-down-fill"></i><?= $asset['downvotes'] ?>
                                             Score: <?= $asset['score'] ?>
+                                            <span class="ms-3"><i class="bi bi-eye-fill"></i> <?= $asset['views'] ?? 0 ?> views</span>
                                         </p>
                                     </div>
                                 </div>

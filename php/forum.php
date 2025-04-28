@@ -134,12 +134,12 @@ $offset = ($page - 1) * $posts_per_page;
 // Main query for posts with LIMIT and OFFSET
 $sql = "SELECT posts.*, categories.name AS category_name, 
                users.username, users.user_id,
-               posts.upvotes, posts.downvotes, 
+               posts.upvotes, posts.downvotes, posts.views,
                (posts.upvotes - posts.downvotes) AS score 
         FROM posts 
         JOIN categories ON posts.category_id = categories.id
         JOIN users ON posts.user_id = users.user_id
-        WHERE posts.status != 'hidden'";  // Add this condition
+        WHERE posts.status != 'hidden'";
 
 if ($search) {
     $sql .= " AND (posts.title LIKE '%$search%' OR posts.content LIKE '%$search%' OR posts.hashtags LIKE '%$search%')";
@@ -1266,6 +1266,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> 
                                     <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> 
                                     Score: <?= $post['score'] ?? 0 ?>
+                                    <span class="ms-3"><i class="bi bi-eye-fill"></i> <?= $post['views'] ?? 0 ?> views</span>
                                 </p>
                             </div>
                         </div>
