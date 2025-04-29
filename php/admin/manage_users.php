@@ -42,7 +42,7 @@ $records_per_page = 10;
 $offset = ($page - 1) * $records_per_page;
 
 // Base query
-$query = "SELECT user_id, username, email, role, status, created_at FROM users WHERE 1=1";
+$query = "SELECT user_id, username, email, role, status, created_at, reported_count FROM users WHERE 1=1";
 $count_query = "SELECT COUNT(*) as total FROM users WHERE 1=1";
 $query_params = [];
 
@@ -63,7 +63,7 @@ if (!empty($role_filter)) {
 }
 
 // Add sorting
-$valid_sort_columns = ['user_id', 'username', 'email', 'role', 'status', 'created_at'];
+$valid_sort_columns = ['user_id', 'username', 'email', 'role', 'status', 'created_at', 'reported_count'];
 $valid_order_values = ['ASC', 'DESC'];
 
 if (!in_array($sort, $valid_sort_columns)) {
@@ -115,7 +115,8 @@ $query = "SELECT
     SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admin_count,
     SUM(CASE WHEN role = 'user' THEN 1 ELSE 0 END) as regular_user_count,
     SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active_users,
-    SUM(CASE WHEN status = 'suspended' THEN 1 ELSE 0 END) as suspended_users
+    SUM(CASE WHEN status = 'suspended' THEN 1 ELSE 0 END) as suspended_users,
+    SUM(CASE WHEN reported_count > 0 THEN 1 ELSE 0 END) as reported_users
     FROM users";
 $result = $conn->query($query);
 $user_stats = $result->fetch_assoc();
@@ -149,6 +150,27 @@ $user_stats = $result->fetch_assoc();
         }
         .cursor-pointer {
             cursor: pointer;
+        }
+        .report-badge {
+            position: relative;
+            display: inline-block;
+        }
+        .report-badge[data-count]:after {
+            content: attr(data-count);
+            position: absolute;
+            background: #dc3545;
+            height: 1.5rem;
+            width: 1.5rem;
+            text-align: center;
+            line-height: 1.5rem;
+            font-size: 0.75rem;
+            border-radius: 50%;
+            color: white;
+            right: -0.5rem;
+            top: -0.5rem;
+        }
+        .high-reports {
+            background-color: rgba(220, 53, 69, 0.1);
         }
     </style>
 </head>
@@ -206,7 +228,7 @@ $user_stats = $result->fetch_assoc();
                 </div>
             </div>
             <div class="col-md-2 mb-3">
-                <div class="card stats-card bg-danger bg-gradient text-white">
+                <div class="card stats-card bg-warning bg-gradient text-white">
                     <div class="card-body text-center">
                         <h3 class="fs-2 mb-0"><?php echo $user_stats['admin_count']; ?></h3>
                         <p class="mb-0">Admins</p>
@@ -234,6 +256,14 @@ $user_stats = $result->fetch_assoc();
                     <div class="card-body text-center">
                         <h3 class="fs-2 mb-0"><?php echo $user_stats['suspended_users']; ?></h3>
                         <p class="mb-0">Suspended</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card stats-card bg-danger bg-gradient text-white">
+                    <div class="card-body text-center">
+                        <h3 class="fs-2 mb-0"><?php echo $user_stats['reported_users']; ?></h3>
+                        <p class="mb-0">Reports</p>
                     </div>
                 </div>
             </div>
@@ -291,6 +321,9 @@ $user_stats = $result->fetch_assoc();
                                 <th class="cursor-pointer" onclick="changeSort('status')">
                                     Status <?php echo getSortIcon('status'); ?>
                                 </th>
+                                <th class="cursor-pointer" onclick="changeSort('reported_count')">
+                                    Reports <?php echo getSortIcon('reported_count'); ?>
+                                </th>
                                 <th class="cursor-pointer" onclick="changeSort('created_at')">
                                     Joined <?php echo getSortIcon('created_at'); ?>
                                 </th>
@@ -300,11 +333,11 @@ $user_stats = $result->fetch_assoc();
                         <tbody>
                             <?php if (empty($users)): ?>
                                 <tr>
-                                    <td colspan="7" class="text-center py-4">No users found.</td>
+                                    <td colspan="8" class="text-center py-4">No users found.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($users as $user): ?>
-                                    <tr>
+                                    <tr class="<?php echo $user['reported_count'] >= 5 ? 'high-reports' : ''; ?>">
                                         <td><?php echo $user['user_id']; ?></td>
                                         <td><?php echo htmlspecialchars($user['username']); ?></td>
                                         <td><?php echo htmlspecialchars($user['email']); ?></td>
@@ -312,7 +345,7 @@ $user_stats = $result->fetch_assoc();
                                             <?php
                                             $badge_class = 'bg-info';
                                             if ($user['role'] === 'admin') {
-                                                $badge_class = 'bg-danger';
+                                                $badge_class = 'bg-warning';
                                             }
                                             ?>
                                             <span class="badge <?php echo $badge_class; ?>"><?php echo ucfirst($user['role']); ?></span>
@@ -322,6 +355,13 @@ $user_stats = $result->fetch_assoc();
                                             $status_class = $user['status'] === 'active' ? 'bg-success' : 'bg-secondary';
                                             ?>
                                             <span class="badge <?php echo $status_class; ?>"><?php echo ucfirst($user['status']); ?></span>
+                                        </td>
+                                        <td>
+                                            <?php if ($user['reported_count'] > 0): ?>
+                                                <span class=""><?php echo $user['reported_count']; ?></span>
+                                            <?php else: ?>
+                                                <span class="text-muted">0</span>
+                                            <?php endif; ?>
                                         </td>
                                         <td><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
                                         <td>
@@ -517,4 +557,4 @@ $user_stats = $result->fetch_assoc();
         ?>
     </script>
 </body>
-</html
+</html>
