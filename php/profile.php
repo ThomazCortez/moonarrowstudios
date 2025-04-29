@@ -322,6 +322,10 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                 --color-card-border: #30363d;
             }
         }
+
+        .report-button {
+            margin-left: auto;
+        }
     </style>
 </head>
 <body>
@@ -348,14 +352,20 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                     <div class="username-container">
                         <h1 class="username mb-0"><?= htmlspecialchars($user['username']) ?></h1>
                         <?php if ($is_logged_in && !$viewing_own_profile): ?>
-                            <form method="POST" class="follow-button">
-                                <?php if ($is_following): ?>
-                                    <button type="submit" name="unfollow" class="btn btn-outline-primary">Unfollow</button>
-                                <?php else: ?>
-                                    <button type="submit" name="follow" class="btn btn-primary">Follow</button>
-                                <?php endif; ?>
-                            </form>
-                        <?php endif; ?>
+    <div class="d-flex gap-2">
+        <form method="POST" class="mb-0">
+            <?php if ($is_following): ?>
+                <button type="submit" name="unfollow" class="btn btn-outline-primary">Unfollow</button>
+            <?php else: ?>
+                <button type="submit" name="follow" class="btn btn-primary">Follow</button>
+            <?php endif; ?>
+        </form>
+        
+        <button type="button" class="btn  text-danger report-btn" data-bs-toggle="modal" data-bs-target="#reportModal">
+            <i class="bi bi-flag-fill"></i> Report User
+        </button>
+    </div>
+<?php endif; ?>
                     </div>
                 </div>
 
@@ -580,26 +590,95 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
         </div>
     </div>
 
-    <script>
+    <!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Report User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="reportForm" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="content_type" value="user">
+                    <!-- Fix: Use $_GET['id'] directly to ensure correct ID -->
+                    <input type="hidden" name="content_id" value="<?= isset($_GET['id']) ? (int)$_GET['id'] : '' ?>">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Reason</label>
+                        <select name="reason" class="form-select" required>
+                            <option value="">Select a reason</option>
+                            <option value="Harassment">Harassment</option>
+                            <option value="Spam">Spam</option>
+                            <option value="Inappropriate Content">Inappropriate Content</option>
+                            <option value="Impersonation">Impersonation</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Additional Details</label>
+                        <textarea name="details" class="form-control" rows="3" 
+                            placeholder="Please provide additional information..." 
+                            maxlength="500"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Update URL when tab changes
+            // Tab handling code
             document.querySelectorAll('.nav-tabs a').forEach(tab => {
                 tab.addEventListener('shown.bs.tab', event => {
                     const tabName = event.target.getAttribute('href').substring(1);
-                    // Update URL but preserve other query parameters
                     const urlParams = new URLSearchParams(window.location.search);
                     urlParams.set('tab', tabName);
                     window.history.replaceState(null, '', `?${urlParams.toString()}`);
                 });
             });
 
-            // Activate correct tab based on URL parameter
             const urlParams = new URLSearchParams(window.location.search);
             const activeTab = urlParams.get('tab') || 'posts';
             const tabTrigger = document.querySelector(`.nav-tabs a[href="#${activeTab}"]`);
             if (tabTrigger) {
                 new bootstrap.Tab(tabTrigger).show();
             }
+
+            // Report form handling
+            document.getElementById('reportForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(e.target);
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                
+                try {
+                    const response = await fetch('report.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Report submitted successfully. Thank you!');
+                        bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
+                    } else {
+                        alert('Error: ' + (result.error || 'Failed to submit report'));
+                    }
+                } catch (error) {
+                    alert('Network error. Please try again.');
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
         });
     </script>
 </body>

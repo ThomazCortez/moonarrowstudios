@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$validTypes = ['post', 'asset', 'comment', 'reply'];
+$validTypes = ['post', 'asset', 'comment', 'reply', 'user'];
 $contentType = $_POST['content_type'] ?? '';
 $contentId = (int) ($_POST['content_id'] ?? 0);
 $reason = htmlspecialchars($_POST['reason'] ?? '');
@@ -31,6 +31,13 @@ if (empty($reason)) {
     exit;
 }
 
+// Prevent users from reporting themselves
+if ($contentType === 'user' && $contentId === $reporterId) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'Cannot report yourself']);
+    exit;
+}
+
 try {
     $conn->begin_transaction();
     
@@ -44,6 +51,7 @@ try {
     // Get content details for email
     $contentLink = '';
     $contentInfo = [];
+    $authorId = null;
 
     if (in_array($contentType, ['comment', 'reply'])) {
         // Handle comments and replies
@@ -82,7 +90,13 @@ try {
                     $contentLink .= "&comment=$contentId";
                 }
             }
+            $authorId = $contentInfo['user_id'] ?? null;
         }
+    } elseif ($contentType === 'user') {
+        // Handle user reports
+        $baseUrl = 'http://localhost/moonarrowstudios/php/';
+        $contentLink = $baseUrl . "profile.php?id=$contentId";
+        $authorId = $contentId; // This is the ID of the user being reported
     } else {
         // Handle posts and assets
         $baseUrl = 'http://localhost/moonarrowstudios/php/';
@@ -95,42 +109,37 @@ try {
 
     // Update reported count in respective table
     $tableMap = [
-        'post' => 'posts',
-        'asset' => 'assets',
-        'comment' => 'comments',
-        'reply' => 'comments'
+        'post' => ['table' => 'posts', 'id_field' => 'id'],
+        'asset' => ['table' => 'assets', 'id_field' => 'id'],
+        'comment' => ['table' => 'comments', 'id_field' => 'id'],
+        'reply' => ['table' => 'comments', 'id_field' => 'id'],
+        'user' => ['table' => 'users', 'id_field' => 'user_id']
     ];
     
-    // Adjust table for comments/replies based on asset_id presence
-    if (in_array($contentType, ['comment', 'reply'])) {
-        $table = isset($contentInfo['asset_id']) ? 'comments_asset' : $tableMap[$contentType];
-    } else {
-        $table = $tableMap[$contentType];
-    }
+    $tableInfo = $tableMap[$contentType];
+    $updateQuery = "UPDATE {$tableInfo['table']} 
+                   SET reported_count = reported_count + 1 
+                   WHERE {$tableInfo['id_field']} = ?";
     
-    // Execute the update
-    $conn->query("UPDATE $table SET reported_count = reported_count + 1 WHERE id = $contentId");
+    $stmt = $conn->prepare($updateQuery);
+    $stmt->bind_param('i', $contentId);
+    $stmt->execute();
 
     // Get reporter's username
     $stmt = $conn->prepare("SELECT username FROM users WHERE user_id = ?");
     $stmt->bind_param('i', $reporterId);
     $stmt->execute();
     $reporterResult = $stmt->get_result();
-    $reporterData = $reporterResult->fetch_assoc();
-    $reporterUsername = $reporterData['username'] ?? 'Unknown';
+    $reporterUsername = $reporterResult->fetch_assoc()['username'] ?? 'Unknown';
 
-    // Get author's user_id based on content type
-    $authorId = null;
-    if (in_array($contentType, ['post', 'asset'])) {
+    // Get author's user_id if not already set
+    if (!$authorId && in_array($contentType, ['post', 'asset'])) {
         $table = ($contentType === 'post') ? 'posts' : 'assets';
         $stmt = $conn->prepare("SELECT user_id FROM $table WHERE id = ?");
         $stmt->bind_param('i', $contentId);
         $stmt->execute();
         $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $authorId = $row['user_id'] ?? null;
-    } elseif (in_array($contentType, ['comment', 'reply'])) {
-        $authorId = $contentInfo['user_id'] ?? null;
+        $authorId = $result->fetch_assoc()['user_id'] ?? null;
     }
 
     // Get author's username
@@ -140,8 +149,7 @@ try {
         $stmt->bind_param('i', $authorId);
         $stmt->execute();
         $authorResult = $stmt->get_result();
-        $authorData = $authorResult->fetch_assoc();
-        $authorUsername = $authorData['username'] ?? 'Unknown';
+        $authorUsername = $authorResult->fetch_assoc()['username'] ?? 'Unknown';
     }
 
     // Send email
@@ -161,15 +169,12 @@ try {
         $mail->isHTML(true);
         $mail->Subject = "New Content Report";
 
-        // HTML email content with new template styling
         $htmlContent = '
         <div style="font-family: Arial, sans-serif; text-align: center; background-color: #18141D; padding: 20px; color: #FFFFFF;">
             <div style="max-width: 500px; margin: auto; background-color: #24222A; border: 1px solid #333; border-radius: 8px; padding: 30px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);">
-                <!-- Logo Section -->
                 <div style="margin-bottom: 20px;">
                     <img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" alt="MoonArrow Studios Logo" style="width: 120px; height: auto;">
                 </div>
-                <!-- Content Section -->
                 <h2 style="font-size: 20px; color: #FFFFFF; margin-bottom: 10px;">New Content Report</h2>
                 <div style="text-align: left; background-color: #2C2A32; padding: 15px; border-radius: 5px; margin: 15px 0;">
                     <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6; margin: 7px 0;">
@@ -216,7 +221,6 @@ try {
             </div>
         </div>';
 
-        // Plain text fallback
         $textContent = "New Content Report\n\n"
             . "Reporter ID: $reporterId\n"
             . "Reporter Username: $reporterUsername\n"
@@ -224,11 +228,8 @@ try {
             . "Reported Username: $authorUsername\n"
             . "Type: " . ucfirst($contentType) . "\n"
             . "Reason: $reason\n"
-            . "Details: $details\n";
-            
-        if ($contentLink) {
-            $textContent .= "Link: $contentLink";
-        }
+            . "Details: $details\n"
+            . ($contentLink ? "Link: $contentLink" : '');
 
         $mail->Body = $htmlContent;
         $mail->AltBody = $textContent;

@@ -823,12 +823,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     <div class="mb-3">
                         <label class="form-label">Additional Details</label>
-                        <textarea class="form-control" name="details" rows="3"></textarea>
+                        <textarea class="form-control" name="details" rows="3" placeholder="Please provide additional information..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Submit Report</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Submit Report</button>
                 </div>
             </form>
         </div>
