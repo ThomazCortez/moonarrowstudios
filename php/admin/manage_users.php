@@ -273,7 +273,7 @@ $user_stats = $result->fetch_assoc();
         <div class="card mb-4">
             <div class="card-body">
                 <form action="manage_users.php" method="GET" class="row g-3">
-                    <div class="col-md-6">
+                <div class="col-md-6">
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
                             <input type="text" class="form-control" placeholder="Search by username or email" name="search" value="<?php echo htmlspecialchars($search); ?>">
@@ -287,8 +287,7 @@ $user_stats = $result->fetch_assoc();
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary me-2">Filter</button>
-                        <a href="manage_users.php" class="btn btn-secondary">Reset</a>
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
                     </div>
                     <input type="hidden" name="sort" value="<?php echo $sort; ?>">
                     <input type="hidden" name="order" value="<?php echo $order; ?>">

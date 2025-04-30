@@ -210,7 +210,7 @@ if (isset($_GET['tab'])) {
         }
 
         .modal-content {
-            background-color: #2b3035;
+            background-color: #212529;
             color: #fff;
             height: 90vh;
         }
@@ -273,7 +273,7 @@ if (isset($_GET['tab'])) {
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             transition: all 0.3s ease;
-            background-color: #2b3035;
+            background-color: #212529;
         }
 
         .settings-card:hover {
