@@ -6,7 +6,7 @@ require 'db_connect.php';
 
 // Fetch the post by ID
 $post_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-$stmt = $conn->prepare("SELECT posts.*, categories.name AS category_name, users.username 
+$stmt = $conn->prepare("SELECT posts.*, categories.name AS category_name, users.username, users.profile_picture 
                         FROM posts 
                         JOIN categories ON posts.category_id = categories.id 
                         JOIN users ON posts.user_id = users.user_id 
@@ -44,7 +44,7 @@ switch ($filter) {
 }
 
 $comments_stmt = $conn->prepare("
-    SELECT c1.*, users.username, 
+    SELECT c1.*, users.username, users.profile_picture,
         (SELECT COUNT(*) FROM comments c2 WHERE c2.parent_id = c1.id AND c2.status != 'hidden') AS reply_count 
     FROM comments c1 
     JOIN users ON c1.user_id = users.user_id 
@@ -59,7 +59,7 @@ $comments = [];
 while ($row = $comments_result->fetch_assoc()) {
     $row['replies'] = [];
     $reply_stmt = $conn->prepare("
-        SELECT replies.*, users.username 
+        SELECT replies.*, users.username, users.profile_picture 
         FROM comments replies 
         JOIN users ON replies.user_id = users.user_id 
         WHERE replies.parent_id = ? AND replies.status != 'hidden' 
@@ -598,15 +598,53 @@ document.addEventListener('DOMContentLoaded', () => {
 <div class="container mt-5">
     <div class="card">
         <div class="card-body">
-            <!-- Post Header -->
-            <div class="text-center mb-4">
-                <h1 class="card-title mb-1"><?= htmlspecialchars($post['title'] ?? 'No Title') ?></h1>
-                <p class="mb-0"><em>Posted on <?= date('F j, Y, g:i A', strtotime($post['created_at'])) ?></em></p>
-                <p class="mb-0">By <strong><a href="profile.php?id=<?= htmlspecialchars($post['user_id']) ?>"><?= htmlspecialchars($post['username'] ?? 'Anonymous') ?></a></strong></p>
-                <p><strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?></p>
-                <p class="card-text"><strong>Hashtags:</strong> <?= htmlspecialchars($post['hashtags'] ?? '') ?></p>
-                <p class="card-text"><strong>Views:</strong> <?= htmlspecialchars($post['views'] ?? '0') ?></p>
+            <!-- Post Header - Cleaner & Minimalist with Icons -->
+            <div class="post-header mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="profile-pic-container me-3">
+                            <?php if (!empty($post['profile_picture'])): ?>
+                                <img src="<?= htmlspecialchars($post['profile_picture']) ?>" alt="Profile" class="rounded-circle" width="40" height="40">
+                            <?php else: ?>
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-person-fill text-white"></i>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div>
+                            <a href="profile.php?id=<?= htmlspecialchars($post['user_id']) ?>" class="text-decoration-none">
+                                <?= htmlspecialchars($post['username'] ?? 'Anonymous') ?>
+                            </a>
+                            <div class="text-muted small">
+                                <i class="bi bi-clock"></i> <?= date('F j, Y, g:i A', strtotime($post['created_at'])) ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-dark me-2">
+                            <i class="bi bi-tag"></i> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?>
+                        </span>
+                        <span class="badge bg-dark">
+                            <i class="bi bi-eye"></i> <?= htmlspecialchars($post['views'] ?? '0') ?>
+                        </span>
+                    </div>
+                </div>
+                
+                <h1 class="card-title mb-3"><?= htmlspecialchars($post['title'] ?? 'No Title') ?></h1>
+                
+                <?php if (!empty($post['hashtags'])): ?>
+                    <div class="hashtag-container mb-3">
+                        <?php 
+                        // Extract all valid hashtags using regular expression
+                        preg_match_all('/#([^\s#]+)/', $post['hashtags'], $matches);
+                        foreach ($matches[1] as $tag) {
+                            echo '<span class="badge bg-dark me-1"><i class="bi bi-hash"></i>' . htmlspecialchars($tag) . '</span>';
+                        }
+                        ?>
+                    </div>
+                    <?php endif; ?>
             </div>
+
             <hr>
             <!-- Post Content -->
             <div> <?= $post['content'] ?> </div>
@@ -679,11 +717,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     <option value="most_replies" <?= isset($_GET['filter']) && $_GET['filter'] == 'most_replies' ? 'selected' : '' ?>>Most Replies</option>
                 </select>
             </div>
-			<div id="comments-container"> <?php foreach ($comments as $comment): ?>
-    <div class="card mb-3" id="comment-<?php echo $comment['id']; ?>" style="max-width: 100%;">
-        <div class="card-body">
-            <!-- Comment Content -->
-            <h6 class="card-subtitle mb-2"><a href="profile.php?id=<?php echo htmlspecialchars($comment['user_id']); ?>"><?php echo htmlspecialchars($comment['username']); ?></a> - <?php echo date('F j, Y, g:i A', strtotime($comment['created_at'])); ?></h6>
+			<div id="comments-container">
+                <?php foreach ($comments as $comment): ?>
+                <div class="card mb-3" id="comment-<?php echo $comment['id']; ?>" style="max-width: 100%;">
+                    <div class="card-body">
+                        <!-- Comment Header with Profile Picture -->
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-2">
+                                <?php if (!empty($comment['profile_picture'])): ?>
+                                    <img src="<?= htmlspecialchars($comment['profile_picture']) ?>" alt="Profile" class="rounded-circle" width="32" height="32">
+                                <?php else: ?>
+                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                        <i class="bi bi-person-fill text-white"></i>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <div>
+                                <a href="profile.php?id=<?php echo htmlspecialchars($comment['user_id']); ?>" class="text-decoration-none fw-bold">
+                                    <?php echo htmlspecialchars($comment['username']); ?>
+                                </a>
+                                <div class="text-muted small">
+                                    <i class="bi bi-clock"></i> <?php echo date('F j, Y, g:i A', strtotime($comment['created_at'])); ?>
+                                </div>
+                            </div>
+                        </div>
             <p class="card-text"><?php echo $comment['content']; ?></p>
             <!-- Upvote and Downvote Buttons for Comments -->
             <button class="btn btn-outline-success me-2 upvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
@@ -701,11 +758,29 @@ document.addEventListener('DOMContentLoaded', () => {
 </button>
             <!-- Replies Section -->
             <div class="replies ms-4 mt-3" style="display: none;">
-                <?php foreach ($comment['replies'] as $reply): ?>
-                    <div class="card mb-2" id="reply-<?php echo $reply['id']; ?>" style="max-width: 100%;">
-                        <div class="card-body">
-                            <!-- Reply Content -->
-                            <h6 class="card-subtitle mb-2 text-muted"><a href="profile.php?id=<?php echo htmlspecialchars($reply['user_id']); ?>"><?php echo htmlspecialchars($reply['username']); ?></a> - <?php echo date('F j, Y, g:i A', strtotime($reply['created_at'])); ?></h6>
+            <?php foreach ($comment['replies'] as $reply): ?>
+                            <div class="card mb-2" id="reply-<?php echo $reply['id']; ?>" style="max-width: 100%;">
+                                <div class="card-body">
+                                    <!-- Reply Header with Profile Picture -->
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="me-2">
+                                            <?php if (!empty($reply['profile_picture'])): ?>
+                                                <img src="<?= htmlspecialchars($reply['profile_picture']) ?>" alt="Profile" class="rounded-circle" width="32" height="32">
+                                            <?php else: ?>
+                                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                                                    <i class="bi bi-person-fill text-white" style="font-size: 12px;"></i>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div>
+                                            <a href="profile.php?id=<?php echo htmlspecialchars($reply['user_id']); ?>" class="text-decoration-none fw-bold">
+                                                <?php echo htmlspecialchars($reply['username']); ?>
+                                            </a>
+                                            <div class="text-muted small">
+                                                <i class="bi bi-clock"></i> <?php echo date('F j, Y, g:i A', strtotime($reply['created_at'])); ?>
+                                            </div>
+                                        </div>
+                                    </div>
                             <p class="card-text"><?php echo $reply['content']; ?></p>
                             <!-- Upvote and Downvote Buttons for Replies -->
                             <button class="btn btn-outline-success me-3 upvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
