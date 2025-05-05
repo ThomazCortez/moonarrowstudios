@@ -958,7 +958,6 @@ function getAssetCount($conn) {
     </div>
 </section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Enhanced Intersection Observer for smooth section animations

@@ -198,9 +198,6 @@ while ($row = $recent_assets_result->fetch_assoc()) {
                         <a href="manage_comments.php" class="btn btn-outline-danger">
                             <i class="bi bi-chat-dots me-2"></i>Manage Comments
                         </a>
-                        <a href="system_settings.php" class="btn btn-outline-secondary">
-                            <i class="bi bi-sliders me-2"></i>System Settings
-                        </a>
                     </div>
                 </div>
             </div>
