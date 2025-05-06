@@ -30,6 +30,7 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             --color-alert-error-bg: #FFEBE9;
             --color-alert-error-border: rgba(255, 129, 130, 0.4);
             --color-alert-error-fg: #cf222e;
+            --animation-duration: 0.8s; /* Animation timing variable */
         }
 
         @media (prefers-color-scheme: dark) {
@@ -131,10 +132,49 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             }
         }
 
-        /* Active nav item */
+        /* Active nav item with animation */
         .nav-link.active {
             color: var(--color-accent-fg) !important;
             font-weight: 500;
+            position: relative;
+        }
+        
+        /* Nav link hover and active styles */
+        .navbar .nav-item .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        /* Hover effect for all nav links - only change color */
+        .navbar .nav-item .nav-link:hover {
+            color: var(--color-accent-fg) !important;
+        }
+
+        /* Underline only for active links */
+        .navbar .nav-item .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            height: 2px;
+            background-color: var(--color-accent-fg);
+            width: 0; /* Start with no width */
+            animation: draw-underline var(--animation-duration) ease forwards;
+        }
+
+        /* Keep the active nav link positioned relatively */
+        .navbar .nav-item .nav-link.active {
+            position: relative;
+        }
+
+        /* Animation keyframes */
+        @keyframes draw-underline {
+            0% {
+                width: 0;
+            }
+            100% {
+                width: 100%;
+            }
         }
         
         /* Special styles for mobile layout */
@@ -307,6 +347,8 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                 height: 36px;
             }
         }
+
+        /* No need for RGB variables since we removed the glow effect */
     </style>
 </head>
 
@@ -437,6 +479,7 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Back button functionality
             const goBackBtn = document.getElementById("goBackBtn");
             if (goBackBtn && window.history.length > 1) {
                 goBackBtn.addEventListener("click", function() {
@@ -445,6 +488,22 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             } else if (goBackBtn) {
                 goBackBtn.setAttribute("disabled", "true");
             }
+            
+            // Replay animation functionality (optional - can be used to manually trigger the animation)
+            function replayActiveAnimation() {
+                const activeLinks = document.querySelectorAll('.nav-link.active');
+                activeLinks.forEach(link => {
+                    // Remove and re-add the class to restart animation
+                    link.classList.remove('active');
+                    // Force reflow
+                    void link.offsetWidth;
+                    // Add class back
+                    link.classList.add('active');
+                });
+            }
+            
+            // Initial animation happens automatically when page loads
+            // You could also add a button to replay the animation if desired
         });
     </script>
 </body>
