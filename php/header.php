@@ -131,12 +131,6 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             }
         }
 
-        /* Dropdown positioning fix */
-        .dropdown-menu-end {
-            right: 0;
-            left: auto;
-        }
-        
         /* Active nav item */
         .nav-link.active {
             color: var(--color-accent-fg) !important;
@@ -162,33 +156,157 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                 top: 12px;
             }
         }
-        /* Add this to your existing CSS */
-.profile-container {
-    position: absolute;
-    right: 90px;
-    top: 12px;
-    display: flex;
-    align-items: center; /* This ensures vertical centering */
-    justify-content: center;
-    height: 35px; /* Match the height of your profile image */
-}
 
-/* Adjust the button inside the container */
-.profile-container .btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-}
+        /* Enhanced Profile Container */
+        .profile-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: auto;
+            margin: 0 5px;
+        }
 
-/* Ensure the icon is properly centered */
-.profile-container .bi-person-fill {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 35px; /* Match container height */
-    width: 35px; /* Match container width */
-}
+        /* Profile Button Styling */
+        .profile-btn {
+            background: transparent;
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+            width: auto;
+            height: auto;
+        }
+        
+        .profile-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .profile-btn:focus {
+            box-shadow: none;
+            outline: none;
+        }
+        
+        /* Profile Image Styling */
+        .profile-img-container {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--color-border-muted);
+            transition: border-color 0.2s ease;
+        }
+        
+        .profile-btn:hover .profile-img-container {
+            border-color: var(--color-accent-fg);
+        }
+        
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .profile-icon-container {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-canvas-subtle);
+            border: 2px solid var(--color-border-muted);
+            transition: border-color 0.2s ease;
+        }
+        
+        .profile-btn:hover .profile-icon-container {
+            border-color: var(--color-accent-fg);
+        }
+
+        .profile-icon {
+            font-size: 1.3rem;
+            color: var(--color-fg-muted);
+        }
+
+        /* Enhanced Dropdown Menu */
+        .dropdown-menu {
+            border-radius: 8px;
+            border: 1px solid var(--color-border-default);
+            background-color: var(--color-modal-bg);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            padding: 8px 0;
+            min-width: 180px;
+            margin-top: 10px;
+            animation: dropdown-appear 0.2s ease-out;
+        }
+
+        @keyframes dropdown-appear {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            padding: 8px 16px;
+            font-size: 14px;
+            color: var(--color-fg-default);
+            display: flex;
+            align-items: center;
+            transition: background-color 0.15s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--color-canvas-subtle);
+        }
+
+        .dropdown-item i {
+            margin-right: 12px;
+            font-size: 16px;
+            width: 18px;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            margin: 8px 0;
+            border-top: 1px solid var(--color-border-muted);
+        }
+
+        /* Dropdown arrow indicator */
+        .dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-modal-bg);
+            transform: rotate(45deg);
+            border-left: 1px solid var(--color-border-default);
+            border-top: 1px solid var(--color-border-default);
+        }
+
+        /* Mobile profile position fix */
+        @media (max-width: 991px) {
+            .profile-container {
+                position: absolute;
+                right: 70px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            
+            .profile-btn {
+                width: 36px;
+                height: 36px;
+            }
+        }
     </style>
 </head>
 
@@ -222,21 +340,25 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                 ?>
                 
                 <div class="dropdown">
-                    <button class="btn rounded-circle p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: none; background: none;">
+                    <button class="btn profile-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <?php if ($hasProfilePicture): ?>
-                            <img src="<?= htmlspecialchars($profile_picture); ?>" alt="Profile" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;">
+                            <div class="profile-img-container">
+                                <img src="<?= htmlspecialchars($profile_picture); ?>" alt="Profile" class="profile-img">
+                            </div>
                         <?php else: ?>
-                            <i class="bi bi-person-fill text-light" style="font-size: 1.3rem;"></i>
+                            <div class="profile-icon-container">
+                                <i class="bi bi-person-fill profile-icon"></i>
+                            </div>
                         <?php endif; ?>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/profile.php">Profile</a></li>
-                        <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/settings.php">Settings</a></li>
+                        <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/profile.php"><i class="bi bi-person"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/settings.php"><i class="bi bi-gear"></i>Settings</a></li>
                         <?php if ($isAdmin): ?>
-                        <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/admin/dashboard.php">Dashboard</a></li>
+                        <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/admin/dashboard.php"><i class="bi bi-speedometer2"></i>Dashboard</a></li>
                         <?php endif; ?>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/sign_out.php">Sign Out</a></li>
+                        <li><a class="dropdown-item text-danger" href="<?php echo $baseUrl; ?>php/sign_out.php"><i class="bi bi-box-arrow-right"></i>Sign Out</a></li>
                     </ul>
                 </div>
             </div>
@@ -280,21 +402,25 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                     ?>
                         <!-- Profile Dropdown (Desktop only) -->
                         <div class="dropdown d-none d-lg-block">
-                            <button class="btn rounded-circle p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: none; background: none;">
+                            <button class="btn profile-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <?php if ($hasProfilePicture): ?>
-                                    <img src="<?= htmlspecialchars($profile_picture); ?>" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                    <div class="profile-img-container">
+                                        <img src="<?= htmlspecialchars($profile_picture); ?>" alt="Profile" class="profile-img">
+                                    </div>
                                 <?php else: ?>
-                                    <i class="bi bi-person-fill text-light" style="font-size: 1.5rem;"></i>
+                                    <div class="profile-icon-container">
+                                        <i class="bi bi-person-fill profile-icon"></i>
+                                    </div>
                                 <?php endif; ?>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/profile.php">Profile</a></li>
-                                <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/settings.php">Settings</a></li>
+                                <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/profile.php"><i class="bi bi-person"></i>Profile</a></li>
+                                <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/settings.php"><i class="bi bi-gear"></i>Settings</a></li>
                                 <?php if ($isAdmin): ?>
-                                <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/admin/dashboard.php">Dashboard</a></li>
+                                <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/admin/dashboard.php"><i class="bi bi-speedometer2"></i>Dashboard</a></li>
                                 <?php endif; ?>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="<?php echo $baseUrl; ?>php/sign_out.php">Sign Out</a></li>
+                                <li><a class="dropdown-item text-danger" href="<?php echo $baseUrl; ?>php/sign_out.php"><i class="bi bi-box-arrow-right"></i>Sign Out</a></li>
                             </ul>
                         </div>
                     <?php else: ?>
