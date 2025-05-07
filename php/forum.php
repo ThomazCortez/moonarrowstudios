@@ -163,6 +163,7 @@ $categories = $conn->query("SELECT * FROM categories");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 	<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 	<title>MoonArrow Studios - Forum</title>
 	<style>
 	/* Style for Quill placeholder */
@@ -779,6 +780,87 @@ hr {
         width: 100%;
     }
 }
+/* Add/Update these styles in your CSS */
+.card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform: translateZ(0); /* Hardware acceleration */
+    will-change: transform; /* Prepare browser for animation */
+    border: 1px solid transparent; /* Add this line */
+}
+
+.card::before,
+.card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(88, 166, 255, 0.3); /* Use your theme's blue color */
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+}
+
+.card::before {
+    top: 0;
+    transform: translateX(-105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card::after {
+    bottom: 0;
+    transform: translateX(105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card:hover {
+    box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
+                0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(88, 166, 255, 0.3) !important;
+}
+
+.card:hover::before,
+.card:hover::after {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.card-body {
+    position: relative;
+    z-index: 1; /* Ensure content stays above borders */
+}
+
+.card-body::before,
+.card-body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: rgba(88, 166, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card-body::before {
+    left: 0;
+    transform: translateY(105%);
+}
+
+.card-body::after {
+    right: 0;
+    transform: translateY(-105%);
+}
+
+.card:hover .card-body::before,
+.card:hover .card-body::after {
+    transform: translateY(0);
+    opacity: 1;
+}
 	</style>
 	<script>
 	document.addEventListener("DOMContentLoaded", function() {
@@ -1128,9 +1210,9 @@ document.addEventListener('DOMContentLoaded', function() {
 </head>
 
 <body class="">
-    <div class="container">
+<div class="container">
         <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show animate__animated animate__shakeX" role="alert">
                 <?= htmlspecialchars($_SESSION['error']) ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -1138,43 +1220,43 @@ document.addEventListener('DOMContentLoaded', function() {
         <?php endif; ?>
 
         <!-- Search, Filter, and Create Post Section -->
-        <div class="d-flex justify-content-between align-items-center my-4">
+        <div class="d-flex justify-content-between align-items-center my-4 animate__animated animate__fadeIn">
             <form method="GET" class="d-flex align-items-center">
-                <input type="text" name="search" class="form-control me-2 bg-dark" placeholder="Search" value="<?= htmlspecialchars($search) ?>">
-                <select name="category" class="form-select me-2 bg-dark text-light">
+                <input type="text" name="search" class="form-control me-2 bg-dark animate__animated animate__fadeInLeft" placeholder="Search" value="<?= htmlspecialchars($search) ?>">
+                <select name="category" class="form-select me-2 bg-dark text-light animate__animated animate__fadeInLeft">
                     <option value="">All Categories</option>
                     <?php while ($row = $categories->fetch_assoc()): ?>
                         <option value="<?= $row['id'] ?>" <?= $category_filter == $row['id'] ? 'selected' : '' ?>><?= $row['name'] ?></option>
                     <?php endwhile; ?>
                 </select>
-                <select name="filter" class="form-select me-2 bg-dark text-light">
+                <select name="filter" class="form-select me-2 bg-dark text-light animate__animated animate__fadeInLeft">
                     <option value="newest" <?= isset($_GET['filter']) && $_GET['filter'] == 'newest' ? 'selected' : '' ?>>Newest</option>
                     <option value="oldest" <?= isset($_GET['filter']) && $_GET['filter'] == 'oldest' ? 'selected' : '' ?>>Oldest</option>
                     <option value="highest_score" <?= isset($_GET['filter']) && $_GET['filter'] == 'highest_score' ? 'selected' : '' ?>>Highest Score</option>
                 </select>
-                <button type="submit" class="btn btn-primary">Search</button>
+                <button type="submit" class="btn btn-primary animate__animated animate__fadeInLeft">Search</button>
             </form>
             <?php if (isset($_SESSION['user_id'])): ?>
-                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPostModal">Create Post</button>
+                <button class="btn btn-success animate__animated animate__fadeInRight" data-bs-toggle="modal" data-bs-target="#createPostModal">Create Post</button>
             <?php endif; ?>
         </div>
-        <hr>
+        <hr class="animate__animated animate__fadeIn">
 
         <!-- Main Content -->
-        <div class="main-container">
+        <div class="main-container animate__animated animate__fadeIn">
             <!-- Sidebar with Leaderboard -->
-            <div class="sidebar">
+            <div class="sidebar animate__animated animate__fadeInLeft">
                 <div class="leaderboard-card">
-                    <h2 class="leaderboard-title">Leaderboard</h2>
+                    <h2 class="leaderboard-title animate__animated animate__fadeIn">Leaderboard</h2>
                     
                     <!-- Top Posts Section -->
-                    <div class="leaderboard-section">
+                    <div class="leaderboard-section animate__animated animate__fadeIn">
                         <h3 class="leaderboard-section-title">Top Posts Today</h3>
                         <?php
                         $top_posts = $conn->query("SELECT * FROM posts WHERE status != 'hidden' ORDER BY upvotes DESC LIMIT 5");
                         $rank = 1;
                         while ($post = $top_posts->fetch_assoc()): ?>
-                            <a href="view_post.php?id=<?= $post['id'] ?>" class="leaderboard-item">
+                            <a href="view_post.php?id=<?= $post['id'] ?>" class="leaderboard-item animate__animated animate__fadeInUp-<?= $rank ?>s">
                                 <span class="leaderboard-rank">#<?= $rank++ ?></span>
                                 <span class="leaderboard-content"><?= htmlspecialchars($post['title']) ?></span>
                             </a>
@@ -1182,7 +1264,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
 
                     <!-- Top Users Section -->
-                    <div class="leaderboard-section">
+                    <div class="leaderboard-section animate__animated animate__fadeIn">
                         <h3 class="leaderboard-section-title">Most Followed Users</h3>
                         <?php
                         $top_followed = $conn->query("SELECT users.user_id, users.username, COUNT(follows.follower_id) AS followers 
@@ -1191,8 +1273,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     GROUP BY users.user_id 
                                                     ORDER BY followers DESC 
                                                     LIMIT 5");
+                        $user_rank = 1;
                         while ($user = $top_followed->fetch_assoc()): ?>
-                            <a href="profile.php?id=<?= $user['user_id'] ?>" class="leaderboard-item">
+                            <a href="profile.php?id=<?= $user['user_id'] ?>" class="leaderboard-item animate__animated animate__fadeInUp<?= $user_rank++ ?>s">
                                 <div class="leaderboard-content">
                                     <?= htmlspecialchars($user['username']) ?>
                                     <span class="leaderboard-stat"><?= $user['followers'] ?> followers</span>
@@ -1202,7 +1285,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
 
                     <!-- Trending Tags Section -->
-                    <div class="leaderboard-section">
+                    <div class="leaderboard-section animate__animated animate__fadeIn">
                         <h3 class="leaderboard-section-title">Trending Tags</h3>
                         <div class="trending-tags">
                             <?php
@@ -1230,8 +1313,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             ORDER BY count DESC, hashtag ASC
                             LIMIT 5
                         ");
+                            $tag_index = 1;
                             while ($hashtag = $top_hashtags->fetch_assoc()): ?>
-                                <a href="?search=<?= urlencode($hashtag['hashtag']) ?>" class="tag-badge">
+                                <a href="?search=<?= urlencode($hashtag['hashtag']) ?>" class="tag-badge animate__animated animate__fadeInUp animate__delay-<?= $tag_index++ ?>s">
                                     <?= htmlspecialchars($hashtag['hashtag']) ?>
                                 </a>
                             <?php endwhile; ?>
@@ -1241,11 +1325,16 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             <!-- Post List -->
-            <div class="post-list">
-                <h2 class="mt-4">Posts</h2>
+            <div class="post-list animate__animated animate__fadeInRight">
+                <h2 class="mt-4 animate__animated animate__fadeIn">Posts</h2>
                 <div class="posts-container">
-                    <?php while ($post = $result->fetch_assoc()): ?>
-                        <div class="card">
+                    <?php 
+                    $post_count = 0;
+                    while ($post = $result->fetch_assoc()): 
+                        $post_count++;
+                        $animation_delay = min($post_count * 0.15, 2); // Cap the delay at 2 seconds
+                    ?>
+                        <div class="card animate__animated animate__fadeInUp" style="animation-delay: <?= $animation_delay ?>s;">
                             <div class="card-body">
                                 <h3 class="card-title">
                                     <a href="view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none">
@@ -1278,23 +1367,23 @@ document.addEventListener('DOMContentLoaded', function() {
         <!-- Modal for Creating Post -->
         <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
             <div class="modal-dialog">
-                <div class="modal-content">
+                <div class="modal-content animate__animated animate__zoomIn">
                     <div class="modal-header">
                         <h5 class="modal-title" id="createPostModalLabel">Create Post</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <form id="createPostForm" method="POST" enctype="multipart/form-data">
-                            <div class="mb-3">
+                            <div class="mb-3 animate__animated animate__fadeIn">
                                 <label for="title" class="form-label">Title</label>
                                 <input type="text" name="title" id="title" class="form-control bg-dark" placeholder="Your post title goes here" required>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 animate__animated animate__fadeIn">
                                 <label for="content" class="form-label">Content</label>
                                 <div id="editor" style="height: 200px; border: 1px solid #ccc;"></div>
                                 <input type="hidden" name="content">
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 animate__animated animate__fadeIn">
                                 <label for="category" class="form-label">Category</label>
                                 <select name="category" id="category" class="form-select bg-dark text-light" required>
                                     <option value="" class="">Select Category</option>
@@ -1303,19 +1392,21 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <?php endwhile; ?>
                                 </select>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 animate__animated animate__fadeIn ">
                                 <label for="hashtags" class="form-label">Hashtags</label>
                                 <input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #unity, #unrealengine">
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 animate__animated animate__fadeIn">
                                 <label for="images" class="form-label">Images</label>
                                 <input type="file" name="images[]" id="images" class="form-control" accept="image/*" multiple>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 animate__animated animate__fadeIn">
                                 <label for="videos" class="form-label">Videos</label>
                                 <input type="file" name="videos[]" id="videos" class="form-control" accept="video/*" multiple>
                             </div>
-                            <button type="submit" name="create_post" class="btn btn-primary">Post</button>
+                            <div class="mt-3 animate__animated animate__fadeIn d-grid">
+                        <button type="submit" name="create_post" class="btn btn-primary animate__animated animate__infinite w-100">Post</button>
+                    </div>
                         </form>
                     </div>
                 </div>
@@ -1323,7 +1414,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
 
         <!-- Pagination -->
-        <div class="pagination-wrapper">
+        <div class="pagination-wrapper animate__animated animate__fadeIn animate__delay-1s">
             <nav aria-label="Page navigation">
                 <ul class="pagination">
                     <!-- First Page -->
@@ -1343,7 +1434,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     for ($i = $start_page; $i <= $end_page; $i++): 
                     ?>
-                        <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                        <li class="page-item <?= ($i == $page) ? 'active animate__animated animate__pulse animate__infinite' : '' ?>">
                             <a class="page-link" href="?page=<?= $i ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>"><?= $i ?></a>
                         </li>
                     <?php endfor; ?>
@@ -1361,6 +1452,44 @@ document.addEventListener('DOMContentLoaded', function() {
             </nav>
         </div>
     </div>
+
+    <!-- Add JavaScript for enhancing animations -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add hover animations to cards
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.classList.add('animate__pulse');
+            });
+            card.addEventListener('mouseleave', function() {
+                this.classList.remove('animate__pulse');
+            });
+        });
+
+        // Add animations to leaderboard items on hover
+        const leaderboardItems = document.querySelectorAll('.leaderboard-item');
+        leaderboardItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.classList.add('animate__pulse');
+            });
+            item.addEventListener('mouseleave', function() {
+                this.classList.remove('animate__pulse');
+            });
+        });
+
+        // Add animations to tag badges on hover
+        const tagBadges = document.querySelectorAll('.tag-badge');
+        tagBadges.forEach(badge => {
+            badge.addEventListener('mouseenter', function() {
+                this.classList.add('animate__pulse');
+            });
+            badge.addEventListener('mouseleave', function() {
+                this.classList.remove('animate__pulse');
+            });
+        });
+    });
+    </script>
 </body>
 
 </html> <?php $conn->close(); ?>

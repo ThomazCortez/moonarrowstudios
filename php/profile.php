@@ -326,6 +326,88 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
         .report-button {
             margin-left: auto;
         }
+
+        /* Add/Update these styles in your CSS */
+.card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform: translateZ(0); /* Hardware acceleration */
+    will-change: transform; /* Prepare browser for animation */
+    border: 1px solid transparent; /* Add this line */
+}
+
+.card::before,
+.card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(88, 166, 255, 0.3); /* Use your theme's blue color */
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+}
+
+.card::before {
+    top: 0;
+    transform: translateX(-105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card::after {
+    bottom: 0;
+    transform: translateX(105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card:hover {
+    box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
+                0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(88, 166, 255, 0.3) !important;
+}
+
+.card:hover::before,
+.card:hover::after {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.card-body {
+    position: relative;
+    z-index: 1; /* Ensure content stays above borders */
+}
+
+.card-body::before,
+.card-body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: rgba(88, 166, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card-body::before {
+    left: 0;
+    transform: translateY(105%);
+}
+
+.card-body::after {
+    right: 0;
+    transform: translateY(-105%);
+}
+
+.card:hover .card-body::before,
+.card:hover .card-body::after {
+    transform: translateY(0);
+    opacity: 1;
+}
     </style>
 </head>
 <body>
