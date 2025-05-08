@@ -287,6 +287,22 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
         --color-header-bg: #161b22;
         --color-modal-bg: #161b22;
     }
+    .custom-alert-success {
+            background-color: #12281e;
+            color: #7ee2b8;
+        }
+        .custom-alert-danger {
+            background-color: #2e0a12;
+            color: #fda4af;
+        }
+        .custom-alert-warning {
+            background-color: #2e2a0e;
+            color: #fde047;
+        }
+        .custom-alert-info {
+            background-color: #092c42;
+            color: #7dd3fc;
+        }
 }
 
 body {
@@ -946,58 +962,197 @@ hr {
     transform: translateY(0);
     opacity: 1;
 }
+
+/* Custom Alert Animation Styles */
+.alert-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1060; /* Increased from 1050 to be above Bootstrap modals (1055) */
+    pointer-events: none;
+}
+
+.custom-alert {
+    position: relative;
+    margin: 16px auto;
+    max-width: 500px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: auto;
+    overflow: hidden;
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s linear;
+    z-index: 1061; /* Added explicit z-index for the alert itself */
+}
+
+.custom-alert.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.custom-alert.hiding {
+    transform: translateY(-100%);
+    opacity: 0;
+}
+
+.custom-alert .progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 0;
+    margin: 0;
+}
+
+.custom-alert .progress-bar {
+    transition: width linear 5000ms;
+    width: 100%;
+    height: 100%;
+}
+
+.custom-alert-success .progress-bar {
+    background-color: #198754;
+}
+
+.custom-alert-danger .progress-bar {
+    background-color: #dc3545;
+}
+
+.custom-alert-warning .progress-bar {
+    background-color: #ffc107;
+}
+
+.custom-alert-info .progress-bar {
+    background-color: #0dcaf0;
+}
+
+.custom-alert-content {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+}
+
+.custom-alert-icon {
+    margin-right: 12px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-alert-message {
+    flex-grow: 1;
+}
+
+.custom-alert-close {
+    background: transparent;
+    border: none;
+    color: inherit;
+    opacity: 0.7;
+    padding: 0 4px;
+    cursor: pointer;
+}
+
+.custom-alert-close:hover {
+    opacity: 1;
+}
+
+.custom-alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.custom-alert-danger {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.custom-alert-warning {
+    background-color: #fff3cd;
+    color: #664d03;
+}
+
+.custom-alert-info {
+    background-color: #cff4fc;
+    color: #055160;
+}
 	</style>
-	<script>
-	document.addEventListener("DOMContentLoaded", function() {
+<script>
+document.addEventListener("DOMContentLoaded", function() {
     // Initialize Quill editor
     var quill = new Quill('#editor', {
         placeholder: 'Your asset content goes here',
         theme: 'snow',
         modules: {
             toolbar: [
-                [{
-                    header: [3, 4, false]
-                }],
+                [{ header: [3, 4, false] }],
                 ['bold', 'italic', 'underline'],
                 ['blockquote', 'code-block'],
-                [{
-                    list: 'ordered'
-                }, {
-                    list: 'bullet'
-                }],
+                [{ list: 'ordered' }, { list: 'bullet' }],
                 ['link']
             ]
         }
     });
 
-    // Create alert container
-    const alertContainer = document.createElement('div');
-    alertContainer.style.position = 'fixed';
-    alertContainer.style.top = '20px';
-    alertContainer.style.left = '50%';
-    alertContainer.style.transform = 'translateX(-50%)';
-    alertContainer.style.zIndex = '9999';
-    document.body.appendChild(alertContainer);
-    
-    function showBootstrapAlert(message) {
-        const alert = `
-            <div class="alert alert-danger alert-dismissible fade show">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>`;
-        alertContainer.innerHTML = alert;
-        
-        // Auto-dismiss after 5 seconds
-        setTimeout(() => {
-            const alertElement = document.querySelector('.alert');
-            if (alertElement) {
-                const bsAlert = new bootstrap.Alert(alertElement);
-                bsAlert.close();
-            }
-        }, 5000);
+    // Custom Alert Functions
+    function showAlert(message, type = 'info') {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertElement = document.createElement('div');
+        alertElement.className = `custom-alert custom-alert-${type}`;
+        let iconClass = 'bi-info-circle';
+        if (type === 'success') iconClass = 'bi-check-circle';
+        if (type === 'danger')  iconClass = 'bi-exclamation-triangle';
+        if (type === 'warning') iconClass = 'bi-exclamation-circle';
+
+        alertElement.innerHTML = `
+            <div class="custom-alert-content">
+                <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
+                <div class="custom-alert-message">${message}</div>
+                <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
+            </div>
+            <div class="progress">
+                <div class="progress-bar"></div>
+            </div>
+        `;
+
+        alertContainer.appendChild(alertElement);
+
+        requestAnimationFrame(() => alertElement.classList.add('show'));
+
+        const progressBar = alertElement.querySelector('.progress-bar');
+        progressBar.style.transition = 'width linear 5000ms';
+        progressBar.style.width = '100%';
+        setTimeout(() => { progressBar.style.width = '0%'; }, 50);
+
+        const dismissTimeout = setTimeout(() => {
+            dismissAlert(alertElement);
+        }, 5050);
+
+        alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
+            clearTimeout(dismissTimeout);
+            dismissAlert(alertElement);
+        });
     }
 
-    let hashtags = new Set(); // Move hashtags Set to global scope
+    function dismissAlert(alertElement) {
+        if (!alertElement || alertElement.classList.contains('hiding')) return;
+        alertElement.classList.add('hiding');
+        alertElement.classList.remove('show');
+        setTimeout(() => { alertElement.remove(); }, 300);
+    }
+
+    // Handle URL parameters for alerts
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('alert')) {
+        showAlert(urlParams.get('alert'), urlParams.get('type') || 'info');
+    }
+
+    let hashtags = new Set();
 
     // Submit handler
     const form = document.querySelector('#createAssetForm');
@@ -1010,15 +1165,15 @@ hr {
         // Check content
         if(quillContent === '' || quillContent === '<p><br></p>') {
             e.preventDefault();
-            showBootstrapAlert('Asset content is required!');
+            showAlert('Asset content is required!', 'danger');
             hasError = true;
         }
         
         // Check for hashtag badges
         if(hashtags.size === 0) {
             e.preventDefault();
-            if (!hasError) { // Only show if no content error
-                showBootstrapAlert('At least one hashtag is required!');
+            if (!hasError) {
+                showAlert('At least one hashtag is required!', 'danger');
             }
             hasError = true;
         }
@@ -1108,10 +1263,8 @@ hr {
             if (tag) addHashtag(tag);
         });
     });
-});
 
-// Add this JavaScript to handle the hover card functionality
-document.addEventListener('DOMContentLoaded', function() {
+    // Hover card functionality
     let hoverCard = document.createElement('div');
     hoverCard.className = 'profile-hover-card';
     document.body.appendChild(hoverCard);
@@ -1133,21 +1286,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 const response = await fetch(`fetch_user_preview.php?user_id=${userId}`);
                 const userData = await response.json();
                 
-                // Create avatar content
                 const avatarContent = userData.profile_picture 
                     ? `<img class="hover-card-avatar" src="${userData.profile_picture}" alt="${userData.username}'s avatar">` 
                     : `<div class="hover-card-avatar d-flex align-items-center justify-content-center bg-dark">
                          <i class="bi bi-person-fill text-light" style="font-size: 1.5rem;"></i>
                        </div>`;
                 
-                // Create banner content
-                let bannerContent;
-                if (userData.banner) {
-                    // Use img tag for banner instead of background-image
-                    bannerContent = `<img src="${userData.banner}" class="hover-card-banner" alt="User banner">`;
-                } else {
-                    bannerContent = `<div class="hover-card-banner" style="background-color: rgb(108, 117, 125);"></div>`;
-                }
+                let bannerContent = userData.banner 
+                    ? `<img src="${userData.banner}" class="hover-card-banner" alt="User banner">`
+                    : `<div class="hover-card-banner" style="background-color: rgb(108, 117, 125);"></div>`;
                 
                 hoverCard.innerHTML = `
                     ${bannerContent}
@@ -1185,124 +1332,44 @@ document.addEventListener('DOMContentLoaded', function() {
     hoverCard.addEventListener('mouseleave', () => {
         hoverCard.classList.remove('visible');
     });
-});
 
-// Add this JavaScript after your existing scripts
-document.addEventListener('DOMContentLoaded', function() {
-    const hashtagInput = document.querySelector('#hashtags');
-    const hashtagContainer = document.createElement('div');
-    hashtagContainer.className = 'hashtag-container d-flex flex-wrap gap-2 mb-2';
-    const hiddenHashtagInput = document.createElement('input');
-    hiddenHashtagInput.type = 'hidden';
-    hiddenHashtagInput.name = 'hashtags';
-    
-    // Insert container before the input
-    hashtagInput.parentNode.insertBefore(hashtagContainer, hashtagInput);
-    hashtagInput.parentNode.appendChild(hiddenHashtagInput);
-    
-    // Style the input
-    hashtagInput.style.paddingLeft = '20px';
-    
-    // Create a '#' prefix that stays before the input
-    const hashPrefix = document.createElement('div');
-    hashPrefix.textContent = '#';
-    hashPrefix.style.position = 'absolute';
-    hashPrefix.style.left = '8px';
-    hashPrefix.style.top = '50%';
-    hashPrefix.style.transform = 'translateY(-50%)';
-    hashPrefix.style.color = '#6c757d';
-    hashPrefix.style.pointerEvents = 'none';
-    
-    // Wrap input in relative container
-    const inputWrapper = document.createElement('div');
-    inputWrapper.style.position = 'relative';
-    hashtagInput.parentNode.insertBefore(inputWrapper, hashtagInput);
-    inputWrapper.appendChild(hashPrefix);
-    inputWrapper.appendChild(hashtagInput);
-    
-    let hashtags = new Set();
-    
-    function addHashtag(tag) {
-        if (tag && !hashtags.has(tag)) {
-            hashtags.add(tag);
-            updateHashtagDisplay();
-            updateHiddenInput();
-        }
-    }
-    
-    function removeHashtag(tag) {
-        hashtags.delete(tag);
-        updateHashtagDisplay();
-        updateHiddenInput();
-    }
-    
-    function updateHashtagDisplay() {
-        hashtagContainer.innerHTML = '';
-        hashtags.forEach(tag => {
-            const badge = document.createElement('span');
-            badge.className = 'badge bg-dark d-flex align-items-center gap-2';
-            badge.innerHTML = `
-                #${tag}
-                <button type="button" class="btn-close btn-close-white" style="font-size: 0.5rem;"></button>
-            `;
-            badge.querySelector('.btn-close').addEventListener('click', () => removeHashtag(tag));
-            hashtagContainer.appendChild(badge);
+    // Animation enhancements
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.classList.add('animate__pulse');
         });
-    }
-    
-    function updateHiddenInput() {
-        hiddenHashtagInput.value = Array.from(hashtags).map(tag => `#${tag}`).join(' ');
-    }
-    
-    hashtagInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            const tag = this.value.trim().replace(/^#/, '');
-            if (tag) {
-                addHashtag(tag);
-                this.value = '';
-            }
-        }
+        card.addEventListener('mouseleave', function() {
+            this.classList.remove('animate__pulse');
+        });
     });
-    
-    // Handle paste events
-    hashtagInput.addEventListener('paste', function(e) {
-        e.preventDefault();
-        const paste = (e.clipboardData || window.clipboardData).getData('text');
-        const tags = paste.split(/[\s,]+/);
-        tags.forEach(tag => {
-            tag = tag.trim().replace(/^#/, '');
-            if (tag) addHashtag(tag);
+
+    const leaderboardItems = document.querySelectorAll('.leaderboard-item');
+    leaderboardItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.classList.add('animate__pulse');
+        });
+        item.addEventListener('mouseleave', function() {
+            this.classList.remove('animate__pulse');
+        });
+    });
+
+    const tagBadges = document.querySelectorAll('.tag-badge');
+    tagBadges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.classList.add('animate__pulse');
+        });
+        badge.addEventListener('mouseleave', function() {
+            this.classList.remove('animate__pulse');
         });
     });
 });
-// Modify the asset display section to show hashtags as badges
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.card-text').forEach(element => {
-        if (element.innerHTML.includes('<strong>Hashtags:</strong>')) {
-            const hashtags = element.innerHTML.split('<strong>Hashtags:</strong> ')[1].trim();
-            if (hashtags) {
-                const hashtagArray = hashtags.split(' ');
-                const hashtagBadges = hashtagArray.map(tag => 
-                    `<span class="badge bg-dark me-1">${tag}</span>`
-                ).join('');
-                element.innerHTML = `<strong>Hashtags:</strong> ${hashtagBadges}`;
-            }
-        }
-    });
-});
-	</script>
+</script>
 </head>
 
 <body class="">
+<div class="alert-container" id="alertContainer"></div>
     <div class="container">
-    <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show animate__animated animate__shakeX" role="alert">
-                <?= htmlspecialchars($_SESSION['error']) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <?php unset($_SESSION['error']); ?>
-        <?php endif; ?>
 
         <!-- Search, Filter, and Create Asset Section -->
         <div class="d-flex justify-content-between align-items-center my-4 animate__animated animate__fadeIn">
@@ -1593,6 +1660,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<?php if (isset($_SESSION['error'])): ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    showAlert('<?= addslashes($_SESSION['error']) ?>', 'danger');
+});
+</script>
+<?php unset($_SESSION['error']); ?>
+<?php endif; ?>
 </body>
 
 </html> <?php $conn->close(); ?>
