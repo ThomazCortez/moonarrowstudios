@@ -29,8 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_asset'])) {
 
     // Check for profanity in the title and content
     if ($profanityFilter->hasProfanity($title)) {
-        $_SESSION['error'] = "Your asset title contains inappropriate language.";
-        header("Location: marketplace.php");
+        header("Location: marketplace.php?alert=" . urlencode("Your asset title contains inappropriate language.") . "&type=danger");
         exit;
     }
 
