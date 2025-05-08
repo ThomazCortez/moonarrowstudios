@@ -35,6 +35,22 @@
                 --color-accent-fg: #58a6ff;
                 --color-input-bg: #0d1117;
             }
+            .custom-alert-success {
+                background-color: #12281e;
+                color: #7ee2b8;
+            }
+            .custom-alert-danger {
+                background-color: #2e0a12;
+                color: #fda4af;
+            }
+            .custom-alert-warning {
+                background-color: #2e2a0e;
+                color: #fde047;
+            }
+            .custom-alert-info {
+                background-color: #092c42;
+                color: #7dd3fc;
+            }
         }
 
         body {
@@ -177,6 +193,124 @@
                 opacity: 1;
             }
         }
+
+        /* Custom Alert Animation Styles */
+        .alert-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            pointer-events: none;
+        }
+
+        .custom-alert {
+            position: relative;
+            margin: 16px auto;
+            max-width: 500px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            pointer-events: auto;
+            overflow: hidden;
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s linear;
+        }
+
+        .custom-alert.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .custom-alert.hiding {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+
+        .custom-alert .progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            border-radius: 0;
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 0;
+            margin: 0;
+        }
+
+        .custom-alert .progress-bar {
+            transition: width linear 5000ms;
+            width: 100%;
+            height: 100%;
+        }
+
+        .custom-alert-success .progress-bar {
+            background-color: #198754;
+        }
+
+        .custom-alert-danger .progress-bar {
+            background-color: #dc3545;
+        }
+
+        .custom-alert-warning .progress-bar {
+            background-color: #ffc107;
+        }
+
+        .custom-alert-info .progress-bar {
+            background-color: #0dcaf0;
+        }
+
+        .custom-alert-content {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+        }
+
+        .custom-alert-icon {
+            margin-right: 12px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-alert-message {
+            flex-grow: 1;
+        }
+
+        .custom-alert-close {
+            background: transparent;
+            border: none;
+            color: inherit;
+            opacity: 0.7;
+            padding: 0 4px;
+            cursor: pointer;
+        }
+
+        .custom-alert-close:hover {
+            opacity: 1;
+        }
+
+        .custom-alert-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .custom-alert-danger {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .custom-alert-warning {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+
+        .custom-alert-info {
+            background-color: #cff4fc;
+            color: #055160;
+        }
     </style>
 </head>
 
@@ -190,13 +324,8 @@
                     <img src="../../media/horizontal_logo.png" alt="Logo" class="img-fluid logo" style="max-width: 200px;">
                 </div>
                 <!-- Alert Section -->
-                <div class="alert-container">
-                    <?php if (isset($_GET['alert'])): ?>
-                    <div class="alert alert-<?= htmlspecialchars($_GET['type']) ?> alert-dismissible fade show" role="alert">
-                        <?= htmlspecialchars($_GET['alert']) ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    <?php endif; ?>
+                <div class="alert-container" id="alertContainer">
+                    <!-- Alerts will be inserted here dynamically -->
                 </div>
                 <!-- Form Section -->
                 <div class="flex-grow-1 d-flex align-items-center">
@@ -243,14 +372,6 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.classList.remove('show');
-                alert.addEventListener('transitionend', () => alert.remove());
-            });
-        }, 5000);
-
         document.getElementById('signInForm').addEventListener('submit', function(event) {
             document.getElementById('submitButton').style.display = 'none';
             document.getElementById('spinnerButton').style.display = 'block';
@@ -261,19 +382,81 @@
         togglePassword.addEventListener('click', function() {
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
-            this.innerHTML = type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+            this.innerHTML = type === 'password'
+                ? '<i class="bi bi-eye"></i>'
+                : '<i class="bi bi-eye-slash"></i>';
         });
 
         document.addEventListener('DOMContentLoaded', () => {
             const artSection = document.querySelector('.art-section img');
-            if(artSection) {
+            if (artSection) {
                 artSection.style.opacity = '0';
                 artSection.style.transition = 'opacity 1s ease-in-out';
-                setTimeout(() => {
-                    artSection.style.opacity = '1';
-                }, 1000);
+                setTimeout(() => { artSection.style.opacity = '1'; }, 1000);
             }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('alert')) {
+                showAlert(urlParams.get('alert'), urlParams.get('type') || 'info');
+            }
+
+            createTestButtons(); // demo only—remove in prod
         });
+
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertElement = document.createElement('div');
+            alertElement.className = `custom-alert custom-alert-${type}`;
+            let iconClass = 'bi-info-circle';
+            if (type === 'success') iconClass = 'bi-check-circle';
+            if (type === 'danger')  iconClass = 'bi-exclamation-triangle';
+            if (type === 'warning') iconClass = 'bi-exclamation-circle';
+
+            alertElement.innerHTML = `
+                <div class="custom-alert-content">
+                    <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
+                    <div class="custom-alert-message">${message}</div>
+                    <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar"></div>
+                </div>
+            `;
+
+            alertContainer.appendChild(alertElement);
+
+            // slide in
+            requestAnimationFrame(() => alertElement.classList.add('show'));
+
+            // progress bar
+            const progressBar = alertElement.querySelector('.progress-bar');
+            progressBar.style.transition = 'width linear 5000ms';
+            progressBar.style.width = '100%';
+            // trigger to 0%
+            setTimeout(() => { progressBar.style.width = '0%'; }, 50);
+
+            // auto-dismiss
+            const dismissTimeout = setTimeout(() => {
+                dismissAlert(alertElement);
+            }, 5050);
+
+            // manual close now also animates
+            alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
+                clearTimeout(dismissTimeout);
+                dismissAlert(alertElement);
+            });
+        }
+
+        function dismissAlert(alertElement) {
+            if (!alertElement || alertElement.classList.contains('hiding')) return;
+            // play slide-up
+            alertElement.classList.add('hiding');
+            alertElement.classList.remove('show');
+            // remove from DOM after animation
+            setTimeout(() => {
+                alertElement.remove();
+            }, 300); // match your CSS 0.3s transition
+        }
     </script>
 </body>
 </html>
