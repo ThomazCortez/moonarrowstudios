@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $pdo->prepare("DELETE FROM password_resets WHERE token = ?");
         $stmt->execute([$token]);
 
-        $successMessage = 'Password has been reset successfully.';
+        $successMessage = 'Password has been reset successfully. Redirecting...';
         $disableInput = true;
     }
 }
@@ -54,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MoonArrow Studios - Reset Password</title>
-    <!-- Darkly Theme from Bootswatch -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../../css/css2.css">
@@ -86,8 +85,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 --color-accent-fg: #58a6ff;
                 --color-input-bg: #0d1117;
             }
+            .custom-alert-success {
+                background-color: #12281e;
+                color: #7ee2b8;
+            }
+            .custom-alert-danger {
+                background-color: #2e0a12;
+                color: #fda4af;
+            }
+            .custom-alert-warning {
+                background-color: #2e2a0e;
+                color: #fde047;
+            }
+            .custom-alert-info {
+                background-color: #092c42;
+                color: #7dd3fc;
+            }
         }
-    
+
         body {
             display: flex;
             justify-content: center;
@@ -108,18 +123,128 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             background-color: var(--color-canvas-subtle);
         }
 
+        /* Custom Alert Styles */
+        .alert-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            pointer-events: none;
+        }
+
+        .custom-alert {
+            position: relative;
+            margin: 16px auto;
+            max-width: 500px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            pointer-events: auto;
+            overflow: hidden;
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s linear;
+        }
+
+        .custom-alert.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .custom-alert.hiding {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+
+        .custom-alert .progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            border-radius: 0;
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 0;
+            margin: 0;
+        }
+
+        .custom-alert .progress-bar {
+            transition: width linear 5000ms;
+            width: 100%;
+            height: 100%;
+        }
+
+        .custom-alert-success .progress-bar {
+            background-color: #198754;
+        }
+
+        .custom-alert-danger .progress-bar {
+            background-color: #dc3545;
+        }
+
+        .custom-alert-warning .progress-bar {
+            background-color: #ffc107;
+        }
+
+        .custom-alert-info .progress-bar {
+            background-color: #0dcaf0;
+        }
+
+        .custom-alert-content {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+        }
+
+        .custom-alert-icon {
+            margin-right: 12px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-alert-message {
+            flex-grow: 1;
+        }
+
+        .custom-alert-close {
+            background: transparent;
+            border: none;
+            color: inherit;
+            opacity: 0.7;
+            padding: 0 4px;
+            cursor: pointer;
+        }
+
+        .custom-alert-close:hover {
+            opacity: 1;
+        }
+
+        .custom-alert-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .custom-alert-danger {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .custom-alert-warning {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+
+        .custom-alert-info {
+            background-color: #cff4fc;
+            color: #055160;
+        }
+
+        /* Existing form styles */
         .logo {
             display: block;
             margin: 0 auto 20px auto;
-        }
-
-        .alert {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1050;
-            max-width: 90%;
         }
 
         .form-control {
@@ -228,28 +353,96 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .centered-footer p {
             margin-bottom: 8px;
         }
+
+        /* Add/Update these styles in your CSS */
+.card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform: translateZ(0); /* Hardware acceleration */
+    will-change: transform; /* Prepare browser for animation */
+    border: 1px solid transparent; /* Add this line */
+}
+
+.card::before,
+.card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(88, 166, 255, 0.3); /* Use your theme's blue color */
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+}
+
+.card::before {
+    top: 0;
+    transform: translateX(-105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card::after {
+    bottom: 0;
+    transform: translateX(105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card:hover {
+    box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
+                0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(88, 166, 255, 0.3) !important;
+}
+
+.card:hover::before,
+.card:hover::after {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.card-body {
+    position: relative;
+    z-index: 1; /* Ensure content stays above borders */
+}
+
+.card-body::before,
+.card-body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: rgba(88, 166, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card-body::before {
+    left: 0;
+    transform: translateY(105%);
+}
+
+.card-body::after {
+    right: 0;
+    transform: translateY(-105%);
+}
+
+.card:hover .card-body::before,
+.card:hover .card-body::after {
+    transform: translateY(0);
+    opacity: 1;
+}
     </style>
 </head>
 
 <body>
-    <!-- Success Alert -->
-    <?php if ($successMessage): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <?php echo htmlspecialchars($successMessage); ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php endif; ?>
+    <!-- Alert Container -->
+    <div class="alert-container" id="alertContainer"></div>
 
-    <!-- Error Alert -->
-    <?php if ($errorMessage): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <?php echo htmlspecialchars($errorMessage); ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php endif; ?>
-
-    <div class="reset-password-container">
-        <!-- Logo -->
+    <div class="reset-password-container card">
         <img src="../../media/horizontal_logo.png" alt="Logo" class="logo" width="180">
         <h2 class="text-center">Reset Password</h2>
         <p class="text-center">Don't worry, happens to the best of us.</p>
@@ -280,8 +473,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </button>
         </form>
         <hr>
-        <div class="text-center mt-3">
-            <small>Done? <a href="../sign_in/sign_in_html.php" class="text-decoration-none">Sign in here</a>.</small>
+        <div class="text-center">
+            <small>If it doesn't redirect, you can click <a href="../sign_in/sign_in_html.php" class="text-decoration-none">here</a>.</small>
         </div>
     </div>
 
@@ -289,34 +482,83 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+    // Alert functions
+    function showAlert(message, type = 'info') {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertElement = document.createElement('div');
+        alertElement.className = `custom-alert custom-alert-${type}`;
+        let iconClass = 'bi-info-circle';
+        if (type === 'success') iconClass = 'bi-check-circle';
+        if (type === 'danger')  iconClass = 'bi-exclamation-triangle';
+        if (type === 'warning') iconClass = 'bi-exclamation-circle';
+
+        alertElement.innerHTML = `
+            <div class="custom-alert-content">
+                <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
+                <div class="custom-alert-message">${message}</div>
+                <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
+            </div>
+            <div class="progress">
+                <div class="progress-bar"></div>
+            </div>
+        `;
+
+        alertContainer.appendChild(alertElement);
+
+        requestAnimationFrame(() => alertElement.classList.add('show'));
+
+        const progressBar = alertElement.querySelector('.progress-bar');
+        progressBar.style.transition = 'width linear 5000ms';
+        progressBar.style.width = '100%';
+        setTimeout(() => { progressBar.style.width = '0%'; }, 50);
+
+        const dismissTimeout = setTimeout(() => {
+            dismissAlert(alertElement);
+        }, 5050);
+
+        alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
+            clearTimeout(dismissTimeout);
+            dismissAlert(alertElement);
+        });
+    }
+
+    function dismissAlert(alertElement) {
+        if (!alertElement || alertElement.classList.contains('hiding')) return;
+        alertElement.classList.add('hiding');
+        alertElement.classList.remove('show');
+        setTimeout(() => { alertElement.remove(); }, 300);
+    }
+
     // Password toggle visibility
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
-    
-    togglePassword.addEventListener('click', function() {
-        // Toggle the password visibility
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        
-        // Toggle the icon
-        this.innerHTML = type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
-    });
-
-    // Auto-dismiss alerts after 5 seconds
-    setTimeout(() => {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
-            alert.classList.remove('show');
-            alert.addEventListener('transitionend', () => alert.remove());
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.innerHTML = type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
         });
-    }, 5000);
+    }
 
-    // If there's a success message, redirect to sign in page after 5 seconds
+    // Redirect on success
     <?php if ($successMessage): ?>
     setTimeout(() => {
         window.location.href = '../sign_in/sign_in_html.php';
-    }, 5000);
+    }, 5050);
     <?php endif; ?>
     </script>
+
+    <?php if ($successMessage || $errorMessage): ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        <?php if ($successMessage): ?>
+            showAlert('<?php echo addslashes($successMessage); ?>', 'success');
+        <?php endif; ?>
+        <?php if ($errorMessage): ?>
+            showAlert('<?php echo addslashes($errorMessage); ?>', 'danger');
+        <?php endif; ?>
+    });
+    </script>
+    <?php endif; ?>
 </body>
 </html>
