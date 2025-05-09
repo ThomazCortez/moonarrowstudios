@@ -138,6 +138,8 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
 <head>
     <?php require 'header.php'; ?>
     <title>MoonArrow Studios - <?= htmlspecialchars($user['username']) ?></title>
+    <!-- Add Animate.css CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         .banner-container {
             height: 200px;
@@ -327,92 +329,130 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
             margin-left: auto;
         }
 
-        /* Add/Update these styles in your CSS */
-.card {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    transform: translateZ(0); /* Hardware acceleration */
-    will-change: transform; /* Prepare browser for animation */
-    border: 1px solid transparent; /* Add this line */
-}
+        /* Card hover effect styles */
+        .card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            transform: translateZ(0);
+            will-change: transform;
+            border: 1px solid transparent;
+        }
 
-.card::before,
-.card::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: rgba(88, 166, 255, 0.3); /* Use your theme's blue color */
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 2;
-    opacity: 0;
-}
+        .card::before,
+        .card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(88, 166, 255, 0.3);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+            opacity: 0;
+        }
 
-.card::before {
-    top: 0;
-    transform: translateX(-105%);
-    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-}
+        .card::before {
+            top: 0;
+            transform: translateX(-105%);
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+        }
 
-.card::after {
-    bottom: 0;
-    transform: translateX(105%);
-    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-}
+        .card::after {
+            bottom: 0;
+            transform: translateX(105%);
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+        }
 
-.card:hover {
-    box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
-                0 4px 20px rgba(0, 0, 0, 0.3) !important;
-    border-color: rgba(88, 166, 255, 0.3) !important;
-}
+        .card:hover {
+            box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
+                        0 4px 20px rgba(0, 0, 0, 0.3) !important;
+            border-color: rgba(88, 166, 255, 0.3) !important;
+        }
 
-.card:hover::before,
-.card:hover::after {
-    transform: translateX(0);
-    opacity: 1;
-}
+        .card:hover::before,
+        .card:hover::after {
+            transform: translateX(0);
+            opacity: 1;
+        }
 
-.card-body {
-    position: relative;
-    z-index: 1; /* Ensure content stays above borders */
-}
+        .card-body {
+            position: relative;
+            z-index: 1;
+        }
 
-.card-body::before,
-.card-body::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 2px;
-    background: rgba(88, 166, 255, 0.3);
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 2;
-    opacity: 0;
-    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-}
+        .card-body::before,
+        .card-body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: rgba(88, 166, 255, 0.3);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+            opacity: 0;
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+        }
 
-.card-body::before {
-    left: 0;
-    transform: translateY(105%);
-}
+        .card-body::before {
+            left: 0;
+            transform: translateY(105%);
+        }
 
-.card-body::after {
-    right: 0;
-    transform: translateY(-105%);
-}
+        .card-body::after {
+            right: 0;
+            transform: translateY(-105%);
+        }
 
-.card:hover .card-body::before,
-.card:hover .card-body::after {
-    transform: translateY(0);
-    opacity: 1;
-}
+        .card:hover .card-body::before,
+        .card:hover .card-body::after {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* Custom animate.css animation durations */
+        .animate__animated.animate__faster {
+            animation-duration: 0.4s;
+        }
+        
+        .animate__animated.animate__fast {
+            animation-duration: 0.6s;
+        }
+        
+        /* Staggered animations for cards */
+        .staggered-animation {
+            opacity: 0;
+        }
+        
+        /* Badge animation */
+        .badge {
+            transition: all 0.3s ease;
+        }
+        
+        .badge:hover {
+            transform: scale(1.15);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        /* Tab transition effects */
+        .tab-pane {
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .tab-pane.fade {
+            opacity: 0;
+        }
+        
+        .tab-pane.fade.show {
+            opacity: 1;
+        }
+        
     </style>
 </head>
 <body>
     <div class="container-fluid p-0">
-        <div class="banner-container">
+        <div class="banner-container animate__animated animate__fadeIn">
             <?php if ($user['banner']): ?>
                 <img src="<?= htmlspecialchars($user['banner']) ?>" alt="Profile banner" class="banner-img">
             <?php else: ?>
@@ -420,49 +460,49 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
             <?php endif; ?>
             
             <?php if ($user['profile_picture']): ?>
-                <img src="<?= htmlspecialchars($user['profile_picture']) ?>" alt="Profile picture" class="profile-picture">
+                <img src="<?= htmlspecialchars($user['profile_picture']) ?>" alt="Profile picture" class="profile-picture animate__animated animate__zoomIn">
             <?php else: ?>
-                <div class="profile-picture bg-dark d-flex align-items-center justify-content-center">
+                <div class="profile-picture bg-dark d-flex align-items-center justify-content-center animate__animated animate__zoomIn">
                     <i class="bi bi-person-fill text-light" style="font-size: 4rem;"></i>
                 </div>
             <?php endif; ?>
         </div>
 
         <div class="container">
-            <div class="profile-info">
+            <div class="profile-info animate__animated animate__fadeInUp">
                 <div class="profile-header">
                     <div class="username-container">
-                        <h1 class="username mb-0"><?= htmlspecialchars($user['username']) ?></h1>
+                        <h1 class="username mb-0 animate__animated animate__fadeInLeft"><?= htmlspecialchars($user['username']) ?></h1>
                         <?php if ($is_logged_in && !$viewing_own_profile): ?>
-    <div class="d-flex gap-2">
-        <form method="POST" class="mb-0">
-            <?php if ($is_following): ?>
-                <button type="submit" name="unfollow" class="btn btn-outline-primary">Unfollow</button>
-            <?php else: ?>
-                <button type="submit" name="follow" class="btn btn-primary">Follow</button>
-            <?php endif; ?>
-        </form>
-        
-        <button type="button" class="btn  text-danger report-btn" data-bs-toggle="modal" data-bs-target="#reportModal">
-            <i class="bi bi-flag-fill"></i> Report User
-        </button>
-    </div>
-<?php endif; ?>
+                            <div class="d-flex gap-2 animate__animated animate__fadeIn">
+                                <form method="POST" class="mb-0">
+                                    <?php if ($is_following): ?>
+                                        <button type="submit" name="unfollow" class="btn btn-outline-primary">Unfollow</button>
+                                    <?php else: ?>
+                                        <button type="submit" name="follow" class="btn btn-primary">Follow</button>
+                                    <?php endif; ?>
+                                </form>
+                                
+                                <button type="button" class="btn text-danger report-btn" data-bs-toggle="modal" data-bs-target="#reportModal">
+                                    <i class="bi bi-flag-fill"></i> Report User
+                                </button>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                <div class="user-stats">
+                <div class="user-stats animate__animated animate__fadeIn">
                     <p class="mb-1">Joined <?= htmlspecialchars($user['formatted_join_date']) ?></p>
                     <p class="mb-1">Followers: <?= htmlspecialchars($follower_count) ?></p>
                 </div>
 
                 <?php if ($user['description']): ?>
-                    <p class="description"><?= nl2br(htmlspecialchars($user['description'])) ?></p>
+                    <p class="description animate__animated animate__fadeIn "><?= nl2br(htmlspecialchars($user['description'])) ?></p>
                 <?php endif; ?>
 
                 <!-- Social Links Section -->
                 <?php if ($user['youtube'] || $user['linkedin'] || $user['twitter'] || $user['instagram'] || $user['github'] || $user['portfolio']): ?>
-                    <div class="social-links">
+                    <div class="social-links animate__animated animate__fadeInUp s">
                         <?php if ($user['youtube']): ?>
                             <a href="<?= htmlspecialchars($user['youtube']) ?>" target="_blank" class="youtube-icon" title="YouTube">
                                 <i class="bi bi-youtube"></i>
@@ -502,9 +542,9 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                 <?php endif; ?>
             </div>
 
-            <hr class="my-4">
+            <hr class="my-4 animate__animated animate__fadeIn s">
 
-            <ul class="nav nav-tabs mb-4">
+            <ul class="nav nav-tabs mb-4 animate__animated animate__fadeInDown s">
                 <li class="nav-item">
                     <a class="nav-link <?= $active_tab === 'posts' ? 'active' : '' ?>" data-bs-toggle="tab" href="#posts">Posts</a>
                 </li>
@@ -516,7 +556,7 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
             <div class="tab-content">
                 <!-- Posts Tab -->
                 <div class="tab-pane fade <?= $active_tab === 'posts' ? 'show active' : '' ?>" id="posts">
-                    <form method="GET" action="profile.php" class="d-flex gap-2 mb-4 flex-wrap">
+                    <form method="GET" action="profile.php" class="d-flex gap-2 mb-4 flex-wrap animate__animated animate__fadeIn s">
                     <?php if(isset($_GET['id'])): ?>
                         <input type="hidden" name="id" value="<?= (int)$_GET['id'] ?>">
                     <?php endif; ?>
@@ -554,8 +594,9 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
 
                     <div class="posts-container">
                         <?php if ($posts->num_rows > 0): ?>
+                            <?php $delay = 0.5; ?>
                             <?php while ($post = $posts->fetch_assoc()): ?>
-                                <div class="card mb-3">
+                                <div class="card mb-3 staggered-animation" data-animation="fadeInUp" data-delay="<?= $delay ?>">
                                     <div class="card-body">
                                         <h3 class="card-title">
                                             <a href="view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none">
@@ -584,16 +625,17 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                                         </p>
                                     </div>
                                 </div>
+                                <?php $delay += 0.05; ?>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <div class="alert alert-info">No posts found.</div>
+                            <div class="alert alert-info animate__animated animate__fadeIn s">No posts found.</div>
                         <?php endif; ?>
                     </div>
                 </div>
 
                 <!-- Assets Tab -->
                 <div class="tab-pane fade <?= $active_tab === 'assets' ? 'show active' : '' ?>" id="assets">
-                    <form method="GET" action="profile.php" class="d-flex gap-2 mb-4 flex-wrap">
+                    <form method="GET" action="profile.php" class="d-flex gap-2 mb-4 flex-wrap animate__animated animate__fadeIn s">
                         <!-- Always include the explicit user_id from URL, not from session -->
                         <?php if(isset($_GET['id'])): ?>
                             <input type="hidden" name="id" value="<?= (int)$_GET['id'] ?>">
@@ -632,8 +674,9 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
 
                     <div class="assets-container">
                         <?php if ($assets->num_rows > 0): ?>
+                            <?php $delay = 0.5; ?>
                             <?php while ($asset = $assets->fetch_assoc()): ?>
-                                <div class="card mb-3">
+                                <div class="card mb-3 staggered-animation" data-animation="fadeInUp" data-delay="<?= $delay ?>">
                                     <div class="card-body">
                                         <h3 class="card-title">
                                             <a href="view_asset.php?id=<?= $asset['id'] ?>" class="text-decoration-none">
@@ -662,9 +705,10 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                                         </p>
                                     </div>
                                 </div>
+                                <?php $delay += 0.05; ?>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <div class="alert alert-info">No assets found.</div>
+                            <div class="alert alert-info animate__animated animate__fadeIn s">No assets found.</div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -673,46 +717,45 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
     </div>
 
     <!-- Report Modal -->
-<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="reportModalLabel">Report User</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel">Report User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="reportForm" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="content_type" value="user">
+                        <input type="hidden" name="content_id" value="<?= isset($_GET['id']) ? (int)$_GET['id'] : '' ?>">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Reason</label>
+                            <select name="reason" class="form-select" required>
+                                <option value="">Select a reason</option>
+                                <option value="Harassment">Harassment</option>
+                                <option value="Spam">Spam</option>
+                                <option value="Inappropriate Content">Inappropriate Content</option>
+                                <option value="Impersonation">Impersonation</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Additional Details</label>
+                            <textarea name="details" class="form-control" rows="3" 
+                                placeholder="Please provide additional information..." 
+                                maxlength="500"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Submit Report</button>
+                    </div>
+                </form>
             </div>
-            <form id="reportForm" method="POST">
-                <div class="modal-body">
-                    <input type="hidden" name="content_type" value="user">
-                    <!-- Fix: Use $_GET['id'] directly to ensure correct ID -->
-                    <input type="hidden" name="content_id" value="<?= isset($_GET['id']) ? (int)$_GET['id'] : '' ?>">
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Reason</label>
-                        <select name="reason" class="form-select" required>
-                            <option value="">Select a reason</option>
-                            <option value="Harassment">Harassment</option>
-                            <option value="Spam">Spam</option>
-                            <option value="Inappropriate Content">Inappropriate Content</option>
-                            <option value="Impersonation">Impersonation</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Additional Details</label>
-                        <textarea name="details" class="form-control" rows="3" 
-                            placeholder="Please provide additional information..." 
-                            maxlength="500"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Submit Report</button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
 
 <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -760,6 +803,59 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                 } finally {
                     submitBtn.disabled = false;
                 }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle staggered animations
+            const animatedElements = document.querySelectorAll('.staggered-animation');
+            
+            // Use IntersectionObserver for better performance
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const element = entry.target;
+                        const animation = element.getAttribute('data-animation');
+                        const delay = element.getAttribute('data-delay');
+                        
+                        // Add the animation classes
+                        element.classList.add('animate__animated', `animate__${animation}`);
+                        element.style.animationDelay = `${delay}s`;
+                        element.style.opacity = '1';
+                        
+                        // Stop observing once animation is applied
+                        observer.unobserve(element);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            // Start observing all elements with staggered animation
+            animatedElements.forEach(element => {
+                observer.observe(element);
+            });
+            
+            // Add smooth transition when switching tabs
+            const tabLinks = document.querySelectorAll('.nav-link');
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    const targetId = this.getAttribute('href');
+                    const targetPane = document.querySelector(targetId);
+                    
+                    // Reset all staggered animations when switching tabs
+                    if (targetPane) {
+                        const staggeredItems = targetPane.querySelectorAll('.staggered-animation');
+                        staggeredItems.forEach((item, index) => {
+                            // Remove previous animation classes
+                            item.classList.remove('animate__animated', `animate__${item.getAttribute('data-animation')}`);
+                            item.style.opacity = '0';
+                            
+                            // Re-observe for animation
+                            observer.observe(item);
+                        });
+                    }
+                });
             });
         });
     </script>
