@@ -110,6 +110,9 @@ while ($row = $comments_result->fetch_assoc()) {
     --color-reply-bg: #f6f8fa;
     --color-code-bg: #f6f8fa;
     --color-media-overlay: rgba(0, 0, 0, 0.5);
+    --color-card-bg: #161b22;
+    --color-card-border: #30363d;
+    --color-accent-fg: #58a6ff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -152,10 +155,54 @@ while ($row = $comments_result->fetch_assoc()) {
 
 /* Content Styling */
 .card {
-    background-color: var(--color-canvas-default);
-    border: 1px solid var(--color-border-default);
-    border-radius: 6px;
-    margin-bottom: 24px;
+    background-color: var(--color-card-bg);
+    border: 1px solid var(--color-card-border);
+    border-radius: 8px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateZ(0);
+    will-change: transform;
+    margin-bottom: 1.5rem;
+    position: relative; /* Add this */
+    overflow: hidden; /* Prevent overflow of pseudo-elements */
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
+                0 0 25px 5px rgba(88, 166, 255, 0.1);
+    border-color: rgba(88, 166, 255, 0.3);
+}
+
+/* Add the glowing border animation */
+.card::before,
+.card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(88, 166, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+}
+
+.card::before {
+    top: 0;
+    transform: translateX(-105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card::after {
+    bottom: 0;
+    transform: translateX(105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card:hover::before,
+.card:hover::after {
+    transform: translateX(0);
+    opacity: 1;
 }
 
 .card-body {
@@ -293,10 +340,15 @@ while ($row = $comments_result->fetch_assoc()) {
 
 /* Comments and Replies */
 .comment-card {
-    border: 1px solid var(--color-border-muted);
-    border-radius: 6px;
-    margin-bottom: 16px;
-    background-color: var(--color-comment-bg);
+    border: 1px solid var(--color-card-border);
+    background-color: var(--color-card-bg);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.comment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .replies {
@@ -306,10 +358,24 @@ while ($row = $comments_result->fetch_assoc()) {
 }
 
 .reply-card {
-    background-color: var(--color-reply-bg);
-    border: 1px solid var(--color-border-muted);
+    background-color: var(--color-canvas-subtle);
+    border: 1px solid var(--color-card-border);
     border-radius: 6px;
-    margin-bottom: 8px;
+}
+
+.main-container {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.post-content-card {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .comment-actions {
@@ -704,7 +770,8 @@ document.addEventListener('DOMContentLoaded', () => {
 </button>
 	</div> <?php if (!isset($_SESSION['user_id'])): ?> <p class="text-center">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p> <?php endif; ?>
 	<!-- Comment Section -->
-	<div class="card container">
+     <div class="container mt-3">
+	<div class="card">
 		<div class="card-body">
 			<h4>Comments</h4> <?php if (isset($_SESSION['user_id'])): ?> <div id="comment-editor" class="mb-3"></div>
 			<button class="btn btn-primary" id="submit-comment" data-post-id="<?= $post_id ?>">Submit Comment</button> <?php else: ?> <p class="">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p> <?php endif; ?>
@@ -799,6 +866,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         </div>
     </div>
+</div>
 <?php endforeach; ?> </div>
 		</div>
 	</div>
