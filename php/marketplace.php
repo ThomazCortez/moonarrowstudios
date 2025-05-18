@@ -616,8 +616,9 @@ body {
 }
 
 .asset-list {
-    width: 100%;
-    min-width: 0; /* Allows content to shrink below minimum content size */
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 .asset-list .card {
@@ -782,10 +783,6 @@ hr {
         flex-direction: column;
     }
     
-    .asset-list {
-        order: 1;
-    }
-    
     .sidebar {
         order: 2;
         width: 100%;
@@ -828,14 +825,16 @@ hr {
 
 
 .pagination-wrapper {
+    margin-top: auto; /* Push to bottom */
+    padding: 20px 0;
     display: flex;
     justify-content: center;
-    margin-top: 2rem;
 }
 
 
 
 .assets-container {
+    flex: 1; /* Take up available space */
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -1523,6 +1522,45 @@ while ($asset = $result->fetch_assoc()):
 </div>
                     <?php endwhile; ?>
                 </div>
+                 <!-- Pagination -->
+        <div class="pagination-wrapper animate__animated animate__fadeIn animate__delay-1s">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <!-- First Page -->
+                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=1<?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">First</a>
+                    </li>
+                    
+                    <!-- Previous Page -->
+                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= max(1, $page - 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Previous</a>
+                    </li>
+                    
+                    <!-- Page Numbers -->
+                    <?php
+                    $start_page = max(1, $page - 2);
+                    $end_page = min($total_pages, $page + 2);
+                    
+                    for ($i = $start_page; $i <= $end_page; $i++): 
+                    ?>
+                        <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                            <a class="page-link" href="?page=<?= $i ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>"><?= $i ?></a>
+                        </li>
+                    <?php endfor; ?>
+                    
+                    <!-- Next Page -->
+                    <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= min($total_pages, $page + 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Next</a>
+                    </li>
+                    
+                    <!-- Last Page -->
+                    <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= $total_pages ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Last</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
             </div>
         </div>
 
@@ -1583,46 +1621,6 @@ while ($asset = $result->fetch_assoc()):
     </div>
 </div>
 
-
-        <!-- Pagination -->
-        <div class="pagination-wrapper animate__animated animate__fadeIn animate__delay-1s">
-            <nav aria-label="Page navigation">
-                <ul class="pagination">
-                    <!-- First Page -->
-                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?page=1<?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">First</a>
-                    </li>
-                    
-                    <!-- Previous Page -->
-                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?page=<?= max(1, $page - 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Previous</a>
-                    </li>
-                    
-                    <!-- Page Numbers -->
-                    <?php
-                    $start_page = max(1, $page - 2);
-                    $end_page = min($total_pages, $page + 2);
-                    
-                    for ($i = $start_page; $i <= $end_page; $i++): 
-                    ?>
-                        <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                            <a class="page-link" href="?page=<?= $i ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>"><?= $i ?></a>
-                        </li>
-                    <?php endfor; ?>
-                    
-                    <!-- Next Page -->
-                    <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?page=<?= min($total_pages, $page + 1) ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Next</a>
-                    </li>
-                    
-                    <!-- Last Page -->
-                    <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?page=<?= $total_pages ?><?= isset($_GET['search']) ? '&search='.urlencode($_GET['search']) : '' ?><?= isset($_GET['category']) ? '&category='.urlencode($_GET['category']) : '' ?><?= isset($_GET['filter']) ? '&filter='.urlencode($_GET['filter']) : '' ?>">Last</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </div>
     <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Add hover animations to cards
