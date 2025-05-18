@@ -2,9 +2,8 @@
 session_start();
 require 'db_connect.php';
 
-// Get user ID from URL or session - IMPORTANT: Prioritize URL parameter
+// Get user ID from URL or session
 $user_id = isset($_GET['id']) ? (int)$_GET['id'] : ($_SESSION['user_id'] ?? null);
-
 if (!$user_id) {
     header("Location: sign_in/sign_in_html.php");
     exit;
@@ -13,12 +12,11 @@ if (!$user_id) {
 // Get active tab from URL parameter
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'posts';
 
-// Fetch user data including social links
+// Fetch user data
 $stmt = $conn->prepare("SELECT *, DATE_FORMAT(created_at, '%M %Y') as formatted_join_date FROM users WHERE user_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
-
 if (!$user) {
     header("Location: index.php");
     exit;
@@ -30,7 +28,7 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $follower_count = $stmt->get_result()->fetch_assoc()['follower_count'];
 
-// Posts filtering
+// Posts filtering and pagination
 $post_search = $_GET['post_search'] ?? '';
 $post_category_filter = (int)($_GET['post_category'] ?? 0);
 $post_sort_order = $_GET['post_sort'] ?? 'newest';
@@ -40,17 +38,12 @@ $post_order_by = match($post_sort_order) {
     default => 'posts.created_at DESC'
 };
 
-// Assets filtering
-$asset_search = $_GET['asset_search'] ?? '';
-$asset_category_filter = (int)($_GET['asset_category'] ?? 0);
-$asset_sort_order = $_GET['asset_sort'] ?? 'newest';
-$asset_order_by = match($asset_sort_order) {
-    'oldest' => 'assets.created_at ASC',
-    'highest_score' => '(assets.upvotes - assets.downvotes) DESC',
-    default => 'assets.created_at DESC'
-};
+// Posts Pagination
+$posts_per_page = 5;
+$post_page = isset($_GET['post_page']) ? max(1, (int)$_GET['post_page']) : 1;
+$post_offset = ($post_page - 1) * $posts_per_page;
 
-// Fetch posts
+// Build posts query
 $post_sql = "SELECT posts.*, categories.name AS category_name, 
             (posts.upvotes - posts.downvotes) AS score 
             FROM posts 
@@ -70,13 +63,54 @@ if ($post_category_filter) {
     $post_params[] = $post_category_filter;
 }
 
-$post_sql .= " ORDER BY " . $post_order_by;
+$post_sql .= " ORDER BY " . $post_order_by . " LIMIT ? OFFSET ?";
+$post_types .= "ii";
+array_push($post_params, $posts_per_page, $post_offset);
+
+// Execute posts query
 $post_stmt = $conn->prepare($post_sql);
 $post_stmt->bind_param($post_types, ...$post_params);
 $post_stmt->execute();
 $posts = $post_stmt->get_result();
 
-// Fetch assets
+// Get total posts count
+$post_count_sql = "SELECT COUNT(*) as total FROM posts WHERE user_id = ?";
+$post_count_params = [$user_id];
+$post_count_types = "i";
+
+if ($post_search) {
+    $post_count_sql .= " AND (title LIKE ? OR content LIKE ? OR hashtags LIKE ?)";
+    $post_count_types .= "sss";
+    array_push($post_count_params, "%$post_search%", "%$post_search%", "%$post_search%");
+}
+if ($post_category_filter) {
+    $post_count_sql .= " AND category_id = ?";
+    $post_count_types .= "i";
+    array_push($post_count_params, $post_category_filter);
+}
+
+$post_count_stmt = $conn->prepare($post_count_sql);
+$post_count_stmt->bind_param($post_count_types, ...$post_count_params);
+$post_count_stmt->execute();
+$total_posts = $post_count_stmt->get_result()->fetch_assoc()['total'];
+$total_post_pages = max(1, ceil($total_posts / $posts_per_page));
+
+// Assets filtering and pagination
+$asset_search = $_GET['asset_search'] ?? '';
+$asset_category_filter = (int)($_GET['asset_category'] ?? 0);
+$asset_sort_order = $_GET['asset_sort'] ?? 'newest';
+$asset_order_by = match($asset_sort_order) {
+    'oldest' => 'assets.created_at ASC',
+    'highest_score' => '(assets.upvotes - assets.downvotes) DESC',
+    default => 'assets.created_at DESC'
+};
+
+// Assets Pagination
+$assets_per_page = 5;
+$asset_page = isset($_GET['asset_page']) ? max(1, (int)$_GET['asset_page']) : 1;
+$asset_offset = ($asset_page - 1) * $assets_per_page;
+
+// Build assets query
 $asset_sql = "SELECT assets.*, asset_categories.name AS category_name, 
              (assets.upvotes - assets.downvotes) AS score 
              FROM assets 
@@ -96,11 +130,37 @@ if ($asset_category_filter) {
     $asset_params[] = $asset_category_filter;
 }
 
-$asset_sql .= " ORDER BY " . $asset_order_by;
+$asset_sql .= " ORDER BY " . $asset_order_by . " LIMIT ? OFFSET ?";
+$asset_types .= "ii";
+array_push($asset_params, $assets_per_page, $asset_offset);
+
+// Execute assets query
 $asset_stmt = $conn->prepare($asset_sql);
 $asset_stmt->bind_param($asset_types, ...$asset_params);
 $asset_stmt->execute();
 $assets = $asset_stmt->get_result();
+
+// Get total assets count
+$asset_count_sql = "SELECT COUNT(*) as total FROM assets WHERE user_id = ?";
+$asset_count_params = [$user_id];
+$asset_count_types = "i";
+
+if ($asset_search) {
+    $asset_count_sql .= " AND (title LIKE ? OR content LIKE ? OR hashtags LIKE ?)";
+    $asset_count_types .= "sss";
+    array_push($asset_count_params, "%$asset_search%", "%$asset_search%", "%$asset_search%");
+}
+if ($asset_category_filter) {
+    $asset_count_sql .= " AND category_id = ?";
+    $asset_count_types .= "i";
+    array_push($asset_count_params, $asset_category_filter);
+}
+
+$asset_count_stmt = $conn->prepare($asset_count_sql);
+$asset_count_stmt->bind_param($asset_count_types, ...$asset_count_params);
+$asset_count_stmt->execute();
+$total_assets = $asset_count_stmt->get_result()->fetch_assoc()['total'];
+$total_asset_pages = max(1, ceil($total_assets / $assets_per_page));
 
 // Check if following
 $is_following = false;
@@ -590,6 +650,47 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
     color: #7dd3fc;
   }
 }
+
+/* Pagination Styles */
+.pagination {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.pagination .page-item .page-link {
+    color: var(--color-fg-default);
+    background-color: var(--color-card-bg);
+    border: 1px solid var(--color-border-default);
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.25rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: var(--color-canvas-subtle);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--color-accent-fg);
+    color: #ffffff;
+    border-color: var(--color-accent-fg);
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--color-fg-muted);
+    pointer-events: none;
+    background-color: var(--color-canvas-subtle);
+}
+
+.pagination-wrapper {
+    margin-top: auto;
+    padding: 20px 0;
+    display: flex;
+    justify-content: center;
+}
         
     </style>
 </head>
@@ -774,6 +875,47 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                         <?php else: ?>
                             <div class="alert alert-info animate__animated animate__fadeIn s">No posts found.</div>
                         <?php endif; ?>
+                        <?php if ($total_post_pages > 1): ?>
+                            <div class="pagination-wrapper mt-4">
+    <nav aria-label="Posts pagination">
+        <ul class="pagination justify-content-center">
+            <li class="page-item <?= ($post_page <= 1) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?<?php 
+                    echo http_build_query(array_merge($_GET, ['post_page' => 1, 'tab' => 'posts']));
+                ?>">First</a>
+            </li>
+            <li class="page-item <?= ($post_page <= 1) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?<?php 
+                    echo http_build_query(array_merge($_GET, ['post_page' => $post_page - 1, 'tab' => 'posts']));
+                ?>">Previous</a>
+            </li>
+
+            <?php 
+            $start_page = max(1, $post_page - 2);
+            $end_page = min($total_post_pages, $post_page + 2);
+            
+            for ($i = $start_page; $i <= $end_page; $i++): ?>
+                <li class="page-item <?= ($i == $post_page) ? 'active animate__animated animate__pulse animate__infinite' : '' ?>">
+                    <a class="page-link" href="?<?php 
+                        echo http_build_query(array_merge($_GET, ['post_page' => $i, 'tab' => 'posts']));
+                    ?>"><?= $i ?></a>
+                </li>
+            <?php endfor; ?>
+
+            <li class="page-item <?= ($post_page >= $total_post_pages) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?<?php 
+                    echo http_build_query(array_merge($_GET, ['post_page' => $post_page + 1, 'tab' => 'posts']));
+                ?>">Next</a>
+            </li>
+            <li class="page-item <?= ($post_page >= $total_post_pages) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?<?php 
+                    echo http_build_query(array_merge($_GET, ['post_page' => $total_post_pages, 'tab' => 'posts']));
+                ?>">Last</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<?php endif; ?>
                     </div>
                 </div>
 
@@ -854,6 +996,47 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                         <?php else: ?>
                             <div class="alert alert-info animate__animated animate__fadeIn s">No assets found.</div>
                         <?php endif; ?>
+                        <?php if ($total_asset_pages > 1): ?>
+<div class="pagination-wrapper mt-4">
+    <nav aria-label="Assets pagination">
+        <ul class="pagination justify-content-center">
+            <li class="page-item <?= ($asset_page <= 1) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?<?php 
+                    echo http_build_query(array_merge($_GET, ['asset_page' => 1, 'tab' => 'assets']));
+                ?>">First</a>
+            </li>
+            <li class="page-item <?= ($asset_page <= 1) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?<?php 
+                    echo http_build_query(array_merge($_GET, ['asset_page' => $asset_page - 1, 'tab' => 'assets']));
+                ?>">Previous</a>
+            </li>
+
+            <?php 
+            $start_page = max(1, $asset_page - 2);
+            $end_page = min($total_asset_pages, $asset_page + 2);
+            
+            for ($i = $start_page; $i <= $end_page; $i++): ?>
+                <li class="page-item <?= ($i == $asset_page) ? 'active animate__animated animate__pulse animate__infinite' : '' ?>">
+                    <a class="page-link" href="?<?php 
+                        echo http_build_query(array_merge($_GET, ['asset_page' => $i, 'tab' => 'assets']));
+                    ?>"><?= $i ?></a>
+                </li>
+            <?php endfor; ?>
+
+            <li class="page-item <?= ($asset_page >= $total_asset_pages) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?<?php 
+                    echo http_build_query(array_merge($_GET, ['asset_page' => $asset_page + 1, 'tab' => 'assets']));
+                ?>">Next</a>
+            </li>
+            <li class="page-item <?= ($asset_page >= $total_asset_pages) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?<?php 
+                    echo http_build_query(array_merge($_GET, ['asset_page' => $total_asset_pages, 'tab' => 'assets']));
+                ?>">Last</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<?php endif; ?>
                     </div>
                 </div>
             </div>
