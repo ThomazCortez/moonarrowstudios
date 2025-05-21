@@ -83,6 +83,7 @@ while ($row = $comments_result->fetch_assoc()) {
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <title>MoonArrow Studios - Post</title>
 	<script>
 	document.addEventListener('DOMContentLoaded', () => {
@@ -137,6 +138,16 @@ while ($row = $comments_result->fetch_assoc()) {
         --color-code-bg: #161b22;
         --color-media-overlay: rgba(0, 0, 0, 0.7);
     }
+}
+
+* {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Hover effects for buttons with animation */
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 /* Post Title and Metadata */
@@ -611,6 +622,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to open modal
     function openModal(mediaElement) {
         const clone = mediaElement.cloneNode(true);
+
+         // Add zoom-in animation classes
+        clone.classList.add('animate__animated', 'animate__zoomIn');
         
         // Reset any specific sizing from the thumbnail
         clone.style.position = 'static';
@@ -630,11 +644,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to close modal
     function closeModal() {
         const mediaElement = modalContent.querySelector('img, video');
-        if (mediaElement) {
-            mediaElement.remove();
-        }
-        modal.classList.remove('active');
-        document.body.style.overflow = ''; // Restore scrolling
+        
+        // Add fade-out animation to both modal background and content
+        modal.classList.add('animate__animated', 'animate__fadeOut');
+        
+        // Wait for either animation to complete
+        modal.addEventListener('animationend', () => {
+            // Cleanup after animations
+            if (mediaElement) mediaElement.remove();
+            modal.classList.remove('active', 'animate__animated', 'animate__fadeOut');
+            document.body.style.overflow = '';
+        }, { once: true });
     }
 
     // Event listeners for opening modal
@@ -662,12 +682,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <body>
 <div class="container mt-5">
-    <div class="card">
+    <div class="card animate__animated animate__fadeIn">
         <div class="card-body">
             <!-- Post Header - Cleaner & Minimalist with Icons -->
             <div class="post-header mb-4">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center animate__animated animate__fadeInLeft">
                         <div class="profile-pic-container me-3">
                             <?php if (!empty($post['profile_picture'])): ?>
                                 <img src="<?= htmlspecialchars($post['profile_picture']) ?>" alt="Profile" class="rounded-circle" width="40" height="40">
@@ -686,7 +706,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center animate__animated animate__fadeInRight">
                         <span class="badge bg-dark me-2">
                             <i class="bi bi-tag"></i> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?>
                         </span>
@@ -696,10 +716,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 
-                <h1 class="card-title mb-3"><?= htmlspecialchars($post['title'] ?? 'No Title') ?></h1>
+                <h1 class="card-title mb-3 animate__animated animate__fadeInDown"><?= htmlspecialchars($post['title'] ?? 'No Title') ?></h1>
                 
                 <?php if (!empty($post['hashtags'])): ?>
-                    <div class="hashtag-container mb-3">
+                    <div class="hashtag-container mb-3 animate__animated animate__fadeIn">
                         <?php 
                         // Extract all valid hashtags using regular expression
                         preg_match_all('/#([^\s#]+)/', $post['hashtags'], $matches);
@@ -708,12 +728,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         ?>
                     </div>
-                    <?php endif; ?>
+                <?php endif; ?>
             </div>
 
             <hr>
             <!-- Post Content -->
-            <div> <?= $post['content'] ?> </div>
+            <div class="animate__animated animate__fadeIn"> 
+                <?= $post['content'] ?> 
+            </div>
             <?php
             // After decoding the JSON, clean up the paths
             $images = !empty($post['images']) ? json_decode($post['images'], true) : [];
@@ -732,19 +754,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!empty($images) || !empty($videos)): ?>
                 <hr>
                 <!-- Display Images and Videos -->
-                <h6 class='text-center'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
-                <div class="media-container">
-                    <?php if (!empty($images)): ?>
-                        <?php foreach ($images as $image): ?>
-                            <div class="media-item">
+                <h6 class='text-center animate__animated animate__fadeIn'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
+                <div class="media-container animate__animated animate__fadeIn">
+                    <?php 
+                    $delay = 0.3;
+                    if (!empty($images)): ?>
+                        <?php foreach ($images as $image): 
+                            $delay += 0.2; ?>
+                            <div class="media-item animate__animated animate__zoomIn">
                                 <img src="<?= htmlspecialchars($image) ?>" alt="Post Image">
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
                     <?php if (!empty($videos)): ?>
-                        <?php foreach ($videos as $video_path): ?>
-                            <div class="media-item">
+                        <?php foreach ($videos as $video_path): 
+                            $delay += 0.2; ?>
+                            <div class="media-item animate__animated animate__zoomIn" style="animation-delay: <?= $delay ?>s">
                                 <video>
                                     <source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag.
                                 </video>
@@ -757,26 +783,39 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
     </div>
 </div>
-	<div class="text-center mt-3">
-		<button class="btn btn-outline-success me-2 upvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-post-id="<?= $post_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
-			<i class="bi bi-caret-up-fill"></i> <span id="upvote-count"><?= $post['upvotes'] ?></span>
-		</button>
-		<button class="btn btn-outline-danger downvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-post-id="<?= $post_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
-			<i class="bi bi-caret-down-fill"></i> <span id="downvote-count"><?= $post['downvotes'] ?></span>
-		</button>
-		<p class="mt-2">Score: <span id="score"><?= $post['upvotes'] - $post['downvotes'] ?></span></p>
-        <button class="btn  text-danger report-btn mb-3" data-content-type="post" data-content-id="<?= $post_id ?>">
-    <i class="bi bi-flag"></i> Report Post
-</button>
-	</div> <?php if (!isset($_SESSION['user_id'])): ?> <p class="text-center">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p> <?php endif; ?>
-	<!-- Comment Section -->
-     <div class="container mt-3">
-	<div class="card">
-		<div class="card-body">
-			<h4>Comments</h4> <?php if (isset($_SESSION['user_id'])): ?> <div id="comment-editor" class="mb-3"></div>
-			<button class="btn btn-primary" id="submit-comment" data-post-id="<?= $post_id ?>">Submit Comment</button> <?php else: ?> <p class="">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p> <?php endif; ?>
-			<hr>
-            <div class="mb-3">
+
+<div class="text-center mt-3 animate__animated animate__fadeIn animate__delay-1s">
+    <button class="btn btn-outline-success me-2 upvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-post-id="<?= $post_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
+        <i class="bi bi-caret-up-fill"></i> <span id="upvote-count"><?= $post['upvotes'] ?></span>
+    </button>
+    <button class="btn btn-outline-danger downvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-post-id="<?= $post_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
+        <i class="bi bi-caret-down-fill"></i> <span id="downvote-count"><?= $post['downvotes'] ?></span>
+    </button>
+    <p class="mt-2">Score: <span id="score"><?= $post['upvotes'] - $post['downvotes'] ?></span></p>
+    <button class="btn text-danger report-btn mb-3" data-content-type="post" data-content-id="<?= $post_id ?>">
+        <i class="bi bi-flag"></i> Report Post
+    </button>
+</div> 
+
+<?php if (!isset($_SESSION['user_id'])): ?> 
+    <p class="text-center animate__animated animate__fadeIn animate__delay-1s">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to vote.</p> 
+<?php endif; ?>
+
+<!-- Comment Section -->
+<div class="container mt-3">
+    <div class="card animate__animated animate__fadeIn animate__delay-1s">
+        <div class="card-body">
+            <h4 class="animate__animated animate__fadeInLeft">Comments</h4> 
+            
+            <?php if (isset($_SESSION['user_id'])): ?> 
+                <div id="comment-editor" class="mb-3 animate__animated animate__fadeIn animate__delay-1s"></div>
+                <button class="btn btn-primary animate__animated animate__fadeIn animate__delay-1s" id="submit-comment" data-post-id="<?= $post_id ?>">Submit Comment</button> 
+            <?php else: ?> 
+                <p class="animate__animated animate__fadeIn animate__delay-1s">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p> 
+            <?php endif; ?>
+            
+            <hr>
+            <div class="mb-3 animate__animated animate__fadeIn animate__delay-1s">
                 <label for="filter" class="form-label">Filter Comments:</label>
                 <select name="filter" id="filter" class="form-select me-2 bg-dark text-light">
                     <option value="highest_score" <?= isset($_GET['filter']) && $_GET['filter'] == 'highest_score' ? 'selected' : '' ?>>Highest Score</option>
@@ -784,9 +823,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <option value="most_replies" <?= isset($_GET['filter']) && $_GET['filter'] == 'most_replies' ? 'selected' : '' ?>>Most Replies</option>
                 </select>
             </div>
-			<div id="comments-container">
-                <?php foreach ($comments as $comment): ?>
-                <div class="card mb-3" id="comment-<?php echo $comment['id']; ?>" style="max-width: 100%;">
+            
+            <div id="comments-container">
+                <?php 
+                $commentDelay = 1;
+                foreach ($comments as $comment): 
+                $commentDelay += 0.2;
+                ?>
+                <div class="card mb-3 animate__animated animate__fadeInUp" id="comment-<?php echo $comment['id']; ?>" style="max-width: 100%; animation-delay: <?= $commentDelay ?>s;">
                     <div class="card-body">
                         <!-- Comment Header with Profile Picture -->
                         <div class="d-flex align-items-center mb-3">
@@ -808,71 +852,84 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                             </div>
                         </div>
-            <p class="card-text"><?php echo $comment['content']; ?></p>
-            <!-- Upvote and Downvote Buttons for Comments -->
-            <button class="btn btn-outline-success me-2 upvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
-                <i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?php echo $comment['upvotes'] ?? 0; ?></span>
-            </button>
-            <button class="btn btn-outline-danger downvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
-                <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $comment['downvotes'] ?? 0; ?></span>
-            </button>
-            <!-- Add near comment vote buttons -->
-            <a class="btn btn-link text-decoration-none reply-btn" data-comment-id="<?php echo $comment['id']; ?>">Reply</a>
-            <!-- Hide/Show Replies Button -->
-            <a class="btn btn-link text-decoration-none toggle-replies-btn" data-comment-id="<?php echo $comment['id']; ?>" data-reply-count="<?php echo $comment['reply_count']; ?>"> Show Replies (<?php echo $comment['reply_count']; ?>) </a>
-            <button class="btn  text-danger report-btn" data-content-type="comment" data-content-id="<?= $comment['id'] ?>">
-    <i class="bi bi-flag"></i> Report Comment
-</button>
-            <!-- Replies Section -->
-            <div class="replies ms-4 mt-3" style="display: none;">
-            <?php foreach ($comment['replies'] as $reply): ?>
-                            <div class="card mb-2" id="reply-<?php echo $reply['id']; ?>" style="max-width: 100%;">
-                                <div class="card-body">
-                                    <!-- Reply Header with Profile Picture -->
-                                    <div class="d-flex align-items-center mb-2">
-                                        <div class="me-2">
-                                            <?php if (!empty($reply['profile_picture'])): ?>
-                                                <img src="<?= htmlspecialchars($reply['profile_picture']) ?>" alt="Profile" class="rounded-circle" width="32" height="32">
-                                            <?php else: ?>
-                                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
-                                                    <i class="bi bi-person-fill text-white" style="font-size: 12px;"></i>
+                        
+                        <p class="card-text"><?php echo $comment['content']; ?></p>
+                        
+                        <!-- Upvote and Downvote Buttons for Comments -->
+                        <button class="btn btn-outline-success me-2 upvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
+                            <i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?php echo $comment['upvotes'] ?? 0; ?></span>
+                        </button>
+                        <button class="btn btn-outline-danger downvote-comment-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $comment['id']; ?>">
+                            <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $comment['downvotes'] ?? 0; ?></span>
+                        </button>
+                        
+                        <!-- Add near comment vote buttons -->
+                        <a class="btn btn-link text-decoration-none reply-btn" data-comment-id="<?php echo $comment['id']; ?>">Reply</a>
+                        
+                        <!-- Hide/Show Replies Button -->
+                        <a class="btn btn-link text-decoration-none toggle-replies-btn" data-comment-id="<?php echo $comment['id']; ?>" data-reply-count="<?php echo $comment['reply_count']; ?>"> 
+                            Show Replies (<?php echo $comment['reply_count']; ?>) 
+                        </a>
+                        
+                        <button class="btn text-danger report-btn" data-content-type="comment" data-content-id="<?= $comment['id'] ?>">
+                            <i class="bi bi-flag"></i> Report Comment
+                        </button>
+                        
+                        <!-- Replies Section -->
+                        <div class="replies ms-4 mt-3" style="display: none;">
+                            <?php foreach ($comment['replies'] as $reply): ?>
+                                <div class="card mb-2 animate__animated animate__fadeIn" id="reply-<?php echo $reply['id']; ?>" style="max-width: 100%;">
+                                    <div class="card-body">
+                                        <!-- Reply Header with Profile Picture -->
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="me-2">
+                                                <?php if (!empty($reply['profile_picture'])): ?>
+                                                    <img src="<?= htmlspecialchars($reply['profile_picture']) ?>" alt="Profile" class="rounded-circle" width="32" height="32">
+                                                <?php else: ?>
+                                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                                                        <i class="bi bi-person-fill text-white" style="font-size: 12px;"></i>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div>
+                                                <a href="profile.php?id=<?php echo htmlspecialchars($reply['user_id']); ?>" class="text-decoration-none fw-bold">
+                                                    <?php echo htmlspecialchars($reply['username']); ?>
+                                                </a>
+                                                <div class="text-muted small">
+                                                    <i class="bi bi-clock"></i> <?php echo date('F j, Y, g:i A', strtotime($reply['created_at'])); ?>
                                                 </div>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div>
-                                            <a href="profile.php?id=<?php echo htmlspecialchars($reply['user_id']); ?>" class="text-decoration-none fw-bold">
-                                                <?php echo htmlspecialchars($reply['username']); ?>
-                                            </a>
-                                            <div class="text-muted small">
-                                                <i class="bi bi-clock"></i> <?php echo date('F j, Y, g:i A', strtotime($reply['created_at'])); ?>
                                             </div>
                                         </div>
+                                        
+                                        <p class="card-text"><?php echo $reply['content']; ?></p>
+                                        
+                                        <!-- Upvote and Downvote Buttons for Replies -->
+                                        <button class="btn btn-outline-success me-3 upvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
+                                            <i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?php echo $reply['upvotes'] ?? 0; ?></span>
+                                        </button>
+                                        <button class="btn btn-outline-danger me-3 downvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
+                                            <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $reply['downvotes'] ?? 0; ?></span>
+                                        </button>
+                                        
+                                        <!-- Add near reply vote buttons -->
+                                        <button class="btn text-danger report-btn" data-content-type="reply" data-content-id="<?= $reply['id'] ?>">
+                                            <i class="bi bi-flag"></i> Report Reply
+                                        </button>
                                     </div>
-                            <p class="card-text"><?php echo $reply['content']; ?></p>
-                            <!-- Upvote and Downvote Buttons for Replies -->
-                            <button class="btn btn-outline-success me-3 upvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
-                                <i class="bi bi-caret-up-fill"></i> <span class="upvote-count"><?php echo $reply['upvotes'] ?? 0; ?></span>
-                            </button>
-                            <button class="btn btn-outline-danger me-3 downvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
-                                <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $reply['downvotes'] ?? 0; ?></span>
-                            </button>
-                            <!-- Add near reply vote buttons -->
-<button class="btn text-danger report-btn" data-content-type="reply" data-content-id="<?= $reply['id'] ?>">
-    <i class="bi bi-flag"></i> Report Reply
-</button>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
-                <?php endforeach; ?>
+                </div>
+                <?php endforeach; ?> 
             </div>
         </div>
     </div>
 </div>
-<?php endforeach; ?> </div>
-		</div>
-	</div>
-    <!-- Report Modal -->
+
+<!-- Report Modal -->
 <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered animate__animated animate__zoomIn">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="reportModalLabel">Report Content</h5>
@@ -912,15 +969,35 @@ document.addEventListener('DOMContentLoaded', () => {
 	<br> <?php $conn->close(); ?> <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 	<script>
 	function toggleFullscreen(event) {
-		const media = event.target.parentElement.querySelector('img, video');
-		if(media.requestFullscreen) {
-			media.requestFullscreen();
-		} else if(media.webkitRequestFullscreen) { // Safari
-			media.webkitRequestFullscreen();
-		} else if(media.msRequestFullscreen) { // IE11
-			media.msRequestFullscreen();
-		}
-	}
+    const mediaItem = event.target.closest('.media-item');
+    const mediaElement = mediaItem.querySelector('img, video');
+    
+    if (!document.fullscreenElement) {
+        if (mediaElement.requestFullscreen) {
+            mediaElement.requestFullscreen();
+        } else if (mediaElement.webkitRequestFullscreen) {
+            mediaElement.webkitRequestFullscreen();
+        } else if (mediaElement.msRequestFullscreen) {
+            mediaElement.msRequestFullscreen();
+        }
+        
+        // Add entrance animation when entering fullscreen
+        mediaElement.classList.add('animate__animated', 'animate__zoomIn');
+        setTimeout(() => {
+            mediaElement.classList.remove('animate__animated', 'animate__zoomIn');
+        }, 1000);
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+    
+    event.preventDefault();
+}
 	document.addEventListener('DOMContentLoaded', () => {
 		document.querySelectorAll('.upvote-btn, .downvote-btn').forEach(button => {
 			button.addEventListener('click', () => {
@@ -1367,6 +1444,36 @@ document.getElementById('reportForm').addEventListener('submit', (e) => {
             alertDiv.remove();
         }, 5000);
     });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Animate vote count changes
+    const voteButtons = document.querySelectorAll('.upvote-btn, .downvote-btn, .upvote-comment-btn, .downvote-comment-btn, .upvote-reply-btn, .downvote-reply-btn');
+    
+    voteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const countSpan = this.querySelector('span');
+            countSpan.classList.add('animate__animated', 'animate__bounceIn');
+            
+            setTimeout(() => {
+                countSpan.classList.remove('animate__animated', 'animate__bounceIn');
+            }, 1000);
+        });
+    });
+    
+    // Filter dropdown animation
+    const filterSelect = document.getElementById('filter');
+    if (filterSelect) {
+        filterSelect.addEventListener('change', function() {
+            document.getElementById('comments-container').classList.add('animate__animated', 'animate__fadeOut');
+            
+            setTimeout(() => {
+                document.getElementById('comments-container').classList.remove('animate__fadeOut');
+                document.getElementById('comments-container').classList.add('animate__fadeIn');
+            }, 500);
+        });
+    }
 });
 	</script>
 </body>
