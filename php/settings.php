@@ -441,23 +441,166 @@ if (isset($_GET['tab'])) {
                 text-align: center;
             }
         }
+        /* Alert Container */
+.alert-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  pointer-events: none;
+}
+
+/* Base Alert Styles */
+.custom-alert {
+  position: relative;
+  margin: 16px auto;
+  max-width: 500px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
+  overflow: hidden;
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s linear;
+}
+
+.custom-alert.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.custom-alert.hiding {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+/* Progress Bar */
+.custom-alert .progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  border-radius: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0;
+  margin: 0;
+}
+
+.custom-alert .progress-bar {
+  transition: width linear 5000ms;
+  width: 100%;
+  height: 100%;
+}
+
+/* Alert Content */
+.custom-alert-content {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.custom-alert-icon {
+  margin-right: 12px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-alert-message {
+  flex-grow: 1;
+}
+
+.custom-alert-close {
+  background: transparent;
+  border: none;
+  color: inherit;
+  opacity: 0.7;
+  padding: 0 4px;
+  cursor: pointer;
+}
+
+.custom-alert-close:hover {
+  opacity: 1;
+}
+
+/* Alert Types - Light Mode */
+.custom-alert-success {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.custom-alert-danger {
+  background-color: #f8d7da;
+  color: #842029;
+}
+
+.custom-alert-warning {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.custom-alert-info {
+  background-color: #cff4fc;
+  color: #055160;
+}
+
+/* Progress Bar Colors */
+.custom-alert-success .progress-bar {
+  background-color: #198754;
+}
+
+.custom-alert-danger .progress-bar {
+  background-color: #dc3545;
+}
+
+.custom-alert-warning .progress-bar {
+  background-color: #ffc107;
+}
+
+.custom-alert-info .progress-bar {
+  background-color: #0dcaf0;
+}
+
+/* Dark Mode Styles */
+@media (prefers-color-scheme: dark) {
+  .custom-alert-success {
+    background-color: #12281e;
+    color: #7ee2b8;
+  }
+  .custom-alert-danger {
+    background-color: #2e0a12;
+    color: #fda4af;
+  }
+  .custom-alert-warning {
+    background-color: #2e2a0e;
+    color: #fde047;
+  }
+  .custom-alert-info {
+    background-color: #092c42;
+    color: #7dd3fc;
+  }
+}
     </style>
 </head>
 <body>
+    <div id="alertContainer" class="alert-container"></div>
     <div class="container mt-4 mb-5">
+    <script>
         <?php if (!empty($success_message)): ?>
-            <div class="alert alert-success alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
-                <?php echo $success_message; ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+            document.addEventListener('DOMContentLoaded', function() {
+                showAlert(<?= json_encode($success_message) ?>, 'success');
+            });
         <?php endif; ?>
 
         <?php if (isset($error_message)): ?>
-            <div class="alert alert-danger alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
-                <?php echo $error_message; ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+            document.addEventListener('DOMContentLoaded', function() {
+                showAlert(<?= json_encode($error_message) ?>, 'danger');
+            });
         <?php endif; ?>
+    </script>
 
         <h1 class="mb-4 animate__animated animate__fadeIn">
             <i class="fas fa-cog me-2"></i> Account Settings
@@ -883,12 +1026,12 @@ if (isset($_GET['tab'])) {
             
             if (newPassword !== confirmPassword) {
                 e.preventDefault();
-                alert('Passwords do not match!');
+                showAlert('Passwords do not match!', 'danger');
             }
             
             if (newPassword.length < 8) {
                 e.preventDefault();
-                alert('Password must be at least 8 characters long!');
+                showAlert('Password must be at least 8 characters long!', 'warning');
             }
         });
 
@@ -913,6 +1056,54 @@ if (isset($_GET['tab'])) {
     // Reposition on window resize
     window.addEventListener('resize', positionSocialIcons);
 });
+
+// Alert Functions
+function showAlert(message, type = 'info') {
+  const alertContainer = document.getElementById('alertContainer');
+  const alertElement = document.createElement('div');
+  alertElement.className = `custom-alert custom-alert-${type}`;
+  
+  let iconClass = 'bi-info-circle';
+  if (type === 'success') iconClass = 'bi-check-circle';
+  if (type === 'danger') iconClass = 'bi-exclamation-triangle';
+  if (type === 'warning') iconClass = 'bi-exclamation-circle';
+  
+  alertElement.innerHTML = `
+    <div class="custom-alert-content">
+      <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
+      <div class="custom-alert-message">${message}</div>
+      <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="progress">
+      <div class="progress-bar"></div>
+    </div>
+  `;
+  
+  alertContainer.appendChild(alertElement);
+  
+  requestAnimationFrame(() => alertElement.classList.add('show'));
+  
+  const progressBar = alertElement.querySelector('.progress-bar');
+  progressBar.style.transition = 'width linear 5000ms';
+  progressBar.style.width = '100%';
+  setTimeout(() => { progressBar.style.width = '0%'; }, 50);
+  
+  const dismissTimeout = setTimeout(() => {
+    dismissAlert(alertElement);
+  }, 5050);
+  
+  alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
+    clearTimeout(dismissTimeout);
+    dismissAlert(alertElement);
+  });
+}
+
+function dismissAlert(alertElement) {
+  if (!alertElement || alertElement.classList.contains('hiding')) return;
+  alertElement.classList.add('hiding');
+  alertElement.classList.remove('show');
+  setTimeout(() => { alertElement.remove(); }, 300);
+}
     </script>
 </body>
 </html>

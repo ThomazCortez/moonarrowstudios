@@ -215,8 +215,8 @@ $categories = $conn->query("SELECT * FROM categories");
         --color-card-border: #30363d;
         --color-header-bg: #161b22;
         --color-modal-bg: #161b22;
-    }
-    .custom-alert-success {
+        
+        .custom-alert-success {
             background-color: #12281e;
             color: #7ee2b8;
         }
@@ -232,6 +232,7 @@ $categories = $conn->query("SELECT * FROM categories");
             background-color: #092c42;
             color: #7dd3fc;
         }
+    }
 }
 
 body {

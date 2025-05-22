@@ -35,22 +35,22 @@
                 --color-fg-muted: #8b949e;
                 --color-accent-fg: #58a6ff;
                 --color-input-bg: #0d1117;
-            }
-            .custom-alert-success {
-                background-color: #12281e;
-                color: #7ee2b8;
-            }
-            .custom-alert-danger {
-                background-color: #2e0a12;
-                color: #fda4af;
-            }
-            .custom-alert-warning {
-                background-color: #2e2a0e;
-                color: #fde047;
-            }
-            .custom-alert-info {
-                background-color: #092c42;
-                color: #7dd3fc;
+                .custom-alert-success {
+                    background-color: #12281e;
+                    color: #7ee2b8;
+                }
+                .custom-alert-danger {
+                    background-color: #2e0a12;
+                    color: #fda4af;
+                }
+                .custom-alert-warning {
+                    background-color: #2e2a0e;
+                    color: #fde047;
+                }
+                .custom-alert-info {
+                    background-color: #092c42;
+                    color: #7dd3fc;
+                }
             }
         }
 

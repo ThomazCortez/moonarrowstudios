@@ -424,24 +424,6 @@ code {
     border-radius: 6px;
 }
 
-/* Alert Styling */
-.alert {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 12px 16px;
-    border-radius: 6px;
-    z-index: 1000;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.alert-danger {
-    background-color: var(--color-downvote-active);
-    color: white;
-    border: none;
-}
-
 /* Filter Select */
 .filter-select {
     padding: 6px 12px;
@@ -603,6 +585,149 @@ code {
     padding: 0.5em;
     margin-left: 0.3em;
 }
+
+/* Alert Container */
+.alert-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  pointer-events: none;
+}
+
+/* Base Alert Styles */
+.custom-alert {
+  position: relative;
+  margin: 16px auto;
+  max-width: 500px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
+  overflow: hidden;
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s linear;
+}
+
+.custom-alert.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.custom-alert.hiding {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+/* Progress Bar */
+.custom-alert .progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  border-radius: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0;
+  margin: 0;
+}
+
+.custom-alert .progress-bar {
+  transition: width linear 5000ms;
+  width: 100%;
+  height: 100%;
+}
+
+/* Alert Content */
+.custom-alert-content {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.custom-alert-icon {
+  margin-right: 12px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-alert-message {
+  flex-grow: 1;
+}
+
+.custom-alert-close {
+  background: transparent;
+  border: none;
+  color: inherit;
+  opacity: 0.7;
+  padding: 0 4px;
+  cursor: pointer;
+}
+
+.custom-alert-close:hover {
+  opacity: 1;
+}
+
+/* Alert Types - Light Mode */
+.custom-alert-success {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.custom-alert-danger {
+  background-color: #f8d7da;
+  color: #842029;
+}
+
+.custom-alert-warning {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.custom-alert-info {
+  background-color: #cff4fc;
+  color: #055160;
+}
+
+/* Progress Bar Colors */
+.custom-alert-success .progress-bar {
+  background-color: #198754;
+}
+
+.custom-alert-danger .progress-bar {
+  background-color: #dc3545;
+}
+
+.custom-alert-warning .progress-bar {
+  background-color: #ffc107;
+}
+
+.custom-alert-info .progress-bar {
+  background-color: #0dcaf0;
+}
+
+/* Dark Mode Styles */
+@media (prefers-color-scheme: dark) {
+  .custom-alert-success {
+    background-color: #12281e;
+    color: #7ee2b8;
+  }
+  .custom-alert-danger {
+    background-color: #2e0a12;
+    color: #fda4af;
+  }
+  .custom-alert-warning {
+    background-color: #2e2a0e;
+    color: #fde047;
+  }
+  .custom-alert-info {
+    background-color: #092c42;
+    color: #7dd3fc;
+  }
+}
 	</style>
 	<script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -681,6 +806,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </head>
 
 <body>
+<div id="alertContainer" class="alert-container"></div>
 <div class="container mt-5">
     <div class="card animate__animated animate__fadeIn">
         <div class="card-body">
@@ -1029,7 +1155,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							button.classList.toggle('active');
 						}
 					} else {
-						alert(data.error || 'An error occurred');
+						showAlert(data.error || 'An error occurred', 'danger');
 					}
 				}).catch(err => console.error('Error:', err));
 			});
@@ -1045,19 +1171,6 @@ document.addEventListener('DOMContentLoaded', () => {
     alertDiv.style.zIndex = '1050';
     alertDiv.style.display = 'none';
     document.body.appendChild(alertDiv);
-
-    function showAlert(message) {
-        alertDiv.innerHTML = `
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        `;
-        alertDiv.style.display = 'block';
-        setTimeout(() => {
-            alertDiv.style.display = 'none';
-        }, 3000);
-    }
 
     const toolbarOptions = [
         [{ header: [1, 2, 3, false] }],
@@ -1083,7 +1196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const plainText = quill.getText().trim();
 
         if (!plainText) {
-            showAlert('Comment cannot be empty.');
+            showAlert('Comment cannot be empty.', 'warning');
             return;
         }
 
@@ -1098,7 +1211,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 location.reload();
             } else {
-                showAlert(data.error || 'An error occurred.');
+                showAlert(data.error || 'An error occurred.', 'danger');
             }
         }).catch(err => console.error('Error:', err));
     });
@@ -1135,7 +1248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const plainText = replyQuill.getText().trim();
 
                     if (!plainText) {
-                        showAlert('Reply cannot be empty.');
+                        showAlert('Reply cannot be empty.', 'warning');
                         return;
                     }
 
@@ -1150,7 +1263,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (data.success) {
                             location.reload();
                         } else {
-                            showAlert(data.error || 'An error occurred.');
+                            showAlert(data.error || 'An error occurred.', 'danger');
                         }
                     }).catch(err => console.error('Error:', err));
                 });
@@ -1197,7 +1310,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						});
 						button.classList.toggle('active');
 					} else {
-						alert(data.error || 'An error occurred');
+						showAlert(data.error || 'An error occurred', 'danger');
 					}
 				}).catch(err => console.error('Error:', err));
 			});
@@ -1226,7 +1339,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						});
 						button.classList.toggle('active');
 					} else {
-						alert(data.error || 'An error occurred');
+						showAlert(data.error || 'An error occurred', 'danger');
 					}
 				}).catch(err => console.error('Error:', err));
 			});
@@ -1384,7 +1497,7 @@ document.addEventListener('DOMContentLoaded', () => {
 document.querySelectorAll('.report-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         if (!<?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>) {
-            alert('Please login to report content');
+            showAlert('Please login to report content.', 'danger');
             return;
         }
         
@@ -1414,16 +1527,7 @@ document.getElementById('reportForm').addEventListener('submit', (e) => {
     })
     .then(data => {
         if (data.success) {
-            // Show success message with Bootstrap alert
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3';
-            alertDiv.textContent = 'Report submitted successfully!';
-            document.body.appendChild(alertDiv);
-            
-            // Remove alert after 3 seconds
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 3000);
+            showAlert('Report submitted successfully!', 'success');
             
             // Close modal
             bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
@@ -1436,13 +1540,7 @@ document.getElementById('reportForm').addEventListener('submit', (e) => {
         // Show error message with Bootstrap alert
         const alertDiv = document.createElement('div');
         alertDiv.className = 'alert alert-danger position-fixed top-0 start-50 translate-middle-x mt-3';
-        alertDiv.textContent = 'Error submitting report: ' + error.message;
-        document.body.appendChild(alertDiv);
-        
-        // Remove alert after 5 seconds
-        setTimeout(() => {
-            alertDiv.remove();
-        }, 5000);
+        showAlert('Error submitting report: ' + error.message, 'success');
     });
 });
 
@@ -1475,5 +1573,53 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Alert Functions
+function showAlert(message, type = 'info') {
+  const alertContainer = document.getElementById('alertContainer');
+  const alertElement = document.createElement('div');
+  alertElement.className = `custom-alert custom-alert-${type}`;
+  
+  let iconClass = 'bi-info-circle';
+  if (type === 'success') iconClass = 'bi-check-circle';
+  if (type === 'danger') iconClass = 'bi-exclamation-triangle';
+  if (type === 'warning') iconClass = 'bi-exclamation-circle';
+  
+  alertElement.innerHTML = `
+    <div class="custom-alert-content">
+      <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
+      <div class="custom-alert-message">${message}</div>
+      <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="progress">
+      <div class="progress-bar"></div>
+    </div>
+  `;
+  
+  alertContainer.appendChild(alertElement);
+  
+  requestAnimationFrame(() => alertElement.classList.add('show'));
+  
+  const progressBar = alertElement.querySelector('.progress-bar');
+  progressBar.style.transition = 'width linear 5000ms';
+  progressBar.style.width = '100%';
+  setTimeout(() => { progressBar.style.width = '0%'; }, 50);
+  
+  const dismissTimeout = setTimeout(() => {
+    dismissAlert(alertElement);
+  }, 5050);
+  
+  alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
+    clearTimeout(dismissTimeout);
+    dismissAlert(alertElement);
+  });
+}
+
+function dismissAlert(alertElement) {
+  if (!alertElement || alertElement.classList.contains('hiding')) return;
+  alertElement.classList.add('hiding');
+  alertElement.classList.remove('show');
+  setTimeout(() => { alertElement.remove(); }, 300);
+}
 	</script>
 </body>

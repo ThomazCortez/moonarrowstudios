@@ -34,8 +34,7 @@
                 --color-fg-muted: #8b949e;
                 --color-accent-fg: #58a6ff;
                 --color-input-bg: #0d1117;
-            }
-            .custom-alert-success {
+                .custom-alert-success {
                 background-color: #12281e;
                 color: #7ee2b8;
             }
@@ -50,6 +49,7 @@
             .custom-alert-info {
                 background-color: #092c42;
                 color: #7dd3fc;
+            }
             }
         }
 
