@@ -21,6 +21,16 @@ if (!$asset || $asset['status'] === 'hidden') {
     exit;
 }
 
+// In view_asset.php asset retrieval
+$model_files = [];
+if (!empty($asset['asset_file']) && is_dir($asset['asset_file'])) {
+    $model_files = array_diff(scandir($asset['asset_file']), ['.', '..']);
+    $model_files = array_map(function($file) use ($asset) {
+        return $asset['asset_file'] . $file;
+    }, $model_files);
+}
+
+
 // Increment the view count - ADD THIS SECTION
 $update_views_stmt = $conn->prepare("UPDATE assets SET views = views + 1 WHERE id = ?");
 $update_views_stmt->bind_param("i", $asset_id);
@@ -844,111 +854,825 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
                 <hr>
                 <!-- Asset Content -->
-                <div class="animate__animated animate__fadeIn"> 
-                    <?= $asset['content'] ?> 
+<div class="animate__animated animate__fadeIn"> 
+    <?= $asset['content'] ?> 
+</div>
+<?php
+// After decoding the JSON, clean up the paths
+$images = !empty($asset['images']) ? json_decode($asset['images'], true) : [];
+$videos = !empty($asset['videos']) ? json_decode($asset['videos'], true) : [];
+
+// Clean up the paths by replacing escaped slashes
+$images = array_map(function($path) {
+    return str_replace('\\/', '/', $path);
+}, $images);
+
+$videos = array_map(function($path) {
+    return str_replace('\\/', '/', $path);
+}, $videos);
+
+// Check if there are any attachments (images, videos, or asset_file)
+if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
+    <hr>
+    <!-- Display Images, Videos, and Asset File -->
+    <h6 class='text-center animate__animated animate__fadeIn'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
+    <div class="media-container animate__animated animate__fadeIn">
+        <?php 
+        $delay = 0.3;
+        if (!empty($images)): ?>
+            <?php foreach ($images as $image): 
+                $delay += 0.2; ?>
+                <div class="media-item animate__animated animate__zoomIn">
+                    <img src="<?= htmlspecialchars($image) ?>" alt="Asset Image">
+                    <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
                 </div>
-                <?php
-                // After decoding the JSON, clean up the paths
-                $images = !empty($asset['images']) ? json_decode($asset['images'], true) : [];
-                $videos = !empty($asset['videos']) ? json_decode($asset['videos'], true) : [];
+            <?php endforeach; ?>
+        <?php endif; ?>
 
-                // Clean up the paths by replacing escaped slashes
-                $images = array_map(function($path) {
-                    return str_replace('\\/', '/', $path);
-                }, $images);
+        <?php if (!empty($videos)): ?>
+            <?php foreach ($videos as $video_path): 
+            $delay += 0.2; ?>
+            <div class="media-item animate__animated animate__zoomIn" style="animation-delay: <?= $delay ?>s">
+                    <video>
+                        <source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag.
+                    </video>
+                    <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
 
-                $videos = array_map(function($path) {
-                    return str_replace('\\/', '/', $path);
-                }, $videos);
+    <?php if (!empty($asset['asset_file'])): ?>
+        <?php
+        // Construct the file path
+        $filePath = __DIR__ . '/' . $asset['asset_file'];
+        $filePath = str_replace('\\', '/', realpath($filePath));
 
-                // Check if there are any attachments (images, videos, or asset_file)
-                if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
-                    <hr>
-                    <!-- Display Images, Videos, and Asset File -->
-                    <h6 class='text-center animate__animated animate__fadeIn'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
-                    <div class="media-container animate__animated animate__fadeIn">
-                        <?php 
-                        $delay = 0.3;
-                        if (!empty($images)): ?>
-                            <?php foreach ($images as $image): 
-                                $delay += 0.2; ?>
-                                <div class="media-item animate__animated animate__zoomIn">
-                                    <img src="<?= htmlspecialchars($image) ?>" alt="Asset Image">
-                                    <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+        if (!file_exists($filePath)) {
+            echo "<div class='alert alert-danger'>3D model file not found at: $filePath</div>";
+        }
+        
+        // Normalize slashes for Windows compatibility
+        $filePath = str_replace('\\', '/', $filePath);
 
-                        <?php if (!empty($videos)): ?>
-                            <?php foreach ($videos as $video_path): 
-                            $delay += 0.2; ?>
-                            <div class="media-item animate__animated animate__zoomIn" style="animation-delay: <?= $delay ?>s">
-                                    <video>
-                                        <source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag.
-                                    </video>
-                                    <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
+        // Get file extension to determine file type
+        $fileExtension = pathinfo($asset['asset_file'], PATHINFO_EXTENSION);
+        $isAudioFile = in_array(strtolower($fileExtension), ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac']);
+        $is3DModelFile = in_array(strtolower($fileExtension), ['obj', 'fbx', 'gltf', 'glb', 'dae', 'ply', 'stl', '3ds']);
+        
+        // Check if the file exists
+        if (file_exists($filePath)) {
+            $fileHash = hash_file('sha256', $filePath);
+            $fileSize = filesize($filePath);
+        } else {
+            $fileHash = 'File not found';
+            $fileSize = 0;
+        }
+        ?>
+        
+        <?php if ($isAudioFile && file_exists($filePath)): ?>
+            <!-- Audio Player -->
+            <div class="audio-player-container text-center mt-3 mb-3">
+                <audio controls class="w-100">
+                    <source src="<?= htmlspecialchars($asset['asset_file']) ?>" type="audio/<?= strtolower($fileExtension) ?>">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        <?php endif; ?>
+        
+<?php if ($is3DModelFile && file_exists($filePath)): ?>
+    <!-- 3D Model Viewer -->
+    <div class="model-viewer-container mt-3 mb-3">
+        <div id="model-viewer-<?= $asset_id ?>" class="model-viewer">
+            <div class="model-loading" style="position: absolute; z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading 3D model...</p>
+            </div>
+        </div>
+        <div class="model-controls">
+            <button class="control-btn" onclick="resetCamera<?= $asset_id ?>()" title="Reset camera view">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>Reset View</span>
+            </button>
+            <button class="control-btn" onclick="toggleWireframe<?= $asset_id ?>()" title="Toggle wireframe mode">
+                <i class="bi bi-grid-3x3"></i>
+                <span>Wireframe</span>
+            </button>
+            <button class="control-btn autorotate-btn" onclick="toggleAutoRotate<?= $asset_id ?>()" title="Toggle auto-rotation">
+                <i class="bi bi-play-circle"></i>
+                <span>Auto-Rotate</span>
+            </button>
+            <button class="control-btn background-btn" onclick="changeBackground<?= $asset_id ?>()" title="Change background">
+                <i class="bi bi-palette"></i>
+                <span class="bg-label">Dark</span>
+            </button>
+            <button class="control-btn shadow-btn" onclick="window['changeShadowMode<?= $asset_id ?>']?.()" title="Change shadow settings">
+                <i class="bi bi-brightness-high"></i>
+                <span class="shadow-label">Normal</span>
+            </button>
+        </div>
+        <div class="model-info">
+            <i class="bi bi-info-circle"></i>
+            <span>Mouse: rotate • Scroll: zoom • Right-click: pan</span>
+        </div>
+    </div>
 
-                    <?php if (!empty($asset['asset_file'])): ?>
-                        <?php
-                        // Construct the file path
-                        $filePath = $_SERVER['DOCUMENT_ROOT'] . '/moonarrowstudios/php/' . $asset['asset_file'];
+    <!-- Three.js Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+
+    <script>
+// Modern 3D viewer with enhanced lighting and shadows
+(function() {
+    const assetId = <?= $asset_id ?>;
+    let scene, camera, renderer, controls, model;
+    let autoRotate = false;
+    let wireframe = false;
+    let mainLight, fillLight, rimLight, ground;
+    
+    // Modern background options
+    const backgroundColors = [
+        { name: 'Dark', color: 0x0f0f0f, class: 'dark' },
+        { name: 'Light', color: 0xf5f5f5, class: 'light' },
+        { name: 'Blue', color: 0x1e3a8a, class: 'blue' },
+        { name: 'Purple', color: 0x581c87, class: 'purple' },
+        { name: 'Green', color: 0x166534, class: 'green' },
+        { name: 'Gradient', color: null, class: 'gradient' }
+    ];
+    let currentBackgroundIndex = 0;
+    
+    // Shadow mode options
+    const shadowModes = [
+        { 
+            name: 'Normal', 
+            config: { 
+                enabled: true, 
+                intensity: 0.3, 
+                bias: -0.0005, 
+                normalBias: 0.02,
+                mapSize: 2048,
+                showGround: true
+            } 
+        },
+        { 
+            name: 'Soft', 
+            config: { 
+                enabled: true, 
+                intensity: 0.2, 
+                bias: -0.001, 
+                normalBias: 0.05,
+                mapSize: 1024,
+                showGround: true
+            } 
+        },
+        { 
+            name: 'Sharp', 
+            config: { 
+                enabled: true, 
+                intensity: 0.5, 
+                bias: 0, 
+                normalBias: 0.01,
+                mapSize: 4096,
+                showGround: true
+            } 
+        },
+        { 
+            name: 'Minimal', 
+            config: { 
+                enabled: true, 
+                intensity: 0.1, 
+                bias: -0.002, 
+                normalBias: 0.1,
+                mapSize: 512,
+                showGround: false
+            } 
+        },
+        { 
+            name: 'Off', 
+            config: { 
+                enabled: false, 
+                intensity: 0, 
+                bias: 0, 
+                normalBias: 0,
+                mapSize: 512,
+                showGround: false
+            } 
+        }
+    ];
+    let currentShadowIndex = 0;
+
+    function init3DViewer() {
+        const container = document.getElementById(`model-viewer-${assetId}`);
+
+        // Scene setup
+        scene = new THREE.Scene();
+        setupBackground();
+
+        // Camera setup with better field of view
+        camera = new THREE.PerspectiveCamera(
+            45, // Reduced FOV for less distortion
+            container.clientWidth / container.clientHeight,
+            0.1,
+            1000
+        );
+        camera.position.set(8, 6, 8);
+
+        // Enhanced renderer setup
+        renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance"
+        });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        // Enhanced shadow settings
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.autoUpdate = true;
+        
+        // Better color management
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        
+        container.appendChild(renderer.domElement);
+
+        // Enhanced OrbitControls
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = autoRotate;
+        controls.autoRotateSpeed = 3.0; // Faster rotation speed
+        controls.enablePan = true;
+        controls.enableZoom = true;
+        controls.maxDistance = 50;
+        controls.minDistance = 1;
+
+        setupLighting();
+        loadModel();
+        animate();
+        
+        window.addEventListener('resize', onWindowResize);
+    }
+
+    function setupBackground() {
+        const current = backgroundColors[currentBackgroundIndex];
+        if (current.name === 'Gradient') {
+            // Create gradient background
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+            gradient.addColorStop(0, '#1e293b');
+            gradient.addColorStop(1, '#0f172a');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 512);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            scene.background = texture;
+        } else {
+            scene.background = new THREE.Color(current.color);
+        }
+    }
+
+    function setupLighting() {
+        // Clear existing lights and ground
+        scene.children = scene.children.filter(child => !child.isLight && child.material?.type !== 'ShadowMaterial');
+        
+        const shadowConfig = shadowModes[currentShadowIndex].config;
+        
+        // Ambient light for overall illumination
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(ambientLight);
+        
+        // Main directional light with configurable shadows
+        mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        mainLight.position.set(10, 10, 5);
+        mainLight.castShadow = shadowConfig.enabled;
+        
+        if (shadowConfig.enabled) {
+            // Enhanced shadow settings based on current mode
+            mainLight.shadow.mapSize.width = shadowConfig.mapSize;
+            mainLight.shadow.mapSize.height = shadowConfig.mapSize;
+            mainLight.shadow.camera.near = 0.1;
+            mainLight.shadow.camera.far = 50;
+            mainLight.shadow.camera.left = -10;
+            mainLight.shadow.camera.right = 10;
+            mainLight.shadow.camera.top = 10;
+            mainLight.shadow.camera.bottom = -10;
+            mainLight.shadow.bias = shadowConfig.bias;
+            mainLight.shadow.normalBias = shadowConfig.normalBias;
+        }
+        
+        scene.add(mainLight);
+        
+        // Fill light from opposite side
+        fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        fillLight.position.set(-5, 3, -5);
+        scene.add(fillLight);
+        
+        // Rim light for edge definition
+        rimLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        rimLight.position.set(0, 5, -10);
+        scene.add(rimLight);
+        
+        // Add ground plane for shadows (configurable)
+        if (shadowConfig.showGround && shadowConfig.enabled) {
+            const groundGeometry = new THREE.PlaneGeometry(20, 20);
+            const groundMaterial = new THREE.ShadowMaterial({ 
+                opacity: shadowConfig.intensity,
+                transparent: true 
+            });
+            ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+        }
+        
+        // Update renderer shadow settings
+        renderer.shadowMap.enabled = shadowConfig.enabled;
+    }
+
+    // Global functions for controls
+    window[`changeBackground${assetId}`] = function() {
+        currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundColors.length;
+        const currentBg = backgroundColors[currentBackgroundIndex];
+        
+        setupBackground();
+        
+        // Update button label
+        const bgLabel = document.querySelector(`#model-viewer-${assetId}`).parentElement.querySelector('.bg-label');
+        bgLabel.textContent = currentBg.name;
+        
+        // Update container theme
+        const container = document.querySelector(`#model-viewer-${assetId}`).parentElement;
+        container.className = container.className.replace(/\s(dark|light|blue|purple|green|gradient)-theme/g, '');
+        container.classList.add(`${currentBg.class}-theme`);
+    };
+
+    window[`changeShadowMode${assetId}`] = function() {
+        currentShadowIndex = (currentShadowIndex + 1) % shadowModes.length;
+        const currentShadow = shadowModes[currentShadowIndex];
+        
+        console.log('Changing shadow mode to:', currentShadow.name); // Debug log
+        
+        setupLighting();
+        
+        // Update button label
+        const container = document.querySelector(`#model-viewer-${assetId}`).parentElement;
+        const shadowLabel = container.querySelector('.shadow-label');
+        if (shadowLabel) {
+            shadowLabel.textContent = currentShadow.name;
+        }
+        
+        // Update shadow icon based on mode
+        const shadowBtn = container.querySelector('.shadow-btn i');
+        if (shadowBtn) {
+            const iconMap = {
+                'Normal': 'bi-brightness-high',
+                'Soft': 'bi-brightness-alt-high',
+                'Sharp': 'bi-sun',
+                'Minimal': 'bi-brightness-low',
+                'Off': 'bi-eye-slash'
+            };
+            shadowBtn.className = `bi ${iconMap[currentShadow.name]}`;
+        }
+        
+        // Re-apply shadows to model if it exists
+        if (model) {
+            const shadowConfig = shadowModes[currentShadowIndex].config;
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = shadowConfig.enabled;
+                    child.receiveShadow = shadowConfig.enabled;
+                }
+            });
+        }
+        
+        // Force a render update
+        if (renderer && scene && camera) {
+            renderer.render(scene, camera);
+        }
+    };
+
+    window[`resetCamera${assetId}`] = function() {
+        controls.reset();
+        camera.position.set(8, 6, 8);
+        camera.lookAt(0, 0, 0);
+        controls.update();
+    };
+
+    window[`toggleWireframe${assetId}`] = function() {
+        wireframe = !wireframe;
+        scene.traverse(child => {
+            if (child.isMesh && child.material && child !== scene.children.find(c => c.material && c.material.type === 'ShadowMaterial')) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.wireframe = wireframe);
+                } else {
+                    child.material.wireframe = wireframe;
+                }
+            }
+        });
+        
+        const button = event.target.closest('button');
+        const span = button.querySelector('span');
+        span.textContent = wireframe ? 'Solid' : 'Wireframe';
+    };
+
+    window[`toggleAutoRotate${assetId}`] = function() {
+        autoRotate = !autoRotate;
+        controls.autoRotate = autoRotate;
+        
+        const button = document.querySelector(`#model-viewer-${assetId}`).parentElement.querySelector('.autorotate-btn');
+        const icon = button.querySelector('i');
+        const span = button.querySelector('span');
+        
+        icon.className = `bi ${autoRotate ? 'bi-pause-circle' : 'bi-play-circle'}`;
+        span.textContent = autoRotate ? 'Stop Rotate' : 'Auto-Rotate';
+    };
+
+    function onWindowResize() {
+        const container = document.getElementById(`model-viewer-${assetId}`);
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    function loadModel() {
+        const modelPath = '<?= htmlspecialchars($asset['asset_file']) ?>';
+        const extension = modelPath.split('.').pop().toLowerCase();
+        const loadingElement = document.querySelector(`#model-viewer-<?= $asset_id ?> .model-loading`);
+        
+        let loader;
+        switch(extension) {
+            case 'gltf':
+            case 'glb':
+                loader = new THREE.GLTFLoader();
+                break;
+            case 'obj':
+                loader = new THREE.OBJLoader();
+                break;
+            default:
+                loadingElement.innerHTML = `<div class="error-message">Unsupported format: .${extension}</div>`;
+                return;
+        }
+
+        loader.load(
+            modelPath,
+            (object) => {
+                loadingElement.style.display = 'none';
+                
+                let loadedModel = (extension === 'gltf' || extension === 'glb') ? object.scene : object;
+
+                // Enhanced shadow and material setup
+                const shadowConfig = shadowModes[currentShadowIndex].config;
+                loadedModel.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = shadowConfig.enabled;
+                        child.receiveShadow = shadowConfig.enabled;
                         
-                        // Normalize slashes for Windows compatibility
-                        $filePath = str_replace('\\', '/', $filePath);
-
-                        // Get file extension to determine if it's an audio file
-                        $fileExtension = pathinfo($asset['asset_file'], PATHINFO_EXTENSION);
-                        $isAudioFile = in_array(strtolower($fileExtension), ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac']);
-                        
-                        // Check if the file exists
-                        if (file_exists($filePath)) {
-                            $fileHash = hash_file('sha256', $filePath);
-                            $fileSize = filesize($filePath);
-                        } else {
-                            $fileHash = 'File not found';
-                            $fileSize = 0;
+                        // Enhance materials
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(mat => {
+                                    mat.shadowSide = THREE.DoubleSide;
+                                });
+                            } else {
+                                child.material.shadowSide = THREE.DoubleSide;
+                            }
                         }
-                        ?>
-                        
-                        <?php if ($isAudioFile && file_exists($filePath)): ?>
-                            <!-- Audio Player -->
-                            <div class="audio-player-container text-center mt-3 mb-3">
-                                <audio controls class="w-100">
-                                    <source src="<?= htmlspecialchars($asset['asset_file']) ?>" type="audio/<?= strtolower($fileExtension) ?>">
-                                    Your browser does not support the audio element.
-                                </audio>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <div class="text-center mt-3">
-                            <a href="<?= htmlspecialchars($asset['asset_file']) ?>" class="btn btn-primary btn-sm me-2" download>
-                                <i class="bi bi-download"></i> Download <?= basename($asset['asset_file']) ?>
-                            </a>
-                            <button class="btn btn-outline-secondary btn-sm" type="button" 
-                                    data-bs-toggle="collapse" data-bs-target="#securityInfo">
-                                <i class="bi bi-shield-check"></i> Security Info
-                            </button>
-                        </div>
-                        <div class="collapse mt-2" id="securityInfo">
-                            <div class="card card-body">
-                                <?php if (file_exists($filePath)): ?>
-                                    <small>File Hash (SHA-256): <code><?= $fileHash ?></code></small>
-                                    <small>File Size: <?= number_format($fileSize / 1024, 2) ?> KB</small>
-                                    <p class="mb-0 mt-1"><small>You can verify this hash online at <a href="https://www.virustotal.com/gui/home/search" target="_blank">VirusTotal</a> by searching for this hash.</small></p>
-                                <?php else: ?>
-                                    <small>File not found.</small>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
+                    }
+                });
+
+                // Center and scale model
+                const box = new THREE.Box3().setFromObject(loadedModel);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                
+                loadedModel.position.sub(center);
+                
+                // Scale model to fit nicely in view
+                const maxDim = Math.max(size.x, size.y, size.z);
+                if (maxDim > 5) {
+                    const scale = 5 / maxDim;
+                    loadedModel.scale.setScalar(scale);
+                }
+
+                scene.add(loadedModel);
+                model = loadedModel;
+                
+                // Adjust camera
+                const scaledSize = size.clone().multiplyScalar(loadedModel.scale.x);
+                const maxScaledDim = Math.max(scaledSize.x, scaledSize.y, scaledSize.z);
+                const distance = maxScaledDim * 2.5;
+                camera.position.set(distance, distance * 0.75, distance);
+                camera.lookAt(0, 0, 0);
+                controls.update();
+            },
+            (progress) => {
+                if (progress.lengthComputable) {
+                    const percent = Math.round((progress.loaded / progress.total) * 100);
+                    loadingElement.querySelector('.loading-text').textContent = `Loading... ${percent}%`;
+                }
+            },
+            (error) => {
+                console.error('Model loading error:', error);
+                loadingElement.innerHTML = `<div class="error-message">Failed to load model</div>`;
+            }
+        );
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    // Initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init3DViewer);
+    } else {
+        init3DViewer();
+    }
+})();
+    </script>
+
+    <style>
+        .model-viewer-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 10px 20px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .model-viewer-container:hover {
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                0 15px 30px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+        
+        .model-viewer {
+            height: 500px;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+        }
+        
+        .model-viewer canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .model-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px;
+            min-width: 200px;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            margin-bottom: 15px;
+        }
+        
+        .loading-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            text-align: center;
+        }
+        
+        .model-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .control-btn i {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .model-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.6);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .model-info i {
+            opacity: 0.8;
+        }
+        
+        /* Theme variations */
+        .model-viewer-container.light-theme {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .model-viewer-container.light-theme .model-controls {
+            background: rgba(255, 255, 255, 0.9);
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .model-viewer-container.light-theme .control-btn {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .model-viewer-container.light-theme .control-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .model-viewer-container.light-theme .model-info {
+            background: rgba(255, 255, 255, 0.8);
+            color: rgba(0, 0, 0, 0.6);
+            border-top-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .model-viewer-container.blue-theme {
+            background: linear-gradient(145deg, #1e3a8a, #3b82f6);
+        }
+        
+        .model-viewer-container.purple-theme {
+            background: linear-gradient(145deg, #581c87, #a855f7);
+        }
+        
+        .model-viewer-container.green-theme {
+            background: linear-gradient(145deg, #166534, #22c55e);
+        }
+        
+        .model-viewer-container.gradient-theme {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .model-viewer-container {
+                width: 100%;
+                margin: 0;
+                border-radius: 12px;
+            }
+            
+            .model-viewer {
+                height: 350px;
+            }
+            
+            .model-controls {
+                padding: 12px 16px;
+                gap: 6px;
+            }
+            
+            .control-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .control-btn span {
+                display: none;
+            }
+            
+            .model-info {
+                padding: 10px 16px;
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .model-controls {
+                justify-content: space-between;
+            }
+            
+            .control-btn {
+                flex: 1;
+                justify-content: center;
+                min-width: 0;
+            }
+        }
+        
+        /* Animations */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Focus styles for accessibility */
+        .control-btn:focus {
+            outline: 2px solid #4f46e5;
+            outline-offset: 2px;
+        }
+        
+        /* Smooth transitions */
+        * {
+            box-sizing: border-box;
+        }
+    </style>
+<?php endif; ?>
+        
+        <div class="text-center mt-3">
+            <a href="<?= htmlspecialchars($asset['asset_file']) ?>" class="btn btn-primary btn-sm me-2" download>
+                <i class="bi bi-download"></i> Download <?= basename($asset['asset_file']) ?>
+            </a>
+            <button class="btn btn-outline-secondary btn-sm" type="button" 
+                    data-bs-toggle="collapse" data-bs-target="#securityInfo">
+                <i class="bi bi-shield-check"></i> Security Info
+            </button>
+        </div>
+        <div class="collapse mt-2" id="securityInfo">
+            <div class="card card-body">
+                <?php if (file_exists($filePath)): ?>
+                    <small>File Hash (SHA-256): <code><?= $fileHash ?></code></small>
+                    <small>File Size: <?= number_format($fileSize / 1024, 2) ?> KB</small>
+                    <p class="mb-0 mt-1"><small>You can verify this hash online at <a href="https://www.virustotal.com/gui/home/search" target="_blank">VirusTotal</a> by searching for this hash.</small></p>
+                <?php else: ?>
+                    <small>File not found.</small>
                 <?php endif; ?>
             </div>
         </div>
-    </div>
+    <?php endif; ?>
+<?php endif; ?>
+</div>
+</div>
+</div>
     <div class="text-center mt-3 animate__animated animate__fadeIn animate__delay-1s">
     <button class="btn btn-outline-success me-2 upvote-btn <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>" data-asset-id="<?= $asset_id ?>" <?= isset($_SESSION['user_id']) ? '' : 'disabled' ?>>
         <i class="bi bi-caret-up-fill"></i> <span id="upvote-count"><?= $asset['upvotes'] ?></span>

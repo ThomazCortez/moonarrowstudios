@@ -1597,15 +1597,30 @@ while ($asset = $result->fetch_assoc()):
                         <input type="text" name="hashtags" id="hashtags" class="form-control bg-dark" placeholder="e.g., #2025, #grass, #car">
                     </div>
                     <div class="mb-3 animate__animated animate__fadeIn">
-                        <label for="asset_file" class="form-label">Asset File</label>
-                        <input type="file" name="asset_file" id="asset_file" class="form-control" accept="" required>
+                        <label for="asset_file" class="form-label">
+                            Asset File 
+                        </label>
+                        <input type="file" name="asset_file" id="asset_file" class="form-control" required>
+                        <div class="form-text">
+                        </div>
+                        <div id="file-preview" class="mt-2" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="bi bi-box"></i> 
+                                <strong>3D Model detected!</strong> 
+                                Your model will be viewable in 3D with rotation, zoom, and pan controls.
+                            </div>
+                        </div>
                     </div>
                     <div class="mb-3 animate__animated animate__fadeIn">
-                        <label for="preview_image" class="form-label">Preview Image</label>
+                        <label for="preview_image" class="form-label">
+                            Preview Image
+                        </label>
                         <input type="file" name="preview_image" id="preview_image" class="form-control" accept="image/*">
+                        <div class="form-text">
+                        </div>
                     </div>
                     <div class="mb-3 animate__animated animate__fadeIn">
-                        <label for="images" class="form-label">Images</label>
+                        <label for="images" class="form-label">Additional Images</label>
                         <input type="file" name="images[]" id="images" class="form-control" accept="image/*" multiple>
                     </div>
                     <div class="mb-3 animate__animated animate__fadeIn">
@@ -1654,6 +1669,33 @@ document.addEventListener('DOMContentLoaded', function() {
         badge.addEventListener('mouseleave', function() {
             this.classList.remove('animate__pulse');
         });
+    });
+});
+
+// Optional: Add file type detection and preview
+document.getElementById('asset_file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('file-preview');
+    
+    if (file) {
+        const extension = file.name.split('.').pop().toLowerCase();
+        const is3DModel = ['obj', 'fbx', 'gltf', 'glb', 'dae', 'ply', 'stl', '3ds'].includes(extension);
+        
+        if (is3DModel) {
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    } else {
+        preview.style.display = 'none';
+    }
+});
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 });
 </script>
