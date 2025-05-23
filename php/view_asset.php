@@ -1136,7 +1136,7 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
             </div>
         <?php endif; ?>
         
-<?php if ($is3DModelFile && file_exists($filePath)): ?>
+<?php if ($asset['category_id'] == 5 && $is3DModelFile && file_exists($filePath)): ?>
     <!-- 3D Model Viewer -->
     <div class="model-viewer-container mt-3 mb-3">
         <div id="model-viewer-<?= $asset_id ?>" class="model-viewer">
@@ -2046,6 +2046,236 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
         }
     })();
     </script>
+<?php elseif ($asset['category_id'] == 8): ?>
+<div class="texture-viewer-container mt-3 mb-3 dark-theme">
+    <div id="animation-viewer-<?= $asset_id ?>" class="model-viewer">
+        <div class="model-loading" style="position: absolute; z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading animation...</p>
+        </div>
+    </div>
+    <div class="model-controls">
+        <button class="control-btn" onclick="resetCameraAnim<?= $asset_id ?>()" title="Reset camera view">
+            <i class="bi bi-arrow-clockwise"></i>
+            <span>Reset View</span>
+        </button>
+        <button class="control-btn autorotate-btn" onclick="toggleAutoRotateAnim<?= $asset_id ?>()" title="Toggle auto-rotation">
+            <i class="bi bi-play-circle"></i>
+            <span>Auto-Rotate</span>
+        </button>
+        <button class="control-btn anim-playpause-btn" onclick="toggleAnimation<?= $asset_id ?>()" title="Play/Pause Animation">
+            <i class="bi bi-pause-circle"></i>
+            <span>Pause</span>
+        </button>
+        <button class="control-btn background-btn" onclick="changeBackground<?= $asset_id ?>()" title="Change background">
+            <i class="bi bi-palette"></i>
+            <span class="bg-label">Dark</span>
+        </button>
+    </div>
+    <div class="model-controls">
+        <input id="anim-timeline-<?= $asset_id ?>" type="range" min="0" max="1" step="0.001" value="0" style="width: 100%;" title="Animation Timeline" />
+    </div>
+    <div class="model-info">
+        <i class="bi bi-info-circle"></i>
+        <span>Mouse: rotate • Scroll: zoom • Right-click: pan</span>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.7.4/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+
+<script>
+(function() {
+    const assetId = <?= $asset_id ?>;
+    let scene, camera, renderer, controls, mixer, clock;
+    let animationAction = null;
+    let autoRotate = false;
+    let isPlaying = true;
+    let currentModel = null;
+
+    const backgroundColors = [
+        { name: 'Dark', color: 0x1a1a1a, class: 'dark' },
+        { name: 'Light', color: 0xf5f5f5, class: 'light' },
+        { name: 'Blue', color: 0x1e3a8a, class: 'blue' },
+        { name: 'Purple', color: 0x581c87, class: 'purple' },
+        { name: 'Green', color: 0x166534, class: 'green' },
+        { name: 'Gradient', color: null, class: 'gradient' }
+    ];
+    let currentBackgroundIndex = 0;
+
+    function initAnimationViewer() {
+        const container = document.getElementById(`animation-viewer-${assetId}`);
+        if (!container) return;
+
+        clock = new THREE.Clock();
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(backgroundColors[0].color);
+
+        camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(5, 5, 5);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        const loader = new THREE.FBXLoader();
+        loader.load(
+            '<?= htmlspecialchars($asset['asset_file']) ?>',
+            function(object) {
+                const loading = container.querySelector('.model-loading');
+                if (loading) loading.style.display = 'none';
+
+                currentModel = object;
+
+                const box = new THREE.Box3().setFromObject(object);
+                const size = box.getSize(new THREE.Vector3()).length();
+                const center = box.getCenter(new THREE.Vector3());
+                controls.target.copy(center);
+                camera.position.copy(center).add(new THREE.Vector3(size / 2, size / 2, size / 2));
+                camera.lookAt(center);
+                controls.update();
+
+                mixer = new THREE.AnimationMixer(object);
+                if (object.animations.length > 0) {
+                    animationAction = mixer.clipAction(object.animations[0]);
+                    animationAction.play();
+                    isPlaying = true;
+                }
+
+                scene.add(object);
+            },
+            undefined,
+            function(error) {
+                console.error('Error loading FBX animation:', error);
+                container.querySelector('.model-loading').innerHTML = '<div class="error-message">Failed to load animation</div>';
+            }
+        );
+
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        animate();
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const delta = clock.getDelta();
+        if (mixer && isPlaying) {
+            mixer.update(delta);
+            updateTimeline();
+        }
+        controls.autoRotate = autoRotate;
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    function updateTimeline() {
+        const input = document.getElementById(`anim-timeline-${assetId}`);
+        if (animationAction && input && animationAction._clip) {
+            const duration = animationAction._clip.duration;
+            const time = animationAction.time % duration;
+            input.value = time / duration;
+        }
+    }
+
+    const scrubInput = document.getElementById(`anim-timeline-${assetId}`);
+    if (scrubInput) {
+        scrubInput.addEventListener('input', function() {
+            if (animationAction && animationAction._clip) {
+                const duration = animationAction._clip.duration;
+                const newTime = parseFloat(this.value) * duration;
+                animationAction.time = newTime;
+                animationAction.paused = true;
+                isPlaying = false;
+                const btn = document.querySelector(`#animation-viewer-${assetId}`).parentElement.querySelector('.anim-playpause-btn');
+                btn.querySelector('i').className = 'bi bi-play-circle';
+                btn.querySelector('span').textContent = 'Play';
+            }
+        });
+    }
+
+    window[`resetCameraAnim${assetId}`] = function() {
+        if (!currentModel) return;
+        const box = new THREE.Box3().setFromObject(currentModel);
+        const size = box.getSize(new THREE.Vector3()).length();
+        const center = box.getCenter(new THREE.Vector3());
+        controls.target.copy(center);
+        camera.position.copy(center).add(new THREE.Vector3(size / 2, size / 2, size / 2));
+        camera.lookAt(center);
+        controls.update();
+    };
+
+    window[`toggleAutoRotateAnim${assetId}`] = function() {
+        autoRotate = !autoRotate;
+        const btn = document.querySelector(`#animation-viewer-${assetId}`).parentElement.querySelector('.autorotate-btn');
+        btn.querySelector('i').className = `bi ${autoRotate ? 'bi-pause-circle' : 'bi-play-circle'}`;
+        btn.querySelector('span').textContent = autoRotate ? 'Stop Rotate' : 'Auto-Rotate';
+    };
+
+    window[`toggleAnimation${assetId}`] = function() {
+        if (!animationAction) return;
+        if (isPlaying) {
+            animationAction.paused = true;
+        } else {
+            animationAction.paused = false;
+            animationAction.play();
+        }
+        isPlaying = !isPlaying;
+
+        const btn = document.querySelector(`#animation-viewer-${assetId}`).parentElement.querySelector('.anim-playpause-btn');
+        btn.querySelector('i').className = `bi ${isPlaying ? 'bi-pause-circle' : 'bi-play-circle'}`;
+        btn.querySelector('span').textContent = isPlaying ? 'Pause' : 'Play';
+    };
+
+    window[`changeBackground${assetId}`] = function() {
+        currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundColors.length;
+        const currentBg = backgroundColors[currentBackgroundIndex];
+
+        if (currentBg.name === 'Gradient') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+            gradient.addColorStop(0, '#1e293b');
+            gradient.addColorStop(1, '#0f172a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 512);
+            scene.background = new THREE.CanvasTexture(canvas);
+        } else {
+            scene.background = new THREE.Color(currentBg.color);
+        }
+
+        const container = document.querySelector(`#animation-viewer-${assetId}`).closest('.texture-viewer-container');
+        container.className = container.className.replace(/\b(dark|light|blue|purple|green|gradient)-theme\b/, '');
+        container.classList.add(`${currentBg.class}-theme`);
+
+        const label = container.querySelector('.bg-label');
+        if (label) label.textContent = currentBg.name;
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAnimationViewer);
+    } else {
+        initAnimationViewer();
+    }
+})();
+</script>
 <?php endif; ?>
         
         <div class="text-center mt-3">
