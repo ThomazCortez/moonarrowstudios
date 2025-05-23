@@ -725,6 +725,202 @@ code {
     color: #7dd3fc;
   }
 }
+.texture-viewer-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 10px 20px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.texture-viewer-container:hover {
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 15px 30px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.texture-viewer-container .model-viewer {
+    height: 500px;
+    position: relative;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+}
+
+.texture-viewer-container canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 16px 16px 0 0;
+}
+
+.texture-viewer-container .model-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 30px;
+    min-width: 200px;
+}
+
+.texture-viewer-container .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid #4f46e5;
+    border-radius: 50%;
+    animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    margin-bottom: 15px;
+}
+
+.texture-viewer-container .loading-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
+}
+
+.texture-viewer-container .error-message {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    text-align: center;
+}
+
+.texture-viewer-container .model-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-wrap: wrap;
+}
+
+.texture-viewer-container .control-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.texture-viewer-container .control-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.texture-viewer-container .model-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .texture-viewer-container {
+        width: 100%;
+        margin: 0;
+        border-radius: 12px;
+    }
+    
+    .texture-viewer-container .model-viewer {
+        height: 350px;
+    }
+    
+    .texture-viewer-container .model-controls {
+        padding: 12px 16px;
+        gap: 6px;
+    }
+    
+    .texture-viewer-container .control-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    .texture-viewer-container .control-btn span {
+        display: none;
+    }
+    
+    .texture-viewer-container .model-info {
+        padding: 10px 16px;
+        font-size: 11px;
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Add these theme variations */
+.texture-viewer-container.light-theme {
+    background: linear-gradient(145deg, #ffffff, #f8fafc);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.texture-viewer-container.light-theme .model-controls {
+    background: rgba(255, 255, 255, 0.9);
+    border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+.texture-viewer-container.light-theme .control-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.8);
+}
+
+.texture-viewer-container.light-theme .control-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.texture-viewer-container.blue-theme {
+    background: linear-gradient(145deg, #1e3a8a, #3b82f6);
+}
+
+.texture-viewer-container.purple-theme {
+    background: linear-gradient(145deg, #581c87, #a855f7);
+}
+
+.texture-viewer-container.green-theme {
+    background: linear-gradient(145deg, #166534, #22c55e);
+}
+
+.texture-viewer-container.gradient-theme {
+    background: linear-gradient(145deg, #667eea, #764ba2);
+}
 	</style>
 	<script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -1646,6 +1842,210 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
             box-sizing: border-box;
         }
     </style>
+<?php elseif ($asset['category_id'] == 6 && in_array(strtolower($fileExtension), ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'tga', 'hdr'])): ?>
+    <!-- Texture Viewer -->
+    <div class="texture-viewer-container mt-3 mb-3">
+        <div id="texture-viewer-<?= $asset_id ?>" class="model-viewer">
+            <div class="model-loading" style="position: absolute; z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading texture...</p>
+            </div>
+        </div>
+        <div class="model-controls">
+            <button class="control-btn" onclick="resetCamera<?= $asset_id ?>()" title="Reset camera view">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>Reset View</span>
+            </button>
+            <button class="control-btn" onclick="toggleWireframe<?= $asset_id ?>()" title="Toggle wireframe mode">
+                <i class="bi bi-grid-3x3"></i>
+                <span>Wireframe</span>
+            </button>
+            <button class="control-btn autorotate-btn" onclick="toggleAutoRotate<?= $asset_id ?>()" title="Toggle auto-rotation">
+                <i class="bi bi-play-circle"></i>
+                <span>Auto-Rotate</span>
+            </button>
+            <!-- Add this new button -->
+            <button class="control-btn background-btn" onclick="changeBackground<?= $asset_id ?>()" title="Change background">
+                <i class="bi bi-palette"></i>
+                <span class="bg-label">Dark</span>
+            </button>
+        </div>
+        <div class="model-info">
+            <i class="bi bi-info-circle"></i>
+            <span>Mouse: rotate • Scroll: zoom • Right-click: pan</span>
+        </div>
+    </div>
+
+    <!-- Add THREE.js dependency -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+    (function() {
+        // Add these color options at the top
+        const backgroundColors = [
+            { name: 'Dark', color: 0x1a1a1a, class: 'dark' },
+            { name: 'Light', color: 0xf5f5f5, class: 'light' },
+            { name: 'Blue', color: 0x1e3a8a, class: 'blue' },
+            { name: 'Purple', color: 0x581c87, class: 'purple' },
+            { name: 'Green', color: 0x166534, class: 'green' },
+            { name: 'Gradient', color: null, class: 'gradient' }
+        ];
+        let currentBackgroundIndex = 0;
+        const assetId = <?= $asset_id ?>;
+        let scene, camera, renderer, controls, sphere;
+        let autoRotate = false;
+        let wireframe = false;
+        
+        function initTextureViewer() {
+            const container = document.getElementById(`texture-viewer-${assetId}`);
+            if (!container) return;
+            
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a1a);
+            
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(
+                45,
+                container.clientWidth / container.clientHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(5, 5, 5);
+            
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            // Set initial background
+            scene.background = new THREE.Color(backgroundColors[currentBackgroundIndex].color);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+            
+            // Load texture
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.load(
+                '<?= htmlspecialchars($asset['asset_file']) ?>',
+                (texture) => {
+                    const loadingElement = document.querySelector(`#texture-viewer-${assetId} .model-loading`);
+                    if (loadingElement) loadingElement.style.display = 'none';
+                    
+                    // Create sphere
+                    const geometry = new THREE.SphereGeometry(3, 64, 64);
+                    const material = new THREE.MeshStandardMaterial({
+                        map: texture,
+                        metalness: 0.3,
+                        roughness: 0.4
+                    });
+                    
+                    sphere = new THREE.Mesh(geometry, material);
+                    scene.add(sphere);
+                },
+                undefined,
+                (err) => {
+                    console.error('Error loading texture:', err);
+                    const loadingElement = document.querySelector(`#texture-viewer-${assetId} .model-loading`);
+                    if (loadingElement) loadingElement.innerHTML = 
+                        '<div class="error-message">Failed to load texture</div>';
+                }
+            );
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+            
+            animate();
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls) controls.update();
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+        
+        // Control functions
+        window[`resetCamera${assetId}`] = function() {
+            if (controls && camera) {
+                controls.reset();
+                camera.position.set(5, 5, 5);
+                controls.update();
+            }
+        };
+        
+        window[`toggleWireframe${assetId}`] = function() {
+            wireframe = !wireframe;
+            if (sphere) {
+                sphere.material.wireframe = wireframe;
+            }
+        };
+        
+       window[`toggleAutoRotate${assetId}`] = function() {
+            autoRotate = !autoRotate;
+            if (controls) controls.autoRotate = autoRotate;
+            
+            const button = document.querySelector(`#texture-viewer-${assetId}`).parentElement.querySelector('.autorotate-btn');
+            const icon = button.querySelector('i');
+            const span = button.querySelector('span');
+            
+            icon.className = `bi ${autoRotate ? 'bi-pause-circle' : 'bi-play-circle'}`;
+            span.textContent = autoRotate ? 'Stop Rotate' : 'Auto-Rotate';
+        };
+
+        // Add this new function for background changing
+        window[`changeBackground${assetId}`] = function() {
+            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundColors.length;
+            const currentBg = backgroundColors[currentBackgroundIndex];
+            
+            if (currentBg.name === 'Gradient') {
+                // Create gradient texture
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 512;
+                const ctx = canvas.getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+                gradient.addColorStop(0, '#1e293b');
+                gradient.addColorStop(1, '#0f172a');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 512, 512);
+                scene.background = new THREE.CanvasTexture(canvas);
+            } else {
+                scene.background = new THREE.Color(currentBg.color);
+            }
+            
+            // Update button label
+            const bgLabel = document.querySelector(`#texture-viewer-${assetId}`).parentElement.querySelector('.bg-label');
+            bgLabel.textContent = currentBg.name;
+            
+            // Update container theme
+            const container = document.querySelector(`.texture-viewer-container`);
+            container.className = container.className.replace(/\s(dark|light|blue|purple|green|gradient)-theme/g, '');
+            container.classList.add(`${currentBg.class}-theme`);
+        };
+        
+        // Initialize when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTextureViewer);
+        } else {
+            initTextureViewer();
+        }
+    })();
+    </script>
 <?php endif; ?>
         
         <div class="text-center mt-3">
