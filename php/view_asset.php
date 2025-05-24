@@ -2736,6 +2736,463 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
         background: #667eea;
     }
     </style>
+<?php elseif ($asset['category_id'] == 9): ?>
+    <!-- Video Player -->
+    <div class="texture-viewer-container video-player-container mt-3 mb-3 dark-theme">
+        <div id="video-viewer-<?= $asset_id ?>" class="model-viewer video-viewer">
+            <video id="video-element-<?= $asset_id ?>" class="video-element" preload="metadata">
+                <source src="<?= htmlspecialchars($asset['asset_file']) ?>" type="video/mp4">
+                <source src="<?= htmlspecialchars($asset['asset_file']) ?>" type="video/webm">
+                <source src="<?= htmlspecialchars($asset['asset_file']) ?>" type="video/ogg">
+                Your browser does not support the video tag.
+            </video>
+            <div class="video-loading" style="position: absolute; z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading video...</p>
+            </div>
+        </div>
+        
+        <!-- Video Controls -->
+        <div class="model-controls video-controls">
+            <button class="control-btn play-pause-btn" onclick="togglePlayPauseVideo<?= $asset_id ?>()" title="Play/Pause">
+                <i class="bi bi-play-circle"></i>
+                <span>Play</span>
+            </button>
+            <button class="control-btn" onclick="stopVideo<?= $asset_id ?>()" title="Stop">
+                <i class="bi bi-stop-circle"></i>
+                <span>Stop</span>
+            </button>
+            <button class="control-btn volume-btn" onclick="toggleMuteVideo<?= $asset_id ?>()" title="Mute/Unmute">
+                <i class="bi bi-volume-up"></i>
+                <span>Volume</span>
+            </button>
+            <button class="control-btn fullscreen-btn" onclick="toggleFullscreen<?= $asset_id ?>()" title="Fullscreen">
+                <i class="bi bi-fullscreen"></i>
+                <span>Fullscreen</span>
+            </button>
+            <button class="control-btn background-btn" onclick="changeBackgroundVideo<?= $asset_id ?>()" title="Change background">
+                <i class="bi bi-palette"></i>
+                <span class="bg-label">Dark</span>
+            </button>
+        </div>
+        
+        <!-- Progress and Volume Controls -->
+        <div class="model-controls video-progress-controls">
+            <div class="progress-container">
+                <span class="time-display current-time">0:00</span>
+                <input id="video-progress-<?= $asset_id ?>" type="range" min="0" max="100" value="0" class="progress-slider" title="Video Progress" />
+                <span class="time-display total-time">0:00</span>
+            </div>
+            <div class="volume-container">
+                <i class="bi bi-volume-down"></i>
+                <input id="video-volume-<?= $asset_id ?>" type="range" min="0" max="100" value="70" class="volume-slider" title="Volume" />
+                <i class="bi bi-volume-up"></i>
+            </div>
+        </div>
+        
+        <div class="model-info">
+            <i class="bi bi-camera-video"></i>
+            <span id="video-info-<?= $asset_id ?>">Video Player • Click play to start</span>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const assetId = <?= $asset_id ?>;
+        const videoUrl = '<?= htmlspecialchars($asset['asset_file']) ?>';
+        
+        let video;
+        let isPlaying = false;
+        let isMuted = false;
+        
+        const backgroundColors = [
+            { name: 'Dark', color: '#1a1a1a', class: 'dark' },
+            { name: 'Light', color: '#f5f5f5', class: 'light' },
+            { name: 'Blue', color: '#1e3a8a', class: 'blue' },
+            { name: 'Purple', color: '#581c87', class: 'purple' },
+            { name: 'Green', color: '#166534', class: 'green' },
+            { name: 'Gradient', color: 'linear-gradient(45deg, #667eea, #764ba2)', class: 'gradient' }
+        ];
+        let currentBackgroundIndex = 0;
+        
+        function initVideoPlayer() {
+            const container = document.getElementById(`video-viewer-${assetId}`);
+            if (!container) return;
+            
+            video = document.getElementById(`video-element-${assetId}`);
+            video.volume = 0.7;
+            
+            // Video event listeners
+            video.addEventListener('loadedmetadata', () => {
+                const loading = container.querySelector('.video-loading');
+                if (loading) loading.style.display = 'none';
+                
+                updateTimeDisplay();
+                updateVideoInfo();
+            });
+            
+            video.addEventListener('timeupdate', updateProgress);
+            video.addEventListener('ended', () => {
+                isPlaying = false;
+                updatePlayButton();
+            });
+            
+            video.addEventListener('play', () => {
+                isPlaying = true;
+                updatePlayButton();
+            });
+            
+            video.addEventListener('pause', () => {
+                isPlaying = false;
+                updatePlayButton();
+            });
+            
+            video.addEventListener('error', (e) => {
+                console.error('Video loading error:', e);
+                const loading = container.querySelector('.video-loading');
+                if (loading) loading.innerHTML = '<div class="error-message">Failed to load video</div>';
+            });
+            
+            // Progress slider
+            const progressSlider = document.getElementById(`video-progress-${assetId}`);
+            progressSlider.addEventListener('input', () => {
+                if (video.duration) {
+                    video.currentTime = (progressSlider.value / 100) * video.duration;
+                }
+            });
+            
+            // Volume slider
+            const volumeSlider = document.getElementById(`video-volume-${assetId}`);
+            volumeSlider.addEventListener('input', () => {
+                video.volume = volumeSlider.value / 100;
+                updateVolumeButton();
+            });
+            
+            // Fullscreen event listeners
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+            document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+            document.addEventListener('MSFullscreenChange', updateFullscreenButton);
+        }
+        
+        function updateProgress() {
+            if (video.duration) {
+                const progress = (video.currentTime / video.duration) * 100;
+                document.getElementById(`video-progress-${assetId}`).value = progress;
+                updateTimeDisplay();
+            }
+        }
+        
+        function updateTimeDisplay() {
+            const currentTime = formatTime(video.currentTime || 0);
+            const totalTime = formatTime(video.duration || 0);
+            
+            const container = document.getElementById(`video-viewer-${assetId}`).parentElement;
+            container.querySelector('.current-time').textContent = currentTime;
+            container.querySelector('.total-time').textContent = totalTime;
+        }
+        
+        function updateVideoInfo() {
+            const info = document.getElementById(`video-info-${assetId}`);
+            const fileName = videoUrl.split('/').pop();
+            const resolution = video.videoWidth && video.videoHeight ? ` • ${video.videoWidth}x${video.videoHeight}` : '';
+            info.textContent = `${fileName} • ${formatTime(video.duration || 0)}${resolution}`;
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function updatePlayButton() {
+            const btn = document.querySelector(`#video-viewer-${assetId}`).parentElement.querySelector('.play-pause-btn');
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+            
+            icon.className = `bi ${isPlaying ? 'bi-pause-circle' : 'bi-play-circle'}`;
+            span.textContent = isPlaying ? 'Pause' : 'Play';
+        }
+        
+        function updateVolumeButton() {
+            const btn = document.querySelector(`#video-viewer-${assetId}`).parentElement.querySelector('.volume-btn');
+            const icon = btn.querySelector('i');
+            
+            if (video.volume === 0 || isMuted) {
+                icon.className = 'bi bi-volume-mute';
+            } else if (video.volume < 0.5) {
+                icon.className = 'bi bi-volume-down';
+            } else {
+                icon.className = 'bi bi-volume-up';
+            }
+        }
+        
+        function updateFullscreenButton() {
+            const btn = document.querySelector(`#video-viewer-${assetId}`).parentElement.querySelector('.fullscreen-btn');
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+            
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || 
+                                document.mozFullScreenElement || document.msFullscreenElement;
+            
+            icon.className = `bi ${isFullscreen ? 'bi-fullscreen-exit' : 'bi-fullscreen'}`;
+            span.textContent = isFullscreen ? 'Exit FS' : 'Fullscreen';
+        }
+        
+        // Control functions
+        window[`togglePlayPauseVideo${assetId}`] = function() {
+            if (isPlaying) {
+                video.pause();
+            } else {
+                video.play().then(() => {
+                    console.log('Video playing');
+                }).catch(e => {
+                    console.error('Failed to play video:', e);
+                });
+            }
+        };
+        
+        window[`stopVideo${assetId}`] = function() {
+            video.pause();
+            video.currentTime = 0;
+            isPlaying = false;
+            updatePlayButton();
+        };
+        
+        window[`toggleMuteVideo${assetId}`] = function() {
+            isMuted = !isMuted;
+            video.muted = isMuted;
+            updateVolumeButton();
+        };
+        
+        window[`toggleFullscreen${assetId}`] = function() {
+            const container = document.getElementById(`video-viewer-${assetId}`);
+            
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+                !document.mozFullScreenElement && !document.msFullscreenElement) {
+                // Enter fullscreen
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.mozRequestFullScreen) {
+                    container.mozRequestFullScreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                }
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        };
+        
+        window[`changeBackgroundVideo${assetId}`] = function() {
+            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundColors.length;
+            const currentBg = backgroundColors[currentBackgroundIndex];
+            
+            const container = document.querySelector(`#video-viewer-${assetId}`).closest('.texture-viewer-container');
+            container.className = container.className.replace(/\b(dark|light|blue|purple|green|gradient)-theme\b/, '');
+            container.classList.add(`${currentBg.class}-theme`);
+            
+            const label = container.querySelector('.bg-label');
+            if (label) label.textContent = currentBg.name;
+        };
+        
+        // Initialize when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initVideoPlayer);
+        } else {
+            initVideoPlayer();
+        }
+    })();
+    </script>
+
+    <style>
+    .video-viewer {
+        position: relative;
+        overflow: hidden;
+        background: #000;
+    }
+    
+    .video-element {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+    }
+    
+    .video-progress-controls {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 10px 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .progress-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+    }
+    
+    .volume-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 120px;
+    }
+    
+    .progress-slider, .volume-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        outline: none;
+        cursor: pointer;
+    }
+    
+    .progress-slider {
+        flex: 1;
+    }
+    
+    .volume-slider {
+        width: 80px;
+    }
+    
+    .progress-slider::-webkit-slider-thumb,
+    .volume-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        background: #06b6d4;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .progress-slider::-webkit-slider-thumb:hover,
+    .volume-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        background: #0891b2;
+    }
+    
+    .time-display {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.8);
+        font-family: monospace;
+        min-width: 35px;
+        text-align: center;
+    }
+    
+    .volume-container i {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+    }
+    
+    /* Fullscreen styles */
+    .video-viewer:-webkit-full-screen {
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    .video-viewer:-moz-full-screen {
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    .video-viewer:fullscreen {
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    .video-viewer:-webkit-full-screen .video-element,
+    .video-viewer:-moz-full-screen .video-element,
+    .video-viewer:fullscreen .video-element {
+        object-fit: contain;
+        width: 100%;
+        height: 100%;
+    }
+    
+    /* Theme variations for video player */
+    .texture-viewer-container.light-theme .video-progress-controls {
+        background: rgba(0, 0, 0, 0.05);
+        border-top-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    .texture-viewer-container.light-theme .time-display,
+    .texture-viewer-container.light-theme .volume-container i {
+        color: rgba(0, 0, 0, 0.7);
+    }
+    
+    .texture-viewer-container.light-theme .progress-slider,
+    .texture-viewer-container.light-theme .volume-slider {
+        background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .texture-viewer-container.light-theme .progress-slider::-webkit-slider-thumb,
+    .texture-viewer-container.light-theme .volume-slider::-webkit-slider-thumb {
+        background: #3b82f6;
+    }
+    
+    .texture-viewer-container.blue-theme .progress-slider::-webkit-slider-thumb,
+    .texture-viewer-container.blue-theme .volume-slider::-webkit-slider-thumb {
+        background: #60a5fa;
+    }
+    
+    .texture-viewer-container.purple-theme .progress-slider::-webkit-slider-thumb,
+    .texture-viewer-container.purple-theme .volume-slider::-webkit-slider-thumb {
+        background: #c084fc;
+    }
+    
+    .texture-viewer-container.green-theme .progress-slider::-webkit-slider-thumb,
+    .texture-viewer-container.green-theme .volume-slider::-webkit-slider-thumb {
+        background: #4ade80;
+    }
+    
+    .texture-viewer-container.gradient-theme .progress-slider::-webkit-slider-thumb,
+    .texture-viewer-container.gradient-theme .volume-slider::-webkit-slider-thumb {
+        background: #667eea;
+    }
+    
+    /* Video loading styles */
+    .video-loading {
+        color: white;
+        text-align: center;
+    }
+    
+    .video-loading .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #06b6d4;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+        color: #ef4444;
+        padding: 20px;
+        text-align: center;
+    }
+    </style>
 <?php endif; ?>
         
         <div class="text-center mt-3">
