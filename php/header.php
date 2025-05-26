@@ -420,6 +420,11 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                 <!-- Left-aligned Navigation -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
+                        <a href="<?php echo $baseUrl; ?>php/home.php" class="nav-link px-2 <?= $current_page == 'home.php' ? 'active' : '' ?>">
+                            <i class="bi bi-house-fill me-2"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="<?php echo $baseUrl; ?>php/forum.php" class="nav-link px-2 <?= $current_page == 'forum.php' ? 'active' : '' ?>">
                             <i class="bi bi-chat-left-text-fill me-2"></i>Forum
                         </a>
