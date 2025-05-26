@@ -87,11 +87,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_asset'])) {
                 $image_paths[] = $image_path;
             }
         }
-    } elseif (!in_array($category_id, [10, 11, 12])) {
-        // If category is not 10, 11, or 12, images are required
-        $_SESSION['error'] = "Images are required for this category.";
-        header("Location: marketplace.php");
-        exit;
     }
 
     // Handle video uploads
@@ -1160,13 +1155,6 @@ document.addEventListener("DOMContentLoaded", function() {
         
         let hasError = false;
         
-        // Check content
-        if(quillContent === '' || quillContent === '<p><br></p>') {
-            e.preventDefault();
-            showAlert('Asset content is required!', 'danger');
-            hasError = true;
-        }
-        
         // Check for hashtag badges
         if(hashtags.size === 0) {
             e.preventDefault();
@@ -1579,7 +1567,8 @@ while ($asset = $result->fetch_assoc()):
                         <input type="text" name="title" id="title" class="form-control bg-dark" placeholder="Your asset title goes here" required>
                     </div>
                     <div class="mb-3 animate__animated animate__fadeIn">
-                        <label for="content" class="form-label">Content</label>
+                        <label for="content" class="form-label">Description</label>
+                        <small>(Optional)</small>
                         <div id="editor" style="height: 200px; border: 1px solid #ccc;"></div>
                         <input type="hidden" name="content">
                     </div>
@@ -1603,29 +1592,15 @@ while ($asset = $result->fetch_assoc()):
                         <input type="file" name="asset_file" id="asset_file" class="form-control" required>
                         <div class="form-text">
                         </div>
-                        <div id="file-preview" class="mt-2" style="display: none;">
-                            <div class="alert alert-info">
-                                <i class="bi bi-box"></i> 
-                                <strong>3D Model detected!</strong> 
-                                Your model will be viewable in 3D with rotation, zoom, and pan controls.
-                            </div>
-                        </div>
                     </div>
                     <div class="mb-3 animate__animated animate__fadeIn">
                         <label for="preview_image" class="form-label">
                             Preview Image
                         </label>
+                        <small>(Optional)</small>
                         <input type="file" name="preview_image" id="preview_image" class="form-control" accept="image/*">
                         <div class="form-text">
                         </div>
-                    </div>
-                    <div class="mb-3 animate__animated animate__fadeIn">
-                        <label for="images" class="form-label">Additional Images</label>
-                        <input type="file" name="images[]" id="images" class="form-control" accept="image/*" multiple>
-                    </div>
-                    <div class="mb-3 animate__animated animate__fadeIn">
-                        <label for="videos" class="form-label">Videos</label>
-                        <input type="file" name="videos[]" id="videos" class="form-control" accept="video/*" multiple>
                     </div>
                     <div class="mt-3 animate__animated animate__fadeIn d-grid">
                         <button type="submit" name="create_asset" class="btn btn-primary animate__animated animate__infinite w-100">Publish Asset</button>

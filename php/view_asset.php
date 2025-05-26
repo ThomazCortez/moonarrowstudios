@@ -1168,6 +1168,7 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
 
     <script>
 // Modern 3D viewer with enhanced lighting and shadows
@@ -1492,88 +1493,89 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
     }
 
     function loadModel() {
-        const modelPath = '<?= htmlspecialchars($asset['asset_file']) ?>';
-        const extension = modelPath.split('.').pop().toLowerCase();
-        const loadingElement = document.querySelector(`#model-viewer-<?= $asset_id ?> .model-loading`);
-        
-        let loader;
-        switch(extension) {
-            case 'gltf':
-            case 'glb':
-                loader = new THREE.GLTFLoader();
-                break;
-            case 'obj':
-                loader = new THREE.OBJLoader();
-                break;
-            default:
-                loadingElement.innerHTML = `<div class="error-message">Unsupported format: .${extension}</div>`;
-                return;
-        }
+    const modelPath = '<?= htmlspecialchars($asset['asset_file']) ?>';
+    const extension = modelPath.split('.').pop().toLowerCase();
+    const loadingElement = document.querySelector(`#model-viewer-<?= $asset_id ?> .model-loading`);
+    
+    let loader;
+    switch(extension) {
+        case 'gltf':
+        case 'glb':
+            loader = new THREE.GLTFLoader();
+            break;
+        case 'obj':
+            loader = new THREE.OBJLoader();
+            break;
+        case 'fbx':
+            loader = new THREE.FBXLoader();
+            break;
+        default:
+            loadingElement.innerHTML = `<div class="error-message">Unsupported format: .${extension}</div>`;
+            return;
+    }
 
-        loader.load(
-            modelPath,
-            (object) => {
-                loadingElement.style.display = 'none';
-                
-                let loadedModel = (extension === 'gltf' || extension === 'glb') ? object.scene : object;
+    loader.load(
+        modelPath,
+        (object) => {
+            loadingElement.style.display = 'none';
+            let loadedModel;
 
-                // Enhanced shadow and material setup
-                const shadowConfig = shadowModes[currentShadowIndex].config;
-                loadedModel.traverse((child) => {
-                    if (child.isMesh) {
-                        child.castShadow = shadowConfig.enabled;
-                        child.receiveShadow = shadowConfig.enabled;
-                        
-                        // Enhance materials
-                        if (child.material) {
-                            if (Array.isArray(child.material)) {
-                                child.material.forEach(mat => {
-                                    mat.shadowSide = THREE.DoubleSide;
-                                });
-                            } else {
-                                child.material.shadowSide = THREE.DoubleSide;
-                            }
+            if (extension === 'gltf' || extension === 'glb') {
+                loadedModel = object.scene;
+            } else {
+                loadedModel = object;
+            }
+
+            const shadowConfig = shadowModes[currentShadowIndex].config;
+            loadedModel.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = shadowConfig.enabled;
+                    child.receiveShadow = shadowConfig.enabled;
+
+                    if (child.material) {
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(mat => mat.shadowSide = THREE.DoubleSide);
+                        } else {
+                            child.material.shadowSide = THREE.DoubleSide;
                         }
                     }
-                });
-
-                // Center and scale model
-                const box = new THREE.Box3().setFromObject(loadedModel);
-                const center = box.getCenter(new THREE.Vector3());
-                const size = box.getSize(new THREE.Vector3());
-                
-                loadedModel.position.sub(center);
-                
-                // Scale model to fit nicely in view
-                const maxDim = Math.max(size.x, size.y, size.z);
-                if (maxDim > 5) {
-                    const scale = 5 / maxDim;
-                    loadedModel.scale.setScalar(scale);
                 }
+            });
 
-                scene.add(loadedModel);
-                model = loadedModel;
-                
-                // Adjust camera
-                const scaledSize = size.clone().multiplyScalar(loadedModel.scale.x);
-                const maxScaledDim = Math.max(scaledSize.x, scaledSize.y, scaledSize.z);
-                const distance = maxScaledDim * 2.5;
-                camera.position.set(distance, distance * 0.75, distance);
-                camera.lookAt(0, 0, 0);
-                controls.update();
-            },
-            (progress) => {
-                if (progress.lengthComputable) {
-                    const percent = Math.round((progress.loaded / progress.total) * 100);
-                    loadingElement.querySelector('.loading-text').textContent = `Loading... ${percent}%`;
-                }
-            },
-            (error) => {
-                console.error('Model loading error:', error);
-                loadingElement.innerHTML = `<div class="error-message">Failed to load model</div>`;
+            const box = new THREE.Box3().setFromObject(loadedModel);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            loadedModel.position.sub(center);
+
+            const maxDim = Math.max(size.x, size.y, size.z);
+            if (maxDim > 5) {
+                const scale = 5 / maxDim;
+                loadedModel.scale.setScalar(scale);
             }
-        );
-    }
+
+            scene.add(loadedModel);
+            model = loadedModel;
+
+            const scaledSize = size.clone().multiplyScalar(loadedModel.scale.x);
+            const maxScaledDim = Math.max(scaledSize.x, scaledSize.y, scaledSize.z);
+            const distance = maxScaledDim * 2.5;
+            camera.position.set(distance, distance * 0.75, distance);
+            camera.lookAt(0, 0, 0);
+            controls.update();
+        },
+        (progress) => {
+            if (progress.lengthComputable) {
+                const percent = Math.round((progress.loaded / progress.total) * 100);
+                loadingElement.querySelector('.loading-text').textContent = `Loading... ${percent}%`;
+            }
+        },
+        (error) => {
+            console.error('Model loading error:', error);
+            loadingElement.innerHTML = `<div class="error-message">Failed to load model</div>`;
+        }
+    );
+}
+
 
     function animate() {
         requestAnimationFrame(animate);
