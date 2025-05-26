@@ -3193,6 +3193,1096 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
         text-align: center;
     }
     </style>
+<?php elseif ($asset['category_id'] == 15): ?>
+    <!-- GIF Player -->
+    <div class="texture-viewer-container gif-player-container mt-3 mb-3 dark-theme">
+        <div id="gif-viewer-<?= $asset_id ?>" class="model-viewer gif-viewer">
+            <img id="gif-element-<?= $asset_id ?>" class="gif-element" src="<?= htmlspecialchars($asset['asset_file']) ?>" alt="GIF Animation">
+            <div class="gif-loading" style="position: absolute; z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading GIF...</p>
+            </div>
+        </div>
+        
+        <!-- GIF Controls -->
+        <div class="model-controls gif-controls">
+            <button class="control-btn play-pause-btn" onclick="togglePlayPauseGif<?= $asset_id ?>()" title="Play/Pause">
+                <i class="bi bi-pause-circle"></i>
+                <span>Pause</span>
+            </button>
+            <button class="control-btn" onclick="restartGif<?= $asset_id ?>()" title="Restart">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>Restart</span>
+            </button>
+            <button class="control-btn speed-btn" onclick="changeSpeed<?= $asset_id ?>()" title="Change Speed">
+                <i class="bi bi-speedometer2"></i>
+                <span class="speed-label">1x</span>
+            </button>
+            <button class="control-btn fullscreen-btn" onclick="toggleFullscreen<?= $asset_id ?>()" title="Fullscreen">
+                <i class="bi bi-fullscreen"></i>
+                <span>Fullscreen</span>
+            </button>
+            <button class="control-btn background-btn" onclick="changeBackgroundGif<?= $asset_id ?>()" title="Change background">
+                <i class="bi bi-palette"></i>
+                <span class="bg-label">Dark</span>
+            </button>
+        </div>
+        
+        <div class="model-info">
+            <i class="bi bi-file-image"></i>
+            <span id="gif-info-<?= $asset_id ?>">GIF Animation • Loading...</span>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const assetId = <?= $asset_id ?>;
+        const gifUrl = '<?= htmlspecialchars($asset['asset_file']) ?>';
+        
+        let gifElement;
+        let isPlaying = true;  // GIFs auto-play by default
+        let currentSpeed = 1;
+        let originalSrc = gifUrl;
+        
+        const speeds = [0.25, 0.5, 1, 1.5, 2];
+        let currentSpeedIndex = 2; // Default to 1x speed
+        
+        const backgroundColors = [
+            { name: 'Dark', color: '#1a1a1a', class: 'dark' },
+            { name: 'Light', color: '#f5f5f5', class: 'light' },
+            { name: 'Blue', color: '#1e3a8a', class: 'blue' },
+            { name: 'Purple', color: '#581c87', class: 'purple' },
+            { name: 'Green', color: '#166534', class: 'green' },
+            { name: 'Gradient', color: 'linear-gradient(45deg, #667eea, #764ba2)', class: 'gradient' }
+        ];
+        let currentBackgroundIndex = 0;
+        
+        function initGifPlayer() {
+            const container = document.getElementById(`gif-viewer-${assetId}`);
+            if (!container) return;
+            
+            gifElement = document.getElementById(`gif-element-${assetId}`);
+            
+            // GIF event listeners
+            gifElement.addEventListener('load', () => {
+                const loading = container.querySelector('.gif-loading');
+                if (loading) loading.style.display = 'none';
+                
+                updateGifInfo();
+            });
+            
+            gifElement.addEventListener('error', (e) => {
+                console.error('GIF loading error:', e);
+                const loading = container.querySelector('.gif-loading');
+                if (loading) loading.innerHTML = '<div class="error-message">Failed to load GIF</div>';
+            });
+            
+            // Fullscreen event listeners
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+            document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+            document.addEventListener('MSFullscreenChange', updateFullscreenButton);
+        }
+        
+        function updateGifInfo() {
+            const info = document.getElementById(`gif-info-${assetId}`);
+            const fileName = gifUrl.split('/').pop();
+            const dimensions = gifElement.naturalWidth && gifElement.naturalHeight ? 
+                ` • ${gifElement.naturalWidth}x${gifElement.naturalHeight}` : '';
+            info.textContent = `${fileName}${dimensions} • Animated GIF`;
+        }
+        
+        function updatePlayButton() {
+            const btn = document.querySelector(`#gif-viewer-${assetId}`).parentElement.querySelector('.play-pause-btn');
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+            
+            icon.className = `bi ${isPlaying ? 'bi-pause-circle' : 'bi-play-circle'}`;
+            span.textContent = isPlaying ? 'Pause' : 'Play';
+        }
+        
+        function updateSpeedButton() {
+            const btn = document.querySelector(`#gif-viewer-${assetId}`).parentElement.querySelector('.speed-btn');
+            const span = btn.querySelector('.speed-label');
+            span.textContent = `${speeds[currentSpeedIndex]}x`;
+        }
+        
+        function updateFullscreenButton() {
+            const btn = document.querySelector(`#gif-viewer-${assetId}`).parentElement.querySelector('.fullscreen-btn');
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+            
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || 
+                                document.mozFullScreenElement || document.msFullscreenElement;
+            
+            icon.className = `bi ${isFullscreen ? 'bi-fullscreen-exit' : 'bi-fullscreen'}`;
+            span.textContent = isFullscreen ? 'Exit FS' : 'Fullscreen';
+        }
+        
+        // Control functions
+        window[`togglePlayPauseGif${assetId}`] = function() {
+            if (isPlaying) {
+                // To "pause" a GIF, we replace it with a static image (first frame)
+                // This is a workaround since GIFs don't have native pause functionality
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = gifElement.naturalWidth || gifElement.width;
+                canvas.height = gifElement.naturalHeight || gifElement.height;
+                ctx.drawImage(gifElement, 0, 0);
+                
+                gifElement.src = canvas.toDataURL();
+                isPlaying = false;
+            } else {
+                // Resume by reloading the original GIF
+                gifElement.src = originalSrc + '?t=' + Date.now(); // Cache bust
+                isPlaying = true;
+            }
+            updatePlayButton();
+        };
+        
+        window[`restartGif${assetId}`] = function() {
+            // Restart GIF by reloading it with cache busting
+            gifElement.src = originalSrc + '?t=' + Date.now();
+            isPlaying = true;
+            updatePlayButton();
+        };
+        
+        window[`changeSpeed${assetId}`] = function() {
+            currentSpeedIndex = (currentSpeedIndex + 1) % speeds.length;
+            currentSpeed = speeds[currentSpeedIndex];
+            
+            // Note: Changing GIF speed requires CSS animation manipulation
+            // This is a simplified version - real speed control would need more complex implementation
+            const speedMultiplier = 1 / currentSpeed;
+            gifElement.style.animationDuration = speedMultiplier + 's';
+            gifElement.style.animationTimingFunction = 'steps(1, end)';
+            
+            updateSpeedButton();
+        };
+        
+        window[`toggleFullscreen${assetId}`] = function() {
+            const container = document.getElementById(`gif-viewer-${assetId}`);
+            
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+                !document.mozFullScreenElement && !document.msFullscreenElement) {
+                // Enter fullscreen
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.mozRequestFullScreen) {
+                    container.mozRequestFullScreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                }
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        };
+        
+        window[`changeBackgroundGif${assetId}`] = function() {
+            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundColors.length;
+            const currentBg = backgroundColors[currentBackgroundIndex];
+            
+            const container = document.querySelector(`#gif-viewer-${assetId}`).closest('.texture-viewer-container');
+            container.className = container.className.replace(/\b(dark|light|blue|purple|green|gradient)-theme\b/, '');
+            container.classList.add(`${currentBg.class}-theme`);
+            
+            const label = container.querySelector('.bg-label');
+            if (label) label.textContent = currentBg.name;
+        };
+        
+        // Initialize when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGifPlayer);
+        } else {
+            initGifPlayer();
+        }
+    })();
+    </script>
+
+    <style>
+    .gif-viewer {
+        position: relative;
+        overflow: hidden;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+    }
+    
+    .gif-element {
+        max-width: 100%;
+        max-height: 100%;
+        display: block;
+        object-fit: contain;
+    }
+    
+    /* Fullscreen styles */
+    .gif-viewer:-webkit-full-screen {
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    .gif-viewer:-moz-full-screen {
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    .gif-viewer:fullscreen {
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    .gif-viewer:-webkit-full-screen .gif-element,
+    .gif-viewer:-moz-full-screen .gif-element,
+    .gif-viewer:fullscreen .gif-element {
+        max-width: 100vw;
+        max-height: 100vh;
+        width: auto;
+        height: auto;
+    }
+    
+    /* GIF loading styles */
+    .gif-loading {
+        color: white;
+        text-align: center;
+    }
+    
+    .gif-loading .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #06b6d4;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+        color: #ef4444;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    /* Theme variations for GIF player */
+    .texture-viewer-container.light-theme .gif-viewer {
+        background: #f5f5f5;
+    }
+    
+    .texture-viewer-container.blue-theme .gif-viewer {
+        background: #1e3a8a;
+    }
+    
+    .texture-viewer-container.purple-theme .gif-viewer {
+        background: #581c87;
+    }
+    
+    .texture-viewer-container.green-theme .gif-viewer {
+        background: #166534;
+    }
+    
+    .texture-viewer-container.gradient-theme .gif-viewer {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+    }
+    
+    /* Speed control visual feedback */
+    .gif-element.speed-adjusted {
+        filter: hue-rotate(10deg);
+        transition: filter 0.3s ease;
+    }
+    </style>
+<?php elseif (in_array($asset['category_id'], [1, 7, 18])): ?>
+    <!-- Image Viewer -->
+    <div class="texture-viewer-container image-viewer-container mt-3 mb-3 dark-theme">
+        <div id="image-viewer-<?= $asset_id ?>" class="model-viewer image-viewer">
+            <img id="image-element-<?= $asset_id ?>" class="image-element" src="<?= htmlspecialchars($asset['asset_file']) ?>" alt="Image">
+            <div class="image-loading" style="position: absolute; z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading image...</p>
+            </div>
+        </div>
+        
+        <!-- Image Controls -->
+        <div class="model-controls image-controls">
+            <button class="control-btn zoom-in-btn" onclick="zoomIn<?= $asset_id ?>()" title="Zoom In">
+                <i class="bi bi-zoom-in"></i>
+                <span>Zoom In</span>
+            </button>
+            <button class="control-btn zoom-out-btn" onclick="zoomOut<?= $asset_id ?>()" title="Zoom Out">
+                <i class="bi bi-zoom-out"></i>
+                <span>Zoom Out</span>
+            </button>
+            <button class="control-btn reset-zoom-btn" onclick="resetZoom<?= $asset_id ?>()" title="Reset Zoom">
+                <i class="bi bi-aspect-ratio"></i>
+                <span>Fit</span>
+            </button>
+            <button class="control-btn fullscreen-btn" onclick="toggleFullscreen<?= $asset_id ?>()" title="Fullscreen">
+                <i class="bi bi-fullscreen"></i>
+                <span>Fullscreen</span>
+            </button>
+            <button class="control-btn background-btn" onclick="changeBackgroundImage<?= $asset_id ?>()" title="Change background">
+                <i class="bi bi-palette"></i>
+                <span class="bg-label">Dark</span>
+            </button>
+        </div>
+        
+        <div class="model-info">
+            <i class="bi bi-image"></i>
+            <span id="image-info-<?= $asset_id ?>">Image • Loading...</span>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const assetId = <?= $asset_id ?>;
+        const imageUrl = '<?= htmlspecialchars($asset['asset_file']) ?>';
+        
+        let imageElement;
+        let currentZoom = 1;
+        let isDragging = false;
+        let startX, startY, translateX = 0, translateY = 0;
+        
+        const backgroundColors = [
+            { name: 'Dark', color: '#1a1a1a', class: 'dark' },
+            { name: 'Light', color: '#f5f5f5', class: 'light' },
+            { name: 'Blue', color: '#1e3a8a', class: 'blue' },
+            { name: 'Purple', color: '#581c87', class: 'purple' },
+            { name: 'Green', color: '#166534', class: 'green' },
+            { name: 'Gradient', color: 'linear-gradient(45deg, #667eea, #764ba2)', class: 'gradient' }
+        ];
+        let currentBackgroundIndex = 0;
+        
+        function initImageViewer() {
+            const container = document.getElementById(`image-viewer-${assetId}`);
+            if (!container) return;
+            
+            imageElement = document.getElementById(`image-element-${assetId}`);
+            
+            // Check if image is already loaded (cached)
+            const loading = container.querySelector('.image-loading');
+            if (imageElement.complete && imageElement.naturalHeight !== 0) {
+                if (loading) loading.style.display = 'none';
+                updateImageInfo();
+            }
+            
+            // Image event listeners
+            imageElement.addEventListener('load', () => {
+                const loading = container.querySelector('.image-loading');
+                if (loading) loading.style.display = 'none';
+                
+                updateImageInfo();
+            });
+            
+            imageElement.addEventListener('error', (e) => {
+                console.error('Image loading error:', e);
+                const loading = container.querySelector('.image-loading');
+                if (loading) loading.innerHTML = '<div class="error-message">Failed to load image</div>';
+            });
+            
+            // Mouse wheel zoom
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                zoom(delta, e.clientX, e.clientY);
+            });
+            
+            // Drag functionality
+            imageElement.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+            
+            // Touch support for mobile
+            imageElement.addEventListener('touchstart', startDrag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('touchend', endDrag);
+            
+            // Fullscreen event listeners
+            document.addEventListener('fullscreenchange', updateFullscreenButton);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+            document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+            document.addEventListener('MSFullscreenChange', updateFullscreenButton);
+        }
+        
+        function updateImageInfo() {
+            const info = document.getElementById(`image-info-${assetId}`);
+            const fileName = imageUrl.split('/').pop();
+            const dimensions = imageElement.naturalWidth && imageElement.naturalHeight ? 
+                ` • ${imageElement.naturalWidth}x${imageElement.naturalHeight}` : '';
+            const fileSize = imageElement.complete ? ' • Image' : '';
+            info.textContent = `${fileName}${dimensions}${fileSize}`;
+        }
+        
+        function updateFullscreenButton() {
+            const btn = document.querySelector(`#image-viewer-${assetId}`).parentElement.querySelector('.fullscreen-btn');
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+            
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || 
+                                document.mozFullScreenElement || document.msFullscreenElement;
+            
+            icon.className = `bi ${isFullscreen ? 'bi-fullscreen-exit' : 'bi-fullscreen'}`;
+            span.textContent = isFullscreen ? 'Exit FS' : 'Fullscreen';
+        }
+        
+        function zoom(factor, centerX, centerY) {
+            const newZoom = Math.max(0.1, Math.min(10, currentZoom * factor));
+            
+            if (centerX && centerY) {
+                const rect = imageElement.getBoundingClientRect();
+                const offsetX = centerX - rect.left - rect.width / 2;
+                const offsetY = centerY - rect.top - rect.height / 2;
+                
+                translateX -= offsetX * (factor - 1);
+                translateY -= offsetY * (factor - 1);
+            }
+            
+            currentZoom = newZoom;
+            updateImageTransform();
+        }
+        
+        function updateImageTransform() {
+            imageElement.style.transform = `scale(${currentZoom}) translate(${translateX}px, ${translateY}px)`;
+            imageElement.style.cursor = currentZoom > 1 ? 'grab' : 'default';
+        }
+        
+        function startDrag(e) {
+            if (currentZoom <= 1) return;
+            
+            isDragging = true;
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            startX = clientX - translateX;
+            startY = clientY - translateY;
+            
+            imageElement.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+        
+        function drag(e) {
+            if (!isDragging) return;
+            
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            translateX = clientX - startX;
+            translateY = clientY - startY;
+            
+            updateImageTransform();
+            e.preventDefault();
+        }
+        
+        function endDrag() {
+            isDragging = false;
+            imageElement.style.cursor = currentZoom > 1 ? 'grab' : 'default';
+        }
+        
+        // Control functions
+        window[`zoomIn${assetId}`] = function() {
+            zoom(1.25);
+        };
+        
+        window[`zoomOut${assetId}`] = function() {
+            zoom(0.8);
+        };
+        
+        window[`resetZoom${assetId}`] = function() {
+            currentZoom = 1;
+            translateX = 0;
+            translateY = 0;
+            updateImageTransform();
+        };
+        
+        window[`toggleFullscreen${assetId}`] = function() {
+            const container = document.getElementById(`image-viewer-${assetId}`);
+            
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+                !document.mozFullScreenElement && !document.msFullscreenElement) {
+                // Enter fullscreen
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.mozRequestFullScreen) {
+                    container.mozRequestFullScreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                }
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        };
+        
+        window[`changeBackgroundImage${assetId}`] = function() {
+            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundColors.length;
+            const currentBg = backgroundColors[currentBackgroundIndex];
+            
+            const container = document.querySelector(`#image-viewer-${assetId}`).closest('.texture-viewer-container');
+            container.className = container.className.replace(/\b(dark|light|blue|purple|green|gradient)-theme\b/, '');
+            container.classList.add(`${currentBg.class}-theme`);
+            
+            const label = container.querySelector('.bg-label');
+            if (label) label.textContent = currentBg.name;
+        };
+        
+        // Initialize when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initImageViewer);
+        } else {
+            initImageViewer();
+        }
+    })();
+    </script>
+
+    <style>
+    .image-viewer {
+        position: relative;
+        overflow: hidden;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+        user-select: none;
+    }
+    
+    .image-element {
+        max-width: 100%;
+        max-height: 100%;
+        display: block;
+        object-fit: contain;
+        transition: transform 0.2s ease;
+        cursor: default;
+    }
+    
+    .image-element:active {
+        cursor: grabbing !important;
+    }
+    
+    /* Fullscreen styles */
+    .image-viewer:-webkit-full-screen {
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    .image-viewer:-moz-full-screen {
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    .image-viewer:fullscreen {
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    .image-viewer:-webkit-full-screen .image-element,
+    .image-viewer:-moz-full-screen .image-element,
+    .image-viewer:fullscreen .image-element {
+        max-width: 100vw;
+        max-height: 100vh;
+    }
+    
+    /* Image loading styles */
+    .image-loading {
+        color: white;
+        text-align: center;
+    }
+    
+    .image-loading .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #06b6d4;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+        color: #ef4444;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    /* Theme variations for image viewer */
+    .texture-viewer-container.light-theme .image-viewer {
+        background: #f5f5f5;
+    }
+    
+    .texture-viewer-container.blue-theme .image-viewer {
+        background: #1e3a8a;
+    }
+    
+    .texture-viewer-container.purple-theme .image-viewer {
+        background: #581c87;
+    }
+    
+    .texture-viewer-container.green-theme .image-viewer {
+        background: #166534;
+    }
+    
+    .texture-viewer-container.gradient-theme .image-viewer {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+    }
+    
+    /* Zoom controls styling */
+    .zoom-in-btn:hover,
+    .zoom-out-btn:hover,
+    .reset-zoom-btn:hover {
+        background: rgba(6, 182, 212, 0.2);
+    }
+    
+    /* Mobile touch improvements */
+    @media (max-width: 768px) {
+        .image-viewer {
+            min-height: 300px;
+        }
+        
+        .image-element {
+            touch-action: none;
+        }
+    }
+    </style>
+<?php elseif ($asset['category_id'] == 17): ?>
+    <!-- Font Viewer -->
+    <div class="texture-viewer-container font-viewer-container mt-3 mb-3 dark-theme">
+        <div id="font-viewer-<?= $asset_id ?>" class="model-viewer font-viewer">
+            <div class="font-loading" style="position: absolute; z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Loading font...</p>
+            </div>
+            
+            <div class="font-preview-container" style="display: none;">
+                <!-- Sample Text Display -->
+                <div class="font-sample-large" id="font-sample-large-<?= $asset_id ?>">
+                    The Quick Brown Fox Jumps Over The Lazy Dog
+                </div>
+                
+                <!-- Alphabet Display -->
+                <div class="font-sample-alphabet" id="font-sample-alphabet-<?= $asset_id ?>">
+                    ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>
+                    abcdefghijklmnopqrstuvwxyz<br>
+                    1234567890 !@#$%^&*()
+                </div>
+                
+                <!-- Custom Text Input -->
+                <div class="font-custom-text">
+                    <textarea id="font-custom-input-<?= $asset_id ?>" 
+                              class="custom-text-input" 
+                              placeholder="Type your custom text here..."
+                              rows="3">Your custom text preview</textarea>
+                    <div class="font-sample-custom" id="font-sample-custom-<?= $asset_id ?>">
+                        Your custom text preview
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Font Controls -->
+        <div class="model-controls font-controls">
+            <button class="control-btn size-down-btn" onclick="decreaseFontSize<?= $asset_id ?>()" title="Decrease Size">
+                <i class="bi bi-dash-circle"></i>
+                <span>A-</span>
+            </button>
+            <button class="control-btn size-up-btn" onclick="increaseFontSize<?= $asset_id ?>()" title="Increase Size">
+                <i class="bi bi-plus-circle"></i>
+                <span>A+</span>
+            </button>
+            <button class="control-btn sample-btn" onclick="changeSampleText<?= $asset_id ?>()" title="Change Sample">
+                <i class="bi bi-text-paragraph"></i>
+                <span class="sample-label">Sample 1</span>
+            </button>
+            <button class="control-btn weight-btn" onclick="changeFontWeight<?= $asset_id ?>()" title="Font Weight">
+                <i class="bi bi-type-bold"></i>
+                <span class="weight-label">Normal</span>
+            </button>
+            <button class="control-btn background-btn" onclick="changeBackgroundFont<?= $asset_id ?>()" title="Change background">
+                <i class="bi bi-palette"></i>
+                <span class="bg-label">Dark</span>
+            </button>
+        </div>
+        
+        <div class="model-info">
+            <i class="bi bi-fonts"></i>
+            <span id="font-info-<?= $asset_id ?>">Font Preview • Loading...</span>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        const assetId = <?= $asset_id ?>;
+        const fontUrl = '<?= htmlspecialchars($asset['asset_file']) ?>';
+        
+        let currentFontSize = 24;
+        let currentWeight = 'normal';
+        let currentSample = 0;
+        
+        const fontWeights = ['normal', 'bold', '100', '300', '400', '500', '600', '700', '800', '900'];
+        let currentWeightIndex = 0;
+        
+        const sampleTexts = [
+            'The Quick Brown Fox Jumps Over The Lazy Dog',
+            'Pack my box with five dozen liquor jugs',
+            'How vexingly quick daft zebras jump!',
+            'Waltz, bad nymph, for quick jigs vex',
+            'Typography & Design Elements',
+            'Lorem ipsum dolor sit amet consectetur'
+        ];
+        
+        const backgroundColors = [
+            { name: 'Dark', color: '#1a1a1a', class: 'dark' },
+            { name: 'Light', color: '#f5f5f5', class: 'light' },
+            { name: 'Blue', color: '#1e3a8a', class: 'blue' },
+            { name: 'Purple', color: '#581c87', class: 'purple' },
+            { name: 'Green', color: '#166534', class: 'green' },
+            { name: 'Gradient', color: 'linear-gradient(45deg, #667eea, #764ba2)', class: 'gradient' }
+        ];
+        let currentBackgroundIndex = 0;
+        
+        function initFontViewer() {
+            const container = document.getElementById(`font-viewer-${assetId}`);
+            if (!container) return;
+            
+            loadFont();
+            
+            // Custom text input listener
+            const customInput = document.getElementById(`font-custom-input-${assetId}`);
+            customInput.addEventListener('input', updateCustomText);
+        }
+        
+        function loadFont() {
+            const fontName = `CustomFont${assetId}`;
+            const fontFace = new FontFace(fontName, `url(${fontUrl})`);
+            
+            fontFace.load().then((loadedFont) => {
+                document.fonts.add(loadedFont);
+                
+                // Apply font to preview elements
+                const elements = [
+                    document.getElementById(`font-sample-large-${assetId}`),
+                    document.getElementById(`font-sample-alphabet-${assetId}`),
+                    document.getElementById(`font-sample-custom-${assetId}`)
+                ];
+                
+                elements.forEach(el => {
+                    if (el) {
+                        el.style.fontFamily = fontName;
+                        el.style.fontSize = currentFontSize + 'px';
+                        el.style.fontWeight = currentWeight;
+                    }
+                });
+                
+                // Hide loading, show preview
+                const loading = document.querySelector(`#font-viewer-${assetId} .font-loading`);
+                const preview = document.querySelector(`#font-viewer-${assetId} .font-preview-container`);
+                if (loading) loading.style.display = 'none';
+                if (preview) preview.style.display = 'block';
+                
+                updateFontInfo();
+                
+            }).catch((error) => {
+                console.error('Font loading failed:', error);
+                const loading = document.querySelector(`#font-viewer-${assetId} .font-loading`);
+                if (loading) loading.innerHTML = '<div class="error-message">Failed to load font</div>';
+            });
+        }
+        
+        function updateFontInfo() {
+            const info = document.getElementById(`font-info-${assetId}`);
+            const fileName = fontUrl.split('/').pop();
+            const fileExt = fileName.split('.').pop().toUpperCase();
+            info.textContent = `${fileName} • ${fileExt} Font • ${currentFontSize}px`;
+        }
+        
+        function updateFontStyles() {
+            const elements = [
+                document.getElementById(`font-sample-large-${assetId}`),
+                document.getElementById(`font-sample-alphabet-${assetId}`),
+                document.getElementById(`font-sample-custom-${assetId}`)
+            ];
+            
+            elements.forEach(el => {
+                if (el) {
+                    el.style.fontSize = currentFontSize + 'px';
+                    el.style.fontWeight = currentWeight;
+                }
+            });
+            
+            updateFontInfo();
+        }
+        
+        function updateCustomText() {
+            const input = document.getElementById(`font-custom-input-${assetId}`);
+            const preview = document.getElementById(`font-sample-custom-${assetId}`);
+            if (input && preview) {
+                preview.textContent = input.value || 'Your custom text preview';
+            }
+        }
+        
+        function updateWeightButton() {
+            const btn = document.querySelector(`#font-viewer-${assetId}`).parentElement.querySelector('.weight-btn');
+            const span = btn.querySelector('.weight-label');
+            const weightName = currentWeight === 'normal' ? 'Normal' : 
+                              currentWeight === 'bold' ? 'Bold' : currentWeight;
+            span.textContent = weightName;
+        }
+        
+        function updateSampleButton() {
+            const btn = document.querySelector(`#font-viewer-${assetId}`).parentElement.querySelector('.sample-btn');
+            const span = btn.querySelector('.sample-label');
+            span.textContent = `Sample ${currentSample + 1}`;
+        }
+        
+        // Control functions
+        window[`increaseFontSize${assetId}`] = function() {
+            currentFontSize = Math.min(72, currentFontSize + 4);
+            updateFontStyles();
+        };
+        
+        window[`decreaseFontSize${assetId}`] = function() {
+            currentFontSize = Math.max(8, currentFontSize - 4);
+            updateFontStyles();
+        };
+        
+        window[`changeSampleText${assetId}`] = function() {
+            currentSample = (currentSample + 1) % sampleTexts.length;
+            const largeElement = document.getElementById(`font-sample-large-${assetId}`);
+            if (largeElement) {
+                largeElement.textContent = sampleTexts[currentSample];
+            }
+            updateSampleButton();
+        };
+        
+        window[`changeFontWeight${assetId}`] = function() {
+            currentWeightIndex = (currentWeightIndex + 1) % fontWeights.length;
+            currentWeight = fontWeights[currentWeightIndex];
+            updateFontStyles();
+            updateWeightButton();
+        };
+        
+        window[`changeBackgroundFont${assetId}`] = function() {
+            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundColors.length;
+            const currentBg = backgroundColors[currentBackgroundIndex];
+            
+            const container = document.querySelector(`#font-viewer-${assetId}`).closest('.texture-viewer-container');
+            container.className = container.className.replace(/\b(dark|light|blue|purple|green|gradient)-theme\b/, '');
+            container.classList.add(`${currentBg.class}-theme`);
+            
+            const label = container.querySelector('.bg-label');
+            if (label) label.textContent = currentBg.name;
+        };
+        
+        // Initialize when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initFontViewer);
+        } else {
+            initFontViewer();
+        }
+    })();
+    </script>
+
+    <style>
+    .font-viewer {
+        position: relative;
+        background: #000;
+        min-height: 400px;
+        padding: 20px;
+        overflow-y: auto;
+    }
+    
+    .font-preview-container {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        color: white;
+    }
+    
+    .font-sample-large {
+        font-size: 24px;
+        line-height: 1.2;
+        text-align: center;
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .font-sample-alphabet {
+        font-size: 18px;
+        line-height: 1.4;
+        text-align: center;
+        font-family: monospace;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .font-custom-text {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .custom-text-input {
+        width: 100%;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        color: white;
+        font-size: 14px;
+        font-family: inherit;
+        resize: vertical;
+    }
+    
+    .custom-text-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .custom-text-input:focus {
+        outline: none;
+        border-color: #06b6d4;
+        background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .font-sample-custom {
+        font-size: 20px;
+        line-height: 1.3;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        min-height: 60px;
+        word-wrap: break-word;
+    }
+    
+    /* Font loading styles */
+    .font-loading {
+        color: white;
+        text-align: center;
+    }
+    
+    .font-loading .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #06b6d4;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+        color: #ef4444;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    /* Theme variations for font viewer */
+    .texture-viewer-container.light-theme .font-viewer {
+        background: #f5f5f5;
+    }
+    
+    .texture-viewer-container.light-theme .font-preview-container {
+        color: #1a1a1a;
+    }
+    
+    .texture-viewer-container.light-theme .font-sample-large,
+    .texture-viewer-container.light-theme .font-sample-alphabet {
+        border-bottom-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    .texture-viewer-container.light-theme .custom-text-input {
+        background: rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.2);
+        color: #1a1a1a;
+    }
+    
+    .texture-viewer-container.light-theme .custom-text-input::placeholder {
+        color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .texture-viewer-container.light-theme .custom-text-input:focus {
+        background: rgba(0, 0, 0, 0.1);
+        border-color: #3b82f6;
+    }
+    
+    .texture-viewer-container.light-theme .font-sample-custom {
+        background: rgba(0, 0, 0, 0.05);
+    }
+    
+    .texture-viewer-container.blue-theme .font-viewer {
+        background: #1e3a8a;
+    }
+    
+    .texture-viewer-container.purple-theme .font-viewer {
+        background: #581c87;
+    }
+    
+    .texture-viewer-container.green-theme .font-viewer {
+        background: #166534;
+    }
+    
+    .texture-viewer-container.gradient-theme .font-viewer {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+    }
+    
+    /* Control button styling */
+    .size-up-btn:hover,
+    .size-down-btn:hover {
+        background: rgba(6, 182, 212, 0.2);
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .font-viewer {
+            padding: 15px;
+        }
+        
+        .font-sample-large {
+            font-size: 20px;
+        }
+        
+        .font-sample-alphabet {
+            font-size: 14px;
+        }
+        
+        .font-sample-custom {
+            font-size: 16px;
+        }
+    }
+    </style>
 <?php endif; ?>
         
         <div class="text-center mt-3">
