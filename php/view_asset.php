@@ -1070,8 +1070,6 @@ $videos = array_map(function($path) {
 // Check if there are any attachments (images, videos, or asset_file)
 if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
     <hr>
-    <!-- Display Images, Videos, and Asset File -->
-    <h6 class='text-center animate__animated animate__fadeIn'><i class="bi bi-paperclip"></i>Attachments<i class="bi bi-paperclip"></i></h6>
     <div class="media-container animate__animated animate__fadeIn">
         <?php 
         $delay = 0.3;
