@@ -33,8 +33,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['username'] = $db_username;
                 $_SESSION['role'] = $role;
 
-                // Redirect to the forum page
-                header("Location: ../forum.php");
+                // Redirect to the home page
+                header("Location: ../home.php");
                 exit();
             } else {
                 // Redirect with error alert
