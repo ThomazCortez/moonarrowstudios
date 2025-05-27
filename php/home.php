@@ -137,346 +137,308 @@ function truncateComment($html, $length = 80) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
-        :root {
-            --color-canvas-default: #ffffff;
-            --color-canvas-subtle: #f8f9fa;
-            --color-border-default: #dee2e6;
-            --color-border-muted: #e9ecef;
-            --color-btn-primary-bg: #0d6efd;
-            --color-btn-primary-hover-bg: #0b5ed7;
-            --color-fg-default: #212529;
-            --color-fg-muted: #6c757d;
-            --color-accent-fg: #0d6efd;
-            --color-input-bg: #ffffff;
-            --color-card-bg: #ffffff;
-            --color-card-border: #dee2e6;
-            --color-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            --color-shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        }
+    :root {
+      --color-canvas-default: #ffffff;
+      --color-canvas-subtle: #f8f9fa;
+      --color-border-default: #dee2e6;
+      --color-border-muted: #e9ecef;
+      --color-btn-primary-bg: #0d6efd;
+      --color-btn-primary-hover-bg: #0b5ed7;
+      --color-fg-default: #212529;
+      --color-fg-muted: #6c757d;
+      --color-accent-fg: #0d6efd;
+      --color-input-bg: #ffffff;
+      --color-card-bg: #ffffff;
+      --color-card-border: #dee2e6;
+      --color-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      --color-shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --color-canvas-default: #0d1117;
-                --color-canvas-subtle: #161b22;
-                --color-border-default: #30363d;
-                --color-border-muted: #21262d;
-                --color-btn-primary-bg: #238636;
-                --color-btn-primary-hover-bg: #2ea043;
-                --color-fg-default: #e6edf3;
-                --color-fg-muted: #8b949e;
-                --color-accent-fg: #58a6ff;
-                --color-input-bg: #0d1117;
-                --color-card-bg: #161b22;
-                --color-card-border: #30363d;
-                --color-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
-                --color-shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
-            }
-        }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-canvas-default: #0d1117;
+        --color-canvas-subtle: #161b22;
+        --color-border-default: #30363d;
+        --color-border-muted: #21262d;
+        --color-btn-primary-bg: #238636;
+        --color-btn-primary-hover-bg: #2ea043;
+        --color-fg-default: #e6edf3;
+        --color-fg-muted: #8b949e;
+        --color-accent-fg: #58a6ff;
+        --color-input-bg: #0d1117;
+        --color-card-bg: #161b22;
+        --color-card-border: #30363d;
+        --color-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+        --color-shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+      }
+    }
 
-        body {
-            background-color: var(--color-canvas-default);
-            color: var(--color-fg-default);
-            transition: all 0.3s ease;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
-        }
+    body {
+      background-color: var(--color-canvas-default);
+      color: var(--color-fg-default);
+      transition: all 0.3s ease;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    }
 
-        .main-container {
-            background-color: var(--color-canvas-default);
-            min-height: 100vh;
-            padding-top: 3rem;
-            padding-bottom: 3rem;
-        }
+    .main-container {
+      background-color: var(--color-canvas-default);
+      min-height: 100vh;
+      padding-top: 3rem;
+      padding-bottom: 3rem;
+    }
 
-        /* Greeting Section */
-        .greeting-section {
-            text-align: center;
-            margin-bottom: 4rem;
-            animation: fadeInUp 0.6s ease-out;
-        }
+    /* Greeting Section */
+    .greeting-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 4rem;
+    animation: fadeInUp 0.6s ease-out;
+    /* Ensure items are centered on cross-axis */
+    align-items: center;
+    }
 
-        .greeting-title {
-            font-size: 2.5rem;
-            font-weight: 300;
-            color: var(--color-fg-default);
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.01em;
-        }
+    .greeting-icon {
+    width: 3em;
+    height: 3em;
+    margin-right: 0.5em;
+    object-fit: contain;
+    /* Remove vertical-align (doesn't work in flex) and adjust position */
+    transform: scaleX(-1);
+    align-self: center; /* Explicitly center in flex container */
+    margin-top: 0.2em; /* Fine-tune vertical position if needed */
+    }
 
-        .greeting-subtitle {
-            font-size: 1.1rem;
-            color: var(--color-fg-muted);
-            font-weight: 400;
-        }
+    .greeting-title {
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: var(--color-fg-default);
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
 
-        /* Search Section - Prominent without card */
-        .search-section {
-            margin-bottom: 4rem;
-            animation: fadeInUp 0.6s ease-out 0.2s both;
-        }
+    .greeting-subtitle {
+      font-size: 1.1rem;
+      color: var(--color-fg-muted);
+      font-weight: 400;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
 
-        .search-toggle-container {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+    /* Search Section - Prominent without card */
+    .search-section {
+      margin-bottom: 4rem;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
 
-        .btn-group .btn {
-            border-color: var(--color-border-default);
-            background-color: var(--color-canvas-subtle);
-            color: var(--color-fg-default);
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0;
-        }
+    .search-toggle-container {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
 
-        .btn-group .btn:first-child {
-            border-top-left-radius: 0.75rem;
-            border-bottom-left-radius: 0.75rem;
-        }
+    .btn-group .btn {
+      border-color: var(--color-border-default);
+      background-color: var(--color-canvas-subtle);
+      color: var(--color-fg-default);
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0;
+    }
+    .btn-group .btn:first-child {
+      border-top-left-radius: 0.75rem;
+      border-bottom-left-radius: 0.75rem;
+    }
+    .btn-group .btn:last-child {
+      border-top-right-radius: 0.75rem;
+      border-bottom-right-radius: 0.75rem;
+    }
+    .btn-group .btn:hover {
+      background-color: var(--color-canvas-default);
+      border-color: var(--color-accent-fg);
+      color: var(--color-accent-fg);
+      z-index: 2;
+    }
+    .btn-group .btn.active {
+      background-color: #0969da;
+      border-color: var(--color-btn-primary-bg);
+      color: white;
+      z-index: 3;
+    }
+    .btn-group .btn.active:hover {
+      background-color: var(--color-accent-fg);
+      border-color: var(--color-btn-primary-hover-bg);
+    }
 
-        .btn-group .btn:last-child {
-            border-top-right-radius: 0.75rem;
-            border-bottom-right-radius: 0.75rem;
-        }
+    .search-container {
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
 
-        .btn-group .btn:hover {
-            background-color: var(--color-canvas-default);
-            border-color: var(--color-accent-fg);
-            color: var(--color-accent-fg);
-            z-index: 2;
-        }
+    .search-input-group {
+      position: relative;
+      box-shadow: var(--color-shadow-md);
+      border-radius: 1rem;
+      overflow: hidden;
+      background: var(--color-input-bg);
+      border: 2px solid var(--color-border-default);
+      transition: all 0.3s ease;
+    }
+    .search-input-group:focus-within {
+      border-color: var(--color-accent-fg);
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+      transform: translateY(-2px);
+    }
+    .search-input-group .form-control {
+      border: none;
+      background: transparent;
+      padding: 1rem 1.25rem;
+      font-size: 1.1rem;
+      color: var(--color-fg-default);
+      border-radius: 0;
+    }
+    .search-input-group .form-control:focus {
+      box-shadow: none;
+      background: transparent;
+    }
+    .search-input-group .btn {
+      border: none;
+      background-color: #0969da;
+      color: white;
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      border-radius: 0;
+    }
+    .search-input-group .btn:hover {
+      background-color: var(--color-accent-fg);
+    }
 
-        .btn-group .btn.active {
-            background-color:  #0969da;
-            border-color: var(--color-btn-primary-bg);
-            color: white;
-            z-index: 3;
-        }
+    /* Content Cards */
+    .content-grid {
+      animation: fadeInUp 0.6s ease-out 0.4s both;
+    }
+    .card {
+      border: 1px solid var(--color-card-border);
+      background-color: var(--color-card-bg);
+      border-radius: 1rem;
+      box-shadow: var(--color-shadow-sm);
+      transition: all 0.3s ease;
+      height: 100%;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--color-shadow-md);
+      border-color: var(--color-accent-fg);
+    }
+    .card-header {
+      background: linear-gradient(135deg, var(--color-canvas-subtle), var(--color-card-bg));
+      border-bottom: 1px solid var(--color-border-muted);
+      border-radius: 1rem 1rem 0 0 !important;
+      padding: 1.25rem;
+    }
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--color-border-default);
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.3rem;
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--color-fg-default);
+      margin: 0;
+    }
+    .card-body {
+      padding: 0;
+    }
+    .content-item {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--color-border-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .content-item:hover {
+      background-color: var(--color-canvas-subtle);
+    }
+    .content-item:last-child {
+      border-bottom: none;
+    }
+    .item-title {
+      font-weight: 600;
+      color: var(--color-fg-default);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    .item-meta {
+      font-size: 0.875rem;
+      color: var(--color-fg-muted);
+    }
+    .meta-item {
+      margin-right: 1rem;
+    }
+    .meta-item i {
+      margin-right: 0.25rem;
+    }
+    .empty-state {
+      text-align: center;
+      color: var(--color-fg-muted);
+      font-style: italic;
+      padding: 3rem 2rem;
+    }
 
-        .btn-group .btn.active:hover {
-            background-color: var(--color-accent-fg);
-            border-color: var(--color-btn-primary-hover-bg);
-        }
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%     { opacity: 0; }
+    }
+    .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.05em; /* Adjust height slightly to better match character height */
+    background-color: var(--color-accent-fg);
+    animation: blink 1s step-end infinite;
+    position: relative;
+    top: 0.2em; /* Adjust downward to align with text baseline */
+    }
 
-        .search-container {
-            max-width: 600px;
-            margin: 0 auto;
-            position: relative;
-        }
 
-        .search-input-group {
-            position: relative;
-            box-shadow: var(--color-shadow-md);
-            border-radius: 1rem;
-            overflow: hidden;
-            background: var(--color-input-bg);
-            border: 2px solid var(--color-border-default);
-            transition: all 0.3s ease;
-        }
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .greeting-title { font-size: 2rem; }
+      .search-section { margin-bottom: 3rem; }
+      .btn-group .btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
+      .search-input-group .form-control { padding: 0.875rem 1rem; font-size: 1rem; }
+      .search-input-group .btn { padding: 0.875rem 1.25rem; }
+    }
 
-        .search-input-group:focus-within {
-            border-color: var(--color-accent-fg);
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-            transform: translateY(-2px);
-        }
-
-        .search-input-group .form-control {
-            border: none;
-            background: transparent;
-            padding: 1rem 1.25rem;
-            font-size: 1.1rem;
-            color: var(--color-fg-default);
-            border-radius: 0;
-        }
-
-        .search-input-group .form-control:focus {
-            box-shadow: none;
-            background: transparent;
-        }
-
-        .search-input-group .btn {
-            border: none;
-            background-color: #0969da;
-            color: white;
-            padding: 1rem 1.5rem;
-            font-weight: 600;
-            border-radius: 0;
-        }
-
-        .search-input-group .btn:hover {
-            background-color: var(--color-accent-fg);
-        }
-
-        /* Content Cards - Clean Bootstrap approach */
-        .content-grid {
-            animation: fadeInUp 0.6s ease-out 0.4s both;
-        }
-
-        .card {
-            border: 1px solid var(--color-card-border);
-            background-color: var(--color-card-bg);
-            border-radius: 1rem;
-            box-shadow: var(--color-shadow-sm);
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--color-shadow-md);
-            border-color: var(--color-accent-fg);
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, var(--color-canvas-subtle), var(--color-card-bg));
-            border-bottom: 1px solid var(--color-border-muted);
-            border-radius: 1rem 1rem 0 0 !important;
-            padding: 1.25rem;
-        }
-
-        .card-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--color-btn-primary-bg), var(--color-accent-fg));
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.3rem;
-        }
-
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--color-fg-default);
-            margin: 0;
-        }
-
-        .card-body {
-            padding: 0;
-        }
-
-        .content-item {
-            padding: 1.25rem;
-            border-bottom: 1px solid var(--color-border-muted);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .content-item:hover {
-            background-color: var(--color-canvas-subtle);
-        }
-
-        .content-item:last-child {
-            border-bottom: none;
-        }
-
-        .item-title {
-            font-weight: 600;
-            color: var(--color-fg-default);
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-
-        .item-meta {
-            font-size: 0.875rem;
-            color: var(--color-fg-muted);
-        }
-
-        .meta-item {
-            margin-right: 1rem;
-        }
-
-        .meta-item i {
-            margin-right: 0.25rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: var(--color-fg-muted);
-            font-style: italic;
-            padding: 3rem 2rem;
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        .cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1em;
-            background-color: var(--color-accent-fg);
-            animation: blink 1s step-end infinite;
-            vertical-align: middle;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .greeting-title {
-                font-size: 2rem;
-            }
-            
-            .search-section {
-                margin-bottom: 3rem;
-            }
-            
-            .btn-group .btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.9rem;
-            }
-            
-            .search-input-group .form-control {
-                padding: 0.875rem 1rem;
-                font-size: 1rem;
-            }
-            
-            .search-input-group .btn {
-                padding: 0.875rem 1.25rem;
-            }
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--color-canvas-default);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--color-border-default);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--color-fg-muted);
-        }
-    </style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--color-canvas-default); }
+    ::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--color-fg-muted); }
+  </style>
 </head>
 <body>
     <div class="main-container">
         <div class="container">
             <!-- Greeting Section -->
             <div class="greeting-section">
-                <h1 class="greeting-title" id="greeting-text"><?= htmlspecialchars($randomGreeting) ?>, <?= htmlspecialchars($username) ?></h1>
-                <p class="greeting-subtitle">Ready to explore today?</p>
+            <img src="../media/moon-image.png" alt="👋" class="greeting-icon"/>
+            <h1 class="greeting-title" id="greeting-text">
+                <span class="cursor"></span>
+            </h1>
             </div>
+            <p class="greeting-subtitle">Ready to explore today?</p>
 
             <!-- Search Section - No Card Wrapper -->
             <div class="search-section">
@@ -620,24 +582,23 @@ function truncateComment($html, $length = 80) {
         }
 
         function setRandomGreeting() {
-            const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-            const greetingElement = document.getElementById('greeting-text');
-            const text = `${randomGreeting}, ${currentUser.username}`;
-            
-            // Typewriter effect
-            greetingElement.innerHTML = '<span class="cursor"></span>';
-            let i = 0;
-            
-            const typeWriter = () => {
-                if (i < text.length) {
-                    greetingElement.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
-                    i++;
-                    setTimeout(typeWriter, 50);
-                }
-            };
-            
-            typeWriter();
+        const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+        const greetingElement = document.getElementById('greeting-text');
+        const text = `${randomGreeting}, ${currentUser.username}`;
+        
+        greetingElement.innerHTML = '<span class="cursor"></span>';
+        let i = 0;
+        const typeWriter = () => {
+            if (i < text.length) {
+            greetingElement.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
+            i++;
+            setTimeout(typeWriter, 50);
+            }
+        };
+        typeWriter();
         }
+
+
 
         function setupSearchToggle() {
             const toggleBtns = document.querySelectorAll('.btn-group .btn');
