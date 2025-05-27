@@ -225,10 +225,74 @@ function truncateComment($html, $length = 80) {
       margin-top: 0.5rem;
     }
 
+    /* Weather Widget - Updated positioning and styling */
+.weather-widget {
+  position: absolute;
+  left: 2rem;
+  background: transparent; /* Removed background */
+  border: none; /* Removed border */
+  border-radius: 0; /* Removed border radius */
+  padding: 0; /* Removed padding */
+  box-shadow: none; /* Removed shadow */
+  animation: fadeInLeft 0.6s ease-out 0.3s both;
+  min-width: 200px;
+}
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.weather-icon {
+  font-size: 2rem;
+  margin-right: 0.75rem;
+  opacity: 0.8;
+}
+
+.weather-temp {
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--color-fg-default);
+  margin: 0;
+}
+
+.weather-location {
+  font-size: 0.9rem;
+  color: var(--color-fg-muted);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.weather-location i {
+  margin-right: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.weather-details {
+  border-top: none; /* Removed border */
+  padding-top: 0; /* Removed padding */
+}
+
+.weather-time {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--color-fg-default);
+  margin-bottom: 0.25rem;
+}
+
+.weather-date {
+  font-size: 0.9rem;
+  color: var(--color-fg-muted);
+}
+
+
     /* Search Section - Prominent without card */
     .search-section {
       margin-bottom: 4rem;
       animation: fadeInUp 0.6s ease-out 0.2s both;
+      position: relative;
     }
 
     .search-toggle-container {
@@ -396,6 +460,11 @@ function truncateComment($html, $length = 80) {
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+    @keyframes fadeInLeft {
+    from { opacity: 0; transform: translateX(-20px) translateY(-50%); }
+    to   { opacity: 1; transform: translateX(0) translateY(-50%); }
+    }
+
     @keyframes blink {
       0%,100% { opacity: 1; }
       50%     { opacity: 0; }
@@ -412,12 +481,25 @@ function truncateComment($html, $length = 80) {
 
 
     /* Responsive adjustments */
+    @media (max-width: 1200px) {
+    .weather-widget {
+        position: static;
+        transform: none;
+        margin: 0 auto 2rem auto;
+        max-width: 300px;
+    }
+    }
+
     @media (max-width: 768px) {
-      .greeting-title { font-size: 2rem; }
-      .search-section { margin-bottom: 3rem; }
-      .btn-group .btn { padding: 0.5rem 1rem; font-size: 0.9rem; }
-      .search-input-group .form-control { padding: 0.875rem 1rem; font-size: 1rem; }
-      .search-input-group .btn { padding: 0.875rem 1.25rem; }
+    .weather-widget {
+        left: 1rem;
+        right: 1rem;
+        min-width: auto;
+        padding: 0;
+        top: 1rem;
+    }
+    .weather-temp { font-size: 1.5rem; }
+    .weather-icon { font-size: 1.5rem; }
     }
 
     /* Custom scrollbar */
@@ -441,6 +523,22 @@ function truncateComment($html, $length = 80) {
 
             <!-- Search Section - No Card Wrapper -->
             <div class="search-section">
+                <!-- Weather Widget -->
+                <div class="weather-widget" id="weather-widget">
+                    <div class="weather-main">
+                        <div class="weather-icon" id="weather-icon">🌤️</div>
+                        <div class="weather-temp" id="weather-temp">--°</div>
+                    </div>
+                    <div class="weather-location" id="weather-location">
+                        <i class="bi bi-geo-alt"></i>
+                        <span id="location-text">Getting location...</span>
+                    </div>
+                    <div class="weather-details">
+                        <div class="weather-time" id="current-time">--:--</div>
+                        <div class="weather-date" id="current-date">Loading...</div>
+                    </div>
+                </div>
+
                 <div class="search-toggle-container">
                     <div class="btn-group" role="group" aria-label="Search toggle">
                         <button type="button" class="btn active" data-type="forum">
@@ -578,6 +676,9 @@ function truncateComment($html, $length = 80) {
         function initializePage() {
             setRandomGreeting();
             setupSearchToggle();
+            initializeWeatherWidget();
+            updateDateTime();
+            setInterval(updateDateTime, 1000); // Update every second
         }
 
         function setRandomGreeting() {
@@ -597,7 +698,95 @@ function truncateComment($html, $length = 80) {
         typeWriter();
         }
 
+        function initializeWeatherWidget() {
+            // Get user's location and fetch weather
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        fetchWeather(lat, lon);
+                    },
+                    error => {
+                        // Fallback to a default location or show error
+                        document.getElementById('location-text').textContent = 'Location unavailable';
+                        setDefaultWeather();
+                    }
+                );
+            } else {
+                document.getElementById('location-text').textContent = 'Location unavailable';
+                setDefaultWeather();
+            }
+        }
 
+        function fetchWeather(lat, lon) {
+            // Using OpenWeatherMap API (you'll need to replace YOUR_API_KEY with actual key)
+            const API_KEY = 'c76c182ca2bcf8a7b99b18f65f86c548'; // Replace with your actual API key
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    updateWeatherDisplay(data);
+                })
+                .catch(error => {
+                    console.error('Weather fetch error:', error);
+                    setDefaultWeather();
+                });
+        }
+
+        function updateWeatherDisplay(data) {
+            const temp = Math.round(data.main.temp);
+            const location = data.name;
+            const weatherMain = data.weather[0].main;
+            
+            document.getElementById('weather-temp').textContent = `${temp}°C`;
+            document.getElementById('location-text').textContent = location;
+            document.getElementById('weather-icon').textContent = getWeatherIcon(weatherMain);
+        }
+
+        function getWeatherIcon(weatherType) {
+            const icons = {
+                'Clear': '☀️',
+                'Clouds': '☁️',
+                'Rain': '🌧️',
+                'Drizzle': '🌦️',
+                'Thunderstorm': '⛈️',
+                'Snow': '❄️',
+                'Mist': '🌫️',
+                'Fog': '🌫️'
+            };
+            return icons[weatherType] || '🌤️';
+        }
+
+        function setDefaultWeather() {
+            document.getElementById('weather-temp').textContent = '22°C';
+            document.getElementById('weather-icon').textContent = '🌤️';
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Format time
+            const timeOptions = { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true
+            };
+            const timeString = now.toLocaleTimeString('en-US', timeOptions);
+            
+            // Format date
+            const dateOptions = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateString = now.toLocaleDateString('en-US', dateOptions);
+            
+            document.getElementById('current-time').textContent = timeString;
+            document.getElementById('current-date').textContent = dateString;
+        }
 
         function setupSearchToggle() {
             const toggleBtns = document.querySelectorAll('.btn-group .btn');
