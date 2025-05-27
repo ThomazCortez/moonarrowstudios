@@ -7,10 +7,10 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="icon" href="/moonarrowstudios/media/moon.ico" type="image/x-icon" />
+    <title>Navigation Header with PHP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
     <style>
         :root {
             --color-canvas-default: #ffffff;
@@ -30,7 +30,7 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             --color-alert-error-bg: #FFEBE9;
             --color-alert-error-border: rgba(255, 129, 130, 0.4);
             --color-alert-error-fg: #cf222e;
-            --animation-duration: 0.8s; /* Animation timing variable */
+            --animation-duration: 0.8s;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -63,14 +63,44 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             font-size: 14px;
         }
 
-        /* Buttons */
+        /* Enhanced Responsive Navbar */
+        .header .navbar {
+            background-color: var(--color-header-bg);
+            border-bottom: 1px solid var(--color-border-muted);
+            z-index: 1030;
+            padding: 0.5rem 1rem;
+            min-height: 60px;
+        }
+
+        /* Container fluid adjustments */
+        .navbar .container-fluid {
+            position: relative;
+            align-items: center;
+        }
+
+        /* Logo Responsive Sizing */
+        .navbar-brand {
+            padding: 0;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            width: auto;
+            max-width: 200px;
+            transition: height 0.3s ease;
+        }
+
+        /* Enhanced Button Styles */
         .header .btn {
             border-radius: 6px;
-            padding: 5px 16px;
+            padding: 6px 16px;
             font-size: 14px;
             font-weight: 500;
             line-height: 20px;
-            transition: .2s cubic-bezier(0.3, 0, 0.5, 1);
+            transition: all 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+            white-space: nowrap;
         }
 
         .header .btn-primary {
@@ -82,119 +112,69 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
 
         .header .btn-primary:hover {
             background-color: #0b5ed7;
+            transform: translateY(-1px);
         }
 
-        .header .navbar {
-            background-color: var(--color-header-bg);
-            border-bottom: 1px solid var(--color-border-muted);
-            z-index: 1030; /* Ensures it stays above content */
+        .header .btn-secondary {
+            color: var(--color-fg-default);
+            background-color: var(--color-canvas-subtle);
+            border: 1px solid var(--color-border-default);
         }
-        
-        /* Responsive styles */
-        .navbar-brand img {
-            height: 40px;
+
+        .header .btn-secondary:hover {
+            background-color: var(--color-border-muted);
+            transform: translateY(-1px);
         }
-        
-        /* Left-aligned navigation on all screen sizes */
+
+        /* Navigation Links */
         .navbar-nav {
             margin-right: auto !important;
             margin-left: 0 !important;
         }
-        
-        @media (max-width: 768px) {
-            .navbar-brand img {
-                height: 35px;
-            }
-            
-            .auth-buttons .btn {
-                padding: 4px 10px;
-                font-size: 12px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .navbar-brand img {
-                height: 30px;
-            }
-            
-            .nav-link {
-                padding: 0.3rem 0.5rem !important;
-                font-size: 12px;
-            }
-            
-            .nav-link i {
-                margin-right: 5px !important;
-            }
-            
-            .auth-buttons .btn {
-                padding: 3px 8px;
-                font-size: 11px;
-            }
+
+        .nav-link {
+            color: var(--color-fg-default) !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
         }
 
-        /* Active nav item with animation */
+        .nav-link i {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        .nav-link:hover {
+            color: var(--color-accent-fg) !important;
+            background-color: var(--color-canvas-subtle);
+        }
+
+        /* Active nav item with enhanced animation */
         .nav-link.active {
             color: var(--color-accent-fg) !important;
-            font-weight: 500;
+            font-weight: 600;
             position: relative;
-        }
-        
-        /* Nav link hover and active styles */
-        .navbar .nav-item .nav-link {
-            position: relative;
-            transition: color 0.3s ease;
+            background-color: var(--color-canvas-subtle);
         }
 
-        /* Hover effect for all nav links - only change color */
-        .navbar .nav-item .nav-link:hover {
-            color: var(--color-accent-fg) !important;
-        }
-
-        /* Underline only for active links */
-        .navbar .nav-item .nav-link.active::after {
+        .nav-link.active::after {
             content: '';
             position: absolute;
             bottom: -2px;
-            left: 0;
+            left: 1rem;
+            right: 1rem;
             height: 2px;
             background-color: var(--color-accent-fg);
-            width: 0; /* Start with no width */
+            width: 0;
             animation: draw-underline var(--animation-duration) ease forwards;
         }
 
-        /* Keep the active nav link positioned relatively */
-        .navbar .nav-item .nav-link.active {
-            position: relative;
-        }
-
-        /* Animation keyframes */
         @keyframes draw-underline {
-            0% {
-                width: 0;
-            }
-            100% {
-                width: 100%;
-            }
-        }
-        
-        /* Special styles for mobile layout */
-        @media (max-width: 991px) {
-            .mobile-nav-container {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                width: 100%;
-            }
-            
-            .navbar-collapse {
-                flex-basis: 100%;
-            }
-            
-            .profile-container {
-                position: absolute;
-                right: 90px;
-                top: 12px;
-            }
+            0% { width: 0; }
+            100% { width: calc(100% - 2rem); }
         }
 
         /* Enhanced Profile Container */
@@ -203,11 +183,9 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             display: flex;
             align-items: center;
             justify-content: center;
-            height: auto;
-            margin: 0 5px;
+            margin: 0 8px;
         }
 
-        /* Profile Button Styling */
         .profile-btn {
             background: transparent;
             border: none;
@@ -215,9 +193,8 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s ease;
-            width: auto;
-            height: auto;
+            transition: all 0.2s ease;
+            border-radius: 50%;
         }
         
         .profile-btn:hover {
@@ -231,12 +208,12 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
         
         /* Profile Image Styling */
         .profile-img-container {
-            width: 46px;
-            height: 46px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             overflow: hidden;
             border: 2px solid var(--color-border-muted);
-            transition: border-color 0.2s ease;
+            transition: all 0.2s ease;
         }
         
         .profile-btn:hover .profile-img-container {
@@ -251,15 +228,15 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
         }
         
         .profile-icon-container {
-            width: 36px;
-            height: 36px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             background: var(--color-canvas-subtle);
             border: 2px solid var(--color-border-muted);
-            transition: border-color 0.2s ease;
+            transition: all 0.2s ease;
         }
         
         .profile-btn:hover .profile-icon-container {
@@ -267,7 +244,7 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
         }
 
         .profile-icon {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: var(--color-fg-muted);
         }
 
@@ -276,10 +253,10 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             border-radius: 8px;
             border: 1px solid var(--color-border-default);
             background-color: var(--color-modal-bg);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
             padding: 8px 0;
-            min-width: 180px;
-            margin-top: 10px;
+            min-width: 200px;
+            margin-top: 8px;
             animation: dropdown-appear 0.2s ease-out;
         }
 
@@ -295,16 +272,23 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
         }
 
         .dropdown-item {
-            padding: 8px 16px;
+            padding: 10px 16px;
             font-size: 14px;
             color: var(--color-fg-default);
             display: flex;
             align-items: center;
             transition: background-color 0.15s ease;
+            text-decoration: none;
         }
 
         .dropdown-item:hover {
             background-color: var(--color-canvas-subtle);
+            color: var(--color-accent-fg);
+        }
+
+        .dropdown-item.text-danger:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
         }
 
         .dropdown-item i {
@@ -319,41 +303,258 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             border-top: 1px solid var(--color-border-muted);
         }
 
-        /* Dropdown arrow indicator */
-        .dropdown-menu::before {
-            content: '';
-            position: absolute;
-            top: -6px;
-            right: 15px;
-            width: 12px;
-            height: 12px;
-            background-color: var(--color-modal-bg);
-            transform: rotate(45deg);
-            border-left: 1px solid var(--color-border-default);
-            border-top: 1px solid var(--color-border-default);
+        /* Auth Buttons Container */
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
-        /* Mobile profile position fix */
-        @media (max-width: 991px) {
-            .profile-container {
-                position: absolute;
-                right: 70px;
-                top: 50%;
-                transform: translateY(-50%);
+        /* Mobile Toggle Button */
+        .navbar-toggler {
+            border: 1px solid var(--color-border-default);
+            padding: 4px 8px;
+            margin-left: 8px;
+            order: 3;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+        }
+
+        /* RESPONSIVE BREAKPOINTS */
+
+        /* Large screens (desktops, 1200px and up) */
+        @media (min-width: 1200px) {
+            .navbar-brand img {
+                height: 45px;
             }
             
-            .profile-btn {
+            .nav-link {
+                padding: 0.6rem 1.2rem !important;
+            }
+            
+            .profile-img-container,
+            .profile-icon-container {
+                width: 46px;
+                height: 46px;
+            }
+        }
+
+        /* Medium screens (tablets, 768px to 1199px) */
+        @media (min-width: 768px) and (max-width: 1199px) {
+            .navbar-brand img {
+                height: 38px;
+            }
+            
+            .nav-link {
+                padding: 0.5rem 0.8rem !important;
+                font-size: 14px;
+            }
+            
+            .header .btn {
+                padding: 5px 12px;
+                font-size: 13px;
+            }
+        }
+
+        /* Small screens (landscape phones, 576px to 767px) */
+        @media (min-width: 576px) and (max-width: 767px) {
+            .navbar {
+                padding: 0.4rem 0.8rem;
+                min-height: 56px;
+            }
+            
+            .navbar-brand img {
+                height: 34px;
+            }
+            
+            .nav-link {
+                padding: 0.4rem 0.6rem !important;
+                font-size: 13px;
+            }
+            
+            .nav-link i {
+                margin-right: 6px;
+                font-size: 0.9rem;
+            }
+            
+            .header .btn {
+                padding: 4px 10px;
+                font-size: 12px;
+            }
+            
+            .profile-img-container,
+            .profile-icon-container {
                 width: 36px;
                 height: 36px;
             }
+            
+            .profile-icon {
+                font-size: 1rem;
+            }
         }
 
-        /* No need for RGB variables since we removed the glow effect */
+        /* Extra small screens (portrait phones, less than 576px) */
+        @media (max-width: 575px) {
+            .navbar {
+                padding: 0.3rem 0.6rem;
+                min-height: 52px;
+            }
+            
+            .navbar-brand {
+                margin-right: 0.5rem;
+            }
+            
+            .navbar-brand img {
+                height: 30px;
+                max-width: 150px;
+            }
+            
+            .nav-link {
+                padding: 0.4rem 0.5rem !important;
+                font-size: 12px;
+            }
+            
+            .nav-link i {
+                margin-right: 5px;
+                font-size: 0.85rem;
+            }
+            
+            .header .btn {
+                padding: 3px 8px;
+                font-size: 11px;
+            }
+            
+            .profile-img-container,
+            .profile-icon-container {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .profile-icon {
+                font-size: 0.9rem;
+            }
+            
+            .dropdown-menu {
+                min-width: 180px;
+            }
+            
+            .dropdown-item {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
+
+        /* Mobile Layout Adjustments */
+        @media (max-width: 991px) {
+            /* Mobile container layout */
+            .mobile-nav-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+            }
+            
+            .navbar-collapse {
+                flex-basis: 100%;
+                margin-top: 1rem;
+            }
+            
+            /* Position profile for mobile */
+            .profile-container {
+                position: absolute;
+                right: 60px;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 1040;
+            }
+            
+            /* Mobile navigation styling */
+            .navbar-nav {
+                margin: 0;
+                padding: 0.5rem 0;
+            }
+            
+            .nav-item {
+                width: 100%;
+            }
+            
+            .nav-link {
+                padding: 0.7rem 1rem !important;
+                border-radius: 8px;
+                margin: 2px 0;
+            }
+            
+            /* Mobile auth buttons */
+            .auth-buttons {
+                justify-content: center;
+                margin-top: 1rem;
+                padding-top: 1rem;
+                border-top: 1px solid var(--color-border-muted);
+            }
+            
+            /* Mobile active nav styling */
+            .nav-link.active::after {
+                display: none;
+            }
+            
+            .nav-link.active {
+                background-color: var(--color-accent-fg);
+                background-color: var(--color-canvas-subtle);
+                border-left: 4px solid var(--color-accent-fg);
+            }
+        }
+
+        /* Ultra-wide screens optimization */
+        @media (min-width: 1400px) {
+            .container-fluid {
+                max-width: 1320px;
+                margin: 0 auto;
+            }
+        }
+
+        /* High DPI display optimization */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .navbar-brand img {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+        }
+
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus improvements for keyboard navigation */
+        .nav-link:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        
+        .btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        /* Smooth transitions for all interactive elements */
+        .nav-link,
+        .btn,
+        .dropdown-item,
+        .profile-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
 
 <body class="header">
-    <nav class="navbar navbar-expand-lg p-2 sticky-top" data-bs-theme="">
+    <nav class="navbar navbar-expand-lg sticky-top" data-bs-theme="">
         <div class="container-fluid">
             <!-- Logo -->
             <a class="navbar-brand" href="<?php echo $baseUrl; ?>">
@@ -420,23 +621,23 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                 <!-- Left-aligned Navigation -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a href="<?php echo $baseUrl; ?>php/home.php" class="nav-link px-2 <?= $current_page == 'home.php' ? 'active' : '' ?>">
-                            <i class="bi bi-house-fill me-2"></i>Home
+                        <a href="<?php echo $baseUrl; ?>php/home.php" class="nav-link <?= $current_page == 'home.php' ? 'active' : '' ?>">
+                            <i class="bi bi-house-fill"></i>Home
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="<?php echo $baseUrl; ?>php/forum.php" class="nav-link px-2 <?= $current_page == 'forum.php' ? 'active' : '' ?>">
-                            <i class="bi bi-chat-left-text-fill me-2"></i>Forum
+                        <a href="<?php echo $baseUrl; ?>php/forum.php" class="nav-link <?= $current_page == 'forum.php' ? 'active' : '' ?>">
+                            <i class="bi bi-chat-left-text-fill"></i>Forum
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="<?php echo $baseUrl; ?>php/marketplace.php" class="nav-link px-2 <?= $current_page == 'marketplace.php' ? 'active' : '' ?>">
-                            <i class="bi bi-bag-fill me-2"></i>Marketplace
+                        <a href="<?php echo $baseUrl; ?>php/marketplace.php" class="nav-link <?= $current_page == 'marketplace.php' ? 'active' : '' ?>">
+                            <i class="bi bi-bag-fill"></i>Marketplace
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="<?php echo $baseUrl; ?>php/about.php" class="nav-link px-2 <?= $current_page == 'about.php' ? 'active' : '' ?>">
-                            <i class="bi bi-question-circle-fill me-2"></i>About
+                        <a href="<?php echo $baseUrl; ?>php/about.php" class="nav-link <?= $current_page == 'about.php' ? 'active' : '' ?>">
+                            <i class="bi bi-question-circle-fill"></i>About
                         </a>
                     </li>
                 </ul>
@@ -479,12 +680,59 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             </div>
         </div>
     </nav>
-
+    
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Back button functionality
+            // Enhanced navigation functionality
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Remove active class from all links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to clicked link
+                    this.classList.add('active');
+                    
+                    // Close mobile menu after clicking (if open)
+                    const navbarCollapse = document.getElementById('navbarContent');
+                    if (navbarCollapse.classList.contains('show')) {
+                        const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+                        bsCollapse.hide();
+                    }
+                });
+            });
+            
+            // REMOVED the problematic dropdown event listener
+            // Dropdown items now work with their natural href navigation
+            
+            // Enhanced responsive behavior
+            function handleResize() {
+                const navbar = document.querySelector('.navbar');
+                const windowWidth = window.innerWidth;
+                
+                // Add responsive classes based on screen size
+                navbar.classList.remove('navbar-xs', 'navbar-sm', 'navbar-md', 'navbar-lg', 'navbar-xl');
+                
+                if (windowWidth < 576) {
+                    navbar.classList.add('navbar-xs');
+                } else if (windowWidth < 768) {
+                    navbar.classList.add('navbar-sm');
+                } else if (windowWidth < 992) {
+                    navbar.classList.add('navbar-md');
+                } else if (windowWidth < 1200) {
+                    navbar.classList.add('navbar-lg');
+                } else {
+                    navbar.classList.add('navbar-xl');
+                }
+            }
+            
+            // Initial call and resize listener
+            handleResize();
+            window.addEventListener('resize', handleResize);
+            
+            // Back button functionality (if needed)
             const goBackBtn = document.getElementById("goBackBtn");
             if (goBackBtn && window.history.length > 1) {
                 goBackBtn.addEventListener("click", function() {
@@ -494,21 +742,34 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                 goBackBtn.setAttribute("disabled", "true");
             }
             
-            // Replay animation functionality (optional - can be used to manually trigger the animation)
+            // Animation replay functionality
             function replayActiveAnimation() {
                 const activeLinks = document.querySelectorAll('.nav-link.active');
                 activeLinks.forEach(link => {
-                    // Remove and re-add the class to restart animation
                     link.classList.remove('active');
-                    // Force reflow
-                    void link.offsetWidth;
-                    // Add class back
+                    void link.offsetWidth; // Force reflow
                     link.classList.add('active');
                 });
             }
             
-            // Initial animation happens automatically when page loads
-            // You could also add a button to replay the animation if desired
+            // Optional: Add keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    // Close any open dropdowns
+                    const openDropdowns = document.querySelectorAll('.dropdown-menu.show');
+                    openDropdowns.forEach(dropdown => {
+                        const bsDropdown = bootstrap.Dropdown.getInstance(dropdown.previousElementSibling);
+                        if (bsDropdown) bsDropdown.hide();
+                    });
+                    
+                    // Close mobile menu if open
+                    const navbarCollapse = document.getElementById('navbarContent');
+                    if (navbarCollapse.classList.contains('show')) {
+                        const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+                        bsCollapse.hide();
+                    }
+                }
+            });
         });
     </script>
 </body>

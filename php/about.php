@@ -66,7 +66,7 @@ require 'db_connect.php';
 </head>
 <body>
     <!-- Hero Section -->
-    <div class="container-fluid bg-dark text-white ">
+    <div class=" bg-dark text-white ">
         <div class="container py-5">
             <div class="row justify-content-center text-center">
                 <div class="col-lg-8">
