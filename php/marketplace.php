@@ -344,13 +344,6 @@ body {
     transition: .2s cubic-bezier(0.3, 0, 0.5, 1);
 }
 
-.btn-primary {
-    color: #ffffff;
-    background-color: var(--color-btn-primary-bg);
-    border: 1px solid rgba(27, 31, 36, 0.15);
-    box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
-}
-
 .btn-primary:hover {
     background-color: var(--color-btn-primary-hover-bg);
 }
@@ -1375,7 +1368,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <button type="submit" class="btn btn-primary">Search</button>
             </form>
             <?php if (isset($_SESSION['user_id'])): ?>
-                <button class="btn btn-success animate__animated animate__fadeInRight" data-bs-toggle="modal" data-bs-target="#createAssetModal">Create Asset</button>
+                <button class="btn btn-primary animate__animated animate__fadeInRight" data-bs-toggle="modal" data-bs-target="#createAssetModal">Create Asset</button>
             <?php endif; ?>
         </div>
         <hr>

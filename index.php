@@ -203,7 +203,7 @@ function getAssetCount($conn) {
             font-weight: 500;
             line-height: 24px;
             color: #ffffff;
-            background-color: var(--color-btn-primary-bg);
+            background-color: #0d6efd;
             border: 1px solid rgba(27, 31, 36, 0.15);
             box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
             transition: .2s cubic-bezier(0.3, 0, 0.5, 1);
@@ -211,7 +211,7 @@ function getAssetCount($conn) {
         }
 
         .btn-custom:hover {
-            background-color: var(--color-btn-primary-hover-bg);
+            background-color: #0b5ed7;
             transform: translateY(-2px);
             color: #ffffff;
             text-decoration: none;

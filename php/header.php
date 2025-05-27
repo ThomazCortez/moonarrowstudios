@@ -75,13 +75,13 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
 
         .header .btn-primary {
             color: #ffffff;
-            background-color: var(--color-btn-primary-bg);
+            background-color: #0d6efd;
             border: 1px solid rgba(27, 31, 36, 0.15);
             box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
         }
 
         .header .btn-primary:hover {
-            background-color: var(--color-btn-primary-hover-bg);
+            background-color: #0b5ed7;
         }
 
         .header .navbar {

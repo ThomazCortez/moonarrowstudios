@@ -265,8 +265,7 @@ function truncateComment($html, $length = 80) {
       z-index: 3;
     }
     .btn-group .btn.active:hover {
-      background-color: var(--color-accent-fg);
-      border-color: var(--color-btn-primary-hover-bg);
+      background-color: #0b5ed7;
     }
 
     .search-container {
@@ -310,7 +309,7 @@ function truncateComment($html, $length = 80) {
       border-radius: 0;
     }
     .search-input-group .btn:hover {
-      background-color: var(--color-accent-fg);
+      background-color: #0b5ed7;
     }
 
     /* Content Cards */

@@ -287,7 +287,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
                         </div>
                     </div>
                     <div class="card-footer text-end">
-                        <a href="manage_posts.php" class="btn btn-sm btn-success">View All Posts</a>
+                        <a href="manage_posts.php" class="btn btn-sm btn-primary">View All Posts</a>
                     </div>
                 </div>
             </div>
@@ -332,7 +332,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
                         </div>
                     </div>
                     <div class="card-footer text-end">
-                        <a href="manage_assets.php" class="btn btn-sm btn-info">View All Assets</a>
+                        <a href="manage_assets.php" class="btn btn-sm btn-primary">View All Assets</a>
                     </div>
                 </div>
             </div>

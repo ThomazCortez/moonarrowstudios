@@ -277,7 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .btn-primary {
             color: #ffffff;
-            background-color: var(--color-btn-primary-bg);
+            background-color: #0d6efd;
             border-color: rgba(27, 31, 36, 0.15);
             box-shadow: 0 1px 0 rgba(27, 31, 36, 0.1);
             font-size: 14px;
@@ -288,11 +288,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .btn-primary:hover {
-            background-color: var(--color-btn-primary-hover-bg);
+            background-color: #0b5ed7;
         }
 
         .btn-primary:disabled {
-            background-color: var(--color-btn-primary-bg);
+            background-color: var(--color-accent-fg);
             opacity: 0.5;
             cursor: not-allowed;
         }
