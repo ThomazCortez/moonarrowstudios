@@ -7,9 +7,9 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Navigation Header with PHP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="icon" href="/moonarrowstudios/media/moon.ico" type="image/x-icon" />
     
     <style>
         :root {
@@ -201,9 +201,11 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
             transform: translateY(-2px);
         }
         
+        /* REMOVED: Profile button focus styles that created the white box */
         .profile-btn:focus {
-            box-shadow: none;
-            outline: none;
+            box-shadow: none !important;
+            outline: none !important;
+            border: none !important;
         }
         
         /* Profile Image Styling */
@@ -495,15 +497,16 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                 border-top: 1px solid var(--color-border-muted);
             }
             
-            /* Mobile active nav styling */
+            /* UPDATED: Mobile active nav styling - simple vertical line */
             .nav-link.active::after {
                 display: none;
             }
             
             .nav-link.active {
-                background-color: var(--color-accent-fg);
-                background-color: var(--color-canvas-subtle);
-                border-left: 4px solid var(--color-accent-fg);
+                background-color: transparent !important;
+                border-left: 3px solid var(--color-accent-fg);
+                border-radius: 0;
+                padding-left: calc(1rem - 3px) !important;
             }
         }
 
@@ -620,11 +623,13 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                 ?>
                 <!-- Left-aligned Navigation -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <?php if (isset($_SESSION['user_id'])): ?>
                     <li class="nav-item">
                         <a href="<?php echo $baseUrl; ?>php/home.php" class="nav-link <?= $current_page == 'home.php' ? 'active' : '' ?>">
                             <i class="bi bi-house-fill"></i>Home
                         </a>
                     </li>
+                    <?php endif; ?>
                     <li class="nav-item">
                         <a href="<?php echo $baseUrl; ?>php/forum.php" class="nav-link <?= $current_page == 'forum.php' ? 'active' : '' ?>">
                             <i class="bi bi-chat-left-text-fill"></i>Forum
@@ -641,6 +646,7 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
                         </a>
                     </li>
                 </ul>
+
 
                 <!-- Right Side: Desktop profile or login buttons -->
                 <div class="auth-buttons d-flex align-items-center">

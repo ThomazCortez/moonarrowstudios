@@ -202,313 +202,325 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         .banner-container {
-            height: 200px;
-            overflow: visible;
-            position: relative;
-            margin-bottom: 80px;
-        }
-        
-        .banner-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .profile-picture {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 4px solid var(--color-canvas-default);
-            position: absolute;
-            bottom: -75px;
-            left: 50px;
-            object-fit: cover;
-        }
-        
-        .profile-info {
-            margin-left: 50px;
-            margin-top: 20px;
-        }
-        
-        .username {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .description {
-            color: var(--color-fg-muted);
-            margin-bottom: 20px;
-            max-width: 600px;
-        }
-        
-        .filter-section {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: var(--color-canvas-subtle);
-            border-radius: 6px;
-        }
-        
-        .posts-container, .assets-container {
-            margin-top: 20px;
-        }
-        
-        .profile-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
+    height: 200px;
+    overflow: visible;
+    position: relative;
+    margin-bottom: 80px;
+    width: 100vw; /* Full viewport width */
+    margin-left: calc(-50vw + 50%); /* Center and extend to edges */
+    margin-right: calc(-50vw + 50%);
+}
 
-        .username-container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+/* Prevent horizontal scrollbar */
+body {
+    overflow-x: hidden;
+}
 
-        .follow-button {
-            position: static;
-        }
+html {
+    overflow-x: hidden;
+}
 
-        .user-stats {
-            margin-bottom: 20px;
-        }
+.banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-        .user-stats p {
-            margin: 0;
-            color: var(--color-fg-muted);
-        }
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 4px solid var(--color-canvas-default);
+    position: absolute;
+    bottom: -75px;
+    left: 50px;
+    object-fit: cover;
+}
 
-        .card {
-            background-color: var(--color-card-bg);
-            border: 1px solid var(--color-card-border);
-            border-radius: 6px;
-            margin-bottom: 16px;
-            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-        }
+.profile-info {
+    margin-left: 50px;
+    margin-top: 20px;
+}
 
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+.username {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
 
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
+.description {
+    color: var(--color-fg-muted);
+    margin-bottom: 20px;
+    max-width: 600px;
+}
 
-        .card-body {
-            padding: 16px;
-        }
+.filter-section {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: var(--color-canvas-subtle);
+    border-radius: 6px;
+}
 
-        .hashtags .badge {
-            margin-right: 4px;
-            margin-bottom: 4px;
-        }
+.posts-container, .assets-container {
+    margin-top: 20px;
+}
 
-        .social-links {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
+.profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
 
-        .social-links a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            color: var(--color-canvas-default);
-            transition: transform 0.2s, opacity 0.2s;
-        }
+.username-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
 
-        .social-links a:hover {
-            transform: scale(1.1);
-            opacity: 0.9;
-        }
+.follow-button {
+    position: static;
+}
 
-        .youtube-icon {
-            background-color: #FF0000;
-        }
+.user-stats {
+    margin-bottom: 20px;
+}
 
-        .linkedin-icon {
-            background-color: #0077B5;
-        }
+.user-stats p {
+    margin: 0;
+    color: var(--color-fg-muted);
+}
 
-        .twitter-icon {
-            background-color: #1DA1F2;
-        }
+.card {
+    background-color: var(--color-card-bg);
+    border: 1px solid var(--color-card-border);
+    border-radius: 6px;
+    margin-bottom: 16px;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
 
-        .instagram-icon {
-            background-color: #E4405F;
-        }
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-        .github-icon {
-            background-color: #333;
-        }
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
 
-        .portfolio-icon {
-            background-color: #6c757d;
-        }
+.card-body {
+    padding: 16px;
+}
 
-        :root {
-            --color-canvas-default: #ffffff;
-            --color-canvas-subtle: #f6f8fa;
-            --color-border-default: #d0d7de;
-            --color-border-muted: #d8dee4;
-            --color-btn-primary-bg: #2da44e;
-            --color-btn-primary-hover-bg: #2c974b;
-            --color-fg-default: #1F2328;
-            --color-fg-muted: #656d76;
-            --color-accent-fg: #0969da;
-            --color-input-bg: #ffffff;
-            --color-card-bg: #ffffff;
-            --color-card-border: #d0d7de;
-        }
+.hashtags .badge {
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --color-canvas-default: #0d1117;
-                --color-canvas-subtle: #161b22;
-                --color-border-default: #30363d;
-                --color-border-muted: #21262d;
-                --color-btn-primary-bg: #238636;
-                --color-btn-primary-hover-bg: #2ea043;
-                --color-fg-default: #c9d1d9;
-                --color-fg-muted: #8b949e;
-                --color-accent-fg: #58a6ff;
-                --color-input-bg: #0d1117;
-                --color-card-bg: #161b22;
-                --color-card-border: #30363d;
-            }
-        }
+.social-links {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
 
-        .report-button {
-            margin-left: auto;
-        }
+.social-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--color-canvas-default);
+    transition: transform 0.2s, opacity 0.2s;
+}
 
-        /* Card hover effect styles */
-        .card {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            transform: translateZ(0);
-            will-change: transform;
-            border: 1px solid transparent;
-        }
+.social-links a:hover {
+    transform: scale(1.1);
+    opacity: 0.9;
+}
 
-        .card::before,
-        .card::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: rgba(88, 166, 255, 0.3);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 2;
-            opacity: 0;
-        }
+.youtube-icon {
+    background-color: #FF0000;
+}
 
-        .card::before {
-            top: 0;
-            transform: translateX(-105%);
-            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-        }
+.linkedin-icon {
+    background-color: #0077B5;
+}
 
-        .card::after {
-            bottom: 0;
-            transform: translateX(105%);
-            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-        }
+.twitter-icon {
+    background-color: #1DA1F2;
+}
 
-        .card:hover {
-            box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
-                        0 4px 20px rgba(0, 0, 0, 0.3) !important;
-            border-color: rgba(88, 166, 255, 0.3) !important;
-        }
+.instagram-icon {
+    background-color: #E4405F;
+}
 
-        .card:hover::before,
-        .card:hover::after {
-            transform: translateX(0);
-            opacity: 1;
-        }
+.github-icon {
+    background-color: #333;
+}
 
-        .card-body {
-            position: relative;
-            z-index: 1;
-        }
+.portfolio-icon {
+    background-color: #6c757d;
+}
 
-        .card-body::before,
-        .card-body::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            height: 100%;
-            width: 2px;
-            background: rgba(88, 166, 255, 0.3);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 2;
-            opacity: 0;
-            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-        }
+:root {
+    --color-canvas-default: #ffffff;
+    --color-canvas-subtle: #f6f8fa;
+    --color-border-default: #d0d7de;
+    --color-border-muted: #d8dee4;
+    --color-btn-primary-bg: #2da44e;
+    --color-btn-primary-hover-bg: #2c974b;
+    --color-fg-default: #1F2328;
+    --color-fg-muted: #656d76;
+    --color-accent-fg: #0969da;
+    --color-input-bg: #ffffff;
+    --color-card-bg: #ffffff;
+    --color-card-border: #d0d7de;
+}
 
-        .card-body::before {
-            left: 0;
-            transform: translateY(105%);
-        }
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-canvas-default: #0d1117;
+        --color-canvas-subtle: #161b22;
+        --color-border-default: #30363d;
+        --color-border-muted: #21262d;
+        --color-btn-primary-bg: #238636;
+        --color-btn-primary-hover-bg: #2ea043;
+        --color-fg-default: #c9d1d9;
+        --color-fg-muted: #8b949e;
+        --color-accent-fg: #58a6ff;
+        --color-input-bg: #0d1117;
+        --color-card-bg: #161b22;
+        --color-card-border: #30363d;
+    }
+}
 
-        .card-body::after {
-            right: 0;
-            transform: translateY(-105%);
-        }
+.report-button {
+    margin-left: auto;
+}
 
-        .card:hover .card-body::before,
-        .card:hover .card-body::after {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        
-        /* Custom animate.css animation durations */
-        .animate__animated.animate__faster {
-            animation-duration: 0.4s;
-        }
-        
-        .animate__animated.animate__fast {
-            animation-duration: 0.6s;
-        }
-        
-        /* Staggered animations for cards */
-        .staggered-animation {
-            opacity: 0;
-        }
-        
-        /* Badge animation */
-        .badge {
-            transition: all 0.3s ease;
-        }
-        
-        .badge:hover {
-            transform: scale(1.15);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        /* Tab transition effects */
-        .tab-pane {
-            transition: opacity 0.3s ease-in-out;
-        }
-        
-        .tab-pane.fade {
-            opacity: 0;
-        }
-        
-        .tab-pane.fade.show {
-            opacity: 1;
-        }
+/* Card hover effect styles */
+.card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform: translateZ(0);
+    will-change: transform;
+    border: 1px solid transparent;
+}
 
-        /* Alert Container */
+.card::before,
+.card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(88, 166, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+}
+
+.card::before {
+    top: 0;
+    transform: translateX(-105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card::after {
+    bottom: 0;
+    transform: translateX(105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card:hover {
+    box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
+                0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(88, 166, 255, 0.3) !important;
+}
+
+.card:hover::before,
+.card:hover::after {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.card-body {
+    position: relative;
+    z-index: 1;
+}
+
+.card-body::before,
+.card-body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: rgba(88, 166, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.card-body::before {
+    left: 0;
+    transform: translateY(105%);
+}
+
+.card-body::after {
+    right: 0;
+    transform: translateY(-105%);
+}
+
+.card:hover .card-body::before,
+.card:hover .card-body::after {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Custom animate.css animation durations */
+.animate__animated.animate__faster {
+    animation-duration: 0.4s;
+}
+
+.animate__animated.animate__fast {
+    animation-duration: 0.6s;
+}
+
+/* Staggered animations for cards */
+.staggered-animation {
+    opacity: 0;
+}
+
+/* Badge animation */
+.badge {
+    transition: all 0.3s ease;
+}
+
+.badge:hover {
+    transform: scale(1.15);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Tab transition effects */
+.tab-pane {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.tab-pane.fade {
+    opacity: 0;
+}
+
+.tab-pane.fade.show {
+    opacity: 1;
+}
+
+/* Alert Container */
 .alert-container {
   position: fixed;
   top: 0;
@@ -789,7 +801,7 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
 
             <hr class="my-4 animate__animated animate__fadeIn s">
 
-            <ul class="nav nav-tabs mb-4 animate__animated animate__fadeInDown s">
+            <ul class="nav mb-4 animate__animated animate__fadeInDown s">
                 <li class="nav-item">
                     <a class="nav-link <?= $active_tab === 'posts' ? 'active' : '' ?>" data-bs-toggle="tab" href="#posts">Posts</a>
                 </li>

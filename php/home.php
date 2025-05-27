@@ -26,7 +26,8 @@ try {
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
-include 'header.php';
+
+require 'header.php';
 
 // Fetch current user's username
 $username = 'User';
@@ -133,9 +134,7 @@ function truncateComment($html, $length = 80) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+    <title>MoonArrow Studios - Home</title>
     <style>
     :root {
       --color-canvas-default: #ffffff;
@@ -667,7 +666,6 @@ function truncateComment($html, $length = 80) {
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
         // Keep original PHP variables and functionality
         const greetings = <?= json_encode($greetings) ?>;
@@ -824,6 +822,5 @@ function truncateComment($html, $length = 80) {
 
         document.addEventListener('DOMContentLoaded', initializePage);
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
