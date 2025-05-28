@@ -12,6 +12,15 @@ if (!isset($_SESSION['user_id'])) {
 // Initialize empty success message
 $success_message = '';
 
+// Load PHPMailer if needed
+$phpmailer_loaded = false;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && 
+    (isset($_POST['action']) && 
+    ($_POST['action'] === 'change_password' || $_POST['action'] === 'change_email'))) {
+    require '../vendor/autoload.php';
+    $phpmailer_loaded = true;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_SESSION['user_id'];
     
@@ -116,35 +125,308 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $success_message = "Profile updated successfully!";
     }
+
+    // Handle Password Change Request
+elseif (isset($_POST['action']) && $_POST['action'] === 'change_password') {
+    $current_password = $_POST['current_password'];
+    $new_password = $_POST['new_password'];
+    $confirm_password = $_POST['confirm_password'];
     
-    // Handle Security Updates
-    elseif (isset($_POST['action']) && $_POST['action'] === 'update_password') {
-        $current_password = $_POST['current_password'];
-        $new_password = $_POST['new_password'];
-        $confirm_password = $_POST['confirm_password'];
-        
-        // Verify current password
-        $stmt = $conn->prepare("SELECT password FROM users WHERE user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $user_data = $stmt->get_result()->fetch_assoc();
-        
-        if (password_verify($current_password, $user_data['password'])) {
-            if ($new_password === $confirm_password) {
-                $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-                
-                $stmt = $conn->prepare("UPDATE users SET password = ? WHERE user_id = ?");
-                $stmt->bind_param("si", $hashed_password, $user_id);
+    // Verify current password
+    $stmt = $conn->prepare("SELECT password, email FROM users WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $user_data = $stmt->get_result()->fetch_assoc();
+    
+    if (password_verify($current_password, $user_data['password'])) {
+        if ($new_password === $confirm_password) {
+            // Generate token
+            $token = bin2hex(random_bytes(32));
+            $email = $user_data['email'];
+            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+            
+            // Validate email exists
+            if (empty($email)) {
+                $error_message = "No email address associated with your account!";
+            } else {
+                // Store token and new password
+                $stmt = $conn->prepare("INSERT INTO password_resets (email, token, new_password, purpose) VALUES (?, ?, ?, 'change')");
+                $stmt->bind_param("sss", $email, $token, $hashed_password);
                 $stmt->execute();
                 
-                $success_message = "Password updated successfully!";
-            } else {
-                $error_message = "New passwords do not match!";
+                // Send verification email
+                if ($phpmailer_loaded) {
+                    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+                    try {
+                        $mail->isSMTP();
+                        $mail->Host       = 'smtp.gmail.com';
+                        $mail->SMTPAuth   = true;
+                        $mail->Username   = 'moonarrowstudios@gmail.com';
+                        $mail->Password   = 'jbws akjv bxvr xxac';
+                        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+                        $mail->Port       = 465;
+
+                        $mail->setFrom('noreply@moonnarrowstudios.com', 'MoonArrow Studios');
+                        
+                        // Validate recipient before adding
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            $mail->addAddress($email);
+                        } else {
+                            throw new Exception("Invalid email address: $email");
+                        }
+
+                        $mail->isHTML(true);
+                        $mail->Subject = 'Verify Password Change';
+                        $mail->Body    = '
+                        <div style="font-family: Arial, sans-serif; text-align: center; background-color: #18141D; padding: 20px; color: #FFFFFF;">
+                            <div style="max-width: 500px; margin: auto; background-color: #24222A; border: 1px solid #333; border-radius: 8px; padding: 30px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);">
+                                <div style="margin-bottom: 20px;">
+                                    <img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" alt="MoonArrow Studios Logo" style="width: 120px; height: auto;">
+                                </div>
+                                <h2 style="font-size: 20px; color: #FFFFFF; margin-bottom: 10px;">Confirm Password Change</h2>
+                                <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6;">
+                                    Please verify your password change by clicking the button below.
+                                </p>
+                                <a href="http://localhost/moonarrowstudios/php/verify_password_change.php?token=' . $token . '" 
+                                    style="display: inline-block; margin-top: 20px; padding: 12px 25px; font-size: 14px; color: #FFFFFF; text-decoration: none; background-color: #007BFF; border-radius: 4px;">
+                                    Verify Password Change
+                                </a>
+                                <p style="font-size: 12px; color: #777777; margin-top: 20px;">
+                                    If you didn\'t request this change, please contact our support team immediately.
+                                </p>
+                                <hr style="border-top: 1px solid #444; margin: 20px 0;">
+                                <p style="font-size: 12px; color: #555555;">
+                                    &copy; 2024 MoonArrow Studios. All rights reserved.
+                                </p>
+                            </div>
+                        </div>';
+
+                        $mail->send();
+                        $success_message = "A verification email has been sent. Please check your inbox to complete the password change.";
+                    } catch (Exception $e) {
+                        error_log("Email error: " . $e->getMessage());
+                        $error_message = "Failed to send email. Please try again later.";
+                    }
+                } else {
+                    $error_message = "Email service not available. Please try again later.";
+                }
             }
         } else {
-            $error_message = "Current password is incorrect!";
+            $error_message = "New passwords do not match!";
+        }
+    } else {
+        $error_message = "Current password is incorrect!";
+    }
+}
+
+    // Handle Email Change Request
+    elseif (isset($_POST['action']) && $_POST['action'] === 'change_email') {
+        $new_email = filter_var($_POST['new_email'], FILTER_SANITIZE_EMAIL);
+        $current_password = $_POST['password'];
+
+        if (!filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
+            $error_message = "Invalid email address.";
+        } else {
+            // Verify password
+            $stmt = $conn->prepare("SELECT password, email FROM users WHERE user_id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $user_data = $stmt->get_result()->fetch_assoc();
+            
+            if (password_verify($current_password, $user_data['password'])) {
+                // Generate token
+                $token = bin2hex(random_bytes(32));
+                
+                // Store token and new email
+                $stmt = $conn->prepare("INSERT INTO email_changes (user_id, new_email, token) VALUES (?, ?, ?)");
+                $stmt->bind_param("iss", $user_id, $new_email, $token);
+                $stmt->execute();
+                
+                // Send verification email to new address
+                if ($phpmailer_loaded) {
+                    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+                    try {
+                        $mail->isSMTP();
+                        $mail->Host       = 'smtp.gmail.com';
+                        $mail->SMTPAuth   = true;
+                        $mail->Username   = 'moonarrowstudios@gmail.com';
+                        $mail->Password   = 'jbws akjv bxvr xxac';
+                        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+                        $mail->Port       = 465;
+                        
+                        $mail->setFrom('noreply@moonnarrowstudios.com', 'MoonArrow Studios');
+                        $mail->addAddress($new_email);
+
+                        $mail->isHTML(true);
+                        $mail->Subject = 'Verify Email Change';
+                        $mail->Body    = '
+                        <div style="font-family: Arial, sans-serif; text-align: center; background-color: #18141D; padding: 20px; color: #FFFFFF;">
+                            <div style="max-width: 500px; margin: auto; background-color: #24222A; border: 1px solid #333; border-radius: 8px; padding: 30px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);">
+                                <div style="margin-bottom: 20px;">
+                                    <img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" alt="MoonArrow Studios Logo" style="width: 120px; height: auto;">
+                                </div>
+                                <h2 style="font-size: 20px; color: #FFFFFF; margin-bottom: 10px;">Confirm Email Change</h2>
+                                <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6;">
+                                    Please verify your email change by clicking the button below.
+                                </p>
+                                <a href="http://localhost/moonarrowstudios/php/verify_email_change.php?token=' . $token . '" 
+                                    style="display: inline-block; margin-top: 20px; padding: 12px 25px; font-size: 14px; color: #FFFFFF; text-decoration: none; background-color: #007BFF; border-radius: 4px;">
+                                    Verify Email Change
+                                </a>
+                                <p style="font-size: 12px; color: #777777; margin-top: 20px;">
+                                    If you didn\'t request this change, please contact our support team immediately.
+                                </p>
+                                <hr style="border-top: 1px solid #444; margin: 20px 0;">
+                                <p style="font-size: 12px; color: #555555;">
+                                    &copy; 2024 MoonArrow Studios. All rights reserved.
+                                </p>
+                            </div>
+                        </div>';
+
+                        $mail->send();
+                        
+                        // Also send notification to old email
+                        $notification_mail = new PHPMailer\PHPMailer\PHPMailer(true);
+                        try {
+                            $notification_mail->isSMTP();
+                            $notification_mail->Host       = 'smtp.gmail.com';
+                            $notification_mail->SMTPAuth   = true;
+                            $notification_mail->Username   = 'moonarrowstudios@gmail.com';
+                            $notification_mail->Password   = 'jbws akjv bxvr xxac';
+                            $notification_mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+                            $notification_mail->Port       = 465;
+                            
+                            $notification_mail->setFrom('noreply@moonnarrowstudios.com', 'MoonArrow Studios');
+                            $notification_mail->addAddress($user_data['email']);
+
+                            $notification_mail->isHTML(true);
+                            $notification_mail->Subject = 'Email Change Requested';
+                            $notification_mail->Body    = '
+                            <div style="font-family: Arial, sans-serif; text-align: center; background-color: #18141D; padding: 20px; color: #FFFFFF;">
+                                <div style="max-width: 500px; margin: auto; background-color: #24222A; border: 1px solid #333; border-radius: 8px; padding: 30px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);">
+                                    <div style="margin-bottom: 20px;">
+                                        <img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" alt="MoonArrow Studios Logo" style="width: 120px; height: auto;">
+                                    </div>
+                                    <h2 style="font-size: 20px; color: #FFFFFF; margin-bottom: 10px;">Email Change Requested</h2>
+                                    <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6;">
+                                        We received a request to change your email address to: ' . $new_email . '.
+                                    </p>
+                                    <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6;">
+                                        If this wasn\'t you, please contact our support team immediately.
+                                    </p>
+                                    <hr style="border-top: 1px solid #444; margin: 20px 0;">
+                                    <p style="font-size: 12px; color: #555555;">
+                                        &copy; 2024 MoonArrow Studios. All rights reserved.
+                                    </p>
+                                </div>
+                            </div>';
+
+                            $notification_mail->send();
+                        } catch (Exception $e) {
+                            // Notification failed, but proceed
+                        }
+                        
+                        $success_message = "A verification email has been sent to your new email address.";
+                    } catch (Exception $e) {
+                        $error_message = "Failed to send email: {$mail->ErrorInfo}";
+                    }
+                } else {
+                    $error_message = "Email service not available. Please try again later.";
+                }
+            } else {
+                $error_message = "Password is incorrect!";
+            }
         }
     }
+    
+    // Handle Account Deletion
+    elseif (isset($_POST['action']) && $_POST['action'] === 'delete_account') {
+        $password = trim($_POST['password'] ?? '');
+    $error_message = '';
+    
+    // Validate input
+    if (empty($password)) {
+        $error_message = "Password is required for account deletion.";
+    } else {
+        try {
+            // Begin transaction for data integrity
+            $conn->begin_transaction();
+            
+            // Verify password
+            $stmt = $conn->prepare("SELECT password FROM users WHERE user_id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows === 0) {
+                throw new Exception("User not found.");
+            }
+            
+            $user_data = $result->fetch_assoc();
+            
+            if (!password_verify($password, $user_data['password'])) {
+                throw new Exception("Incorrect password. Account deletion cancelled.");
+            }
+            
+            // Get user email before deletion for cleanup
+            $stmt = $conn->prepare("SELECT email FROM users WHERE user_id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $email_result = $stmt->get_result()->fetch_assoc();
+            $user_email = $email_result['email'];
+            
+            // Delete related data first (foreign key constraints)
+            $cleanup_queries = [
+                "DELETE FROM password_resets WHERE email = ?",
+                "DELETE FROM email_changes WHERE user_id = ?",
+                // Add other related tables as needed
+                // "DELETE FROM user_sessions WHERE user_id = ?",
+                // "DELETE FROM user_preferences WHERE user_id = ?",
+            ];
+            
+            foreach ($cleanup_queries as $query) {
+                $stmt = $conn->prepare($query);
+                if (strpos($query, 'email') !== false) {
+                    $stmt->bind_param("s", $user_email);
+                } else {
+                    $stmt->bind_param("i", $user_id);
+                }
+                $stmt->execute();
+            }
+            
+            // Finally, delete the user account
+            $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            
+            if ($stmt->affected_rows === 0) {
+                throw new Exception("Failed to delete user account.");
+            }
+            
+            // Commit transaction
+            $conn->commit();
+            
+            // Destroy session and redirect
+            session_destroy();
+            
+            // Clear any session cookies
+            if (isset($_COOKIE[session_name()])) {
+                setcookie(session_name(), '', time() - 3600, '/');
+            }
+            
+            header("Location: ../index.php?alert=" . urlencode("Your account has been successfully deleted."));
+            exit();
+            
+        } catch (Exception $e) {
+            // Rollback transaction on error
+            $conn->rollback();
+            $error_message = $e->getMessage();
+            
+            // Log the error for debugging (optional)
+            error_log("Account deletion failed for user_id $user_id: " . $e->getMessage());
+        }
+    }
+}
     
     // Handle Notification Settings Updates
     elseif (isset($_POST['action']) && $_POST['action'] === 'update_notifications') {
@@ -273,7 +555,7 @@ if (isset($_GET['tab'])) {
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             transition: all 0.3s ease;
-            background-color: #212529;
+            background-color: #161b22;
         }
 
         .settings-card:hover {
@@ -303,30 +585,26 @@ if (isset($_GET['tab'])) {
 
         .settings-tabs {
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding: 0 15px;
+            padding-bottom: 10px; /* Add this */
             background-color: rgba(0,0,0,0.05);
+            padding-left: 15px;
+            padding-right: 15px;
         }
+
 
         .nav-tabs .nav-link {
             border: none;
             color: #adb5bd;
             font-weight: 500;
             padding: 15px 20px;
-            border-bottom: 3px solid transparent;
             transition: all 0.2s ease;
         }
 
-        .nav-tabs .nav-link:hover {
-            border-color: rgba(255,255,255,0.2);
-            background-color: rgba(255,255,255,0.05);
-            color: #fff;
+        .nav-tabs {
+            border-bottom: none !important; /* Force-remove any browser default */
         }
 
-        .nav-tabs .nav-link.active {
-            background-color: transparent;
-            border-bottom: 3px solid #0d6efd;
-            color: #fff;
-        }
+
 
         .tab-icon {
             margin-right: 8px;
@@ -746,105 +1024,151 @@ if (isset($_GET['tab'])) {
                             </form>
                         </div>
                         
-                        <!-- Security Tab -->
-                        <div class="tab-pane fade <?php echo ($active_tab == 'security') ? 'show active' : ''; ?> animated-tab animate__animated animate__fadeIn" id="security" role="tabpanel" aria-labelledby="security-tab">
-                            <h4 class="mb-4"><i class="fas fa-lock me-2"></i> Change Password</h4>
-                            <form method="POST" id="securityForm">
-                                <input type="hidden" name="action" value="update_password">
-                                
-                                <div class="mb-3">
-                                    <label for="current_password" class="form-label">Current Password</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-key"></i></span>
-                                        <input type="password" class="form-control" id="current_password" name="current_password" required>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="new_password" class="form-label">New Password</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                        <input type="password" class="form-control" id="new_password" name="new_password" required>
-                                    </div>
-                                    <small class="text-muted">Password must be at least 8 characters long and include a mix of letters and numbers.</small>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="confirm_password" class="form-label">Confirm New Password</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                                    </div>
-                                </div>
-                                
-                                <div class="text-end">
-                                    <button type="submit" class="btn btn-primary btn-save">
-                                        <i class="fas fa-key me-2"></i> Update Password
-                                    </button>
-                                </div>
-                            </form>
+<!-- Security Tab -->
+<div class="tab-pane fade <?php echo ($active_tab == 'security') ? 'show active' : ''; ?> animated-tab animate__animated animate__fadeIn" id="security" role="tabpanel" aria-labelledby="security-tab">
+    <!-- Change Password Form -->
+    <h4 class="mb-4"><i class="fas fa-lock me-2"></i> Change Password</h4>
+    <form method="POST" id="passwordForm">
+        <input type="hidden" name="action" value="change_password">
+        
+        <div class="mb-3">
+            <label for="current_password" class="form-label">Current Password</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                <input type="password" class="form-control" id="current_password" name="current_password" required>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="new_password" class="form-label">New Password</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                <input type="password" class="form-control" id="new_password" name="new_password" required>
+            </div>
+            <small class="text-muted">Password must be at least 8 characters long and include a mix of letters and numbers.</small>
+        </div>
+        
+        <div class="mb-4">
+            <label for="confirm_password" class="form-label">Confirm New Password</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+            </div>
+        </div>
+        
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary btn-save">
+                <i class="fas fa-key me-2"></i> Send Verification Email
+            </button>
+        </div>
+    </form>
+    
+    <!-- Change Email Form -->
+    <h4 class="mb-4 mt-5"><i class="fas fa-envelope me-2"></i> Change Email</h4>
+    <form method="POST" id="emailForm">
+        <input type="hidden" name="action" value="change_email">
+        
+        <div class="mb-3">
+            <label for="new_email" class="form-label">New Email Address</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                <input type="email" class="form-control" id="new_email" name="new_email" required>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <label for="password" class="form-label">Confirm Password</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+        </div>
+        
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary btn-save">
+                <i class="fas fa-paper-plane me-2"></i> Send Verification Email
+            </button>
+        </div>
+    </form>
+    
+    <!-- Delete Account Section -->
+<h4 class="mb-4 mt-5"><i class="fas fa-trash-alt me-2"></i> Delete Account</h4>
+<div class="alert alert-danger">
+    <strong>Warning:</strong> Deleting your account is permanent and cannot be undone. All your data will be removed.
+</div>
+<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+    <i class="fas fa-trash-alt me-2"></i> Delete Account
+</button>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirm Account Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="deleteAccountForm">
+                <input type="hidden" name="action" value="delete_account">
+                <div class="modal-body">
+                    <div class="alert alert-warning mb-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>This action is irreversible!</strong> All your data will be permanently deleted.
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-danger mb-3">What will be deleted:</h6>
+                        <ul class="text-muted">
+                            <li>Your account and profile information</li>
+                            <li>All your saved data</li>
+                            <li>Password reset tokens</li>
+                            <li>Email change requests</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="delete_password" class="form-label fw-bold">
+                            Enter your password to confirm deletion:
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="delete_password" 
+                               name="password" 
+                               placeholder="Your current password"
+                               required 
+                               autocomplete="current-password">
+                        <div class="invalid-feedback">
+                            Please enter your password to confirm deletion.
                         </div>
-                        
-                        <!-- Notifications Tab -->
-                        <div class="tab-pane fade <?php echo ($active_tab == 'notifications') ? 'show active' : ''; ?> animated-tab animate__animated animate__fadeIn" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
-                            <h4 class="mb-4"><i class="fas fa-bell me-2"></i> Notification Preferences</h4>
-                            <form method="POST" id="notificationsForm">
-                                <input type="hidden" name="action" value="update_notifications">
-                                
-                                <div class="card mb-3 bg-dark border-0">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <div>
-                                                <h5 class="mb-1"><i class="fas fa-envelope me-2"></i> Email Updates</h5>
-                                                <p class="text-muted mb-0">Receive news, updates, and promotional emails</p>
-                                            </div>
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="email_updates" name="email_updates" <?php echo (isset($user['email_updates']) && $user['email_updates']) ? 'checked' : ''; ?>>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="card mb-3 bg-dark border-0">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <div>
-                                                <h5 class="mb-1"><i class="fas fa-comment me-2"></i> Comment Notifications</h5>
-                                                <p class="text-muted mb-0">Get notified when someone comments on your posts</p>
-                                            </div>
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="comment_notifications" name="comment_notifications" <?php echo (isset($user['comment_notifications']) && $user['comment_notifications']) ? 'checked' : ''; ?>>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="card mb-4 bg-dark border-0">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <div>
-                                                <h5 class="mb-1"><i class="fas fa-paper-plane me-2"></i> Message Notifications</h5>
-                                                <p class="text-muted mb-0">Get notified when you receive new messages</p>
-                                            </div>
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="message_notifications" name="message_notifications" <?php echo (isset($user['message_notifications']) && $user['message_notifications']) ? 'checked' : ''; ?>>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="text-end">
-                                    <button type="submit" class="btn btn-primary btn-save">
-                                        <i class="fas fa-save me-2"></i> Save Notification Preferences
-                                    </button>
-                                </div>
-                            </form>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmDeletion" required>
+                            <label class="form-check-label text-danger fw-bold" for="confirmDeletion">
+                                I understand this action cannot be undone
+                            </label>
                         </div>
                     </div>
                 </div>
-            </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger" id="deleteAccountButton" disabled>
+                        <i class="fas fa-trash-alt me-2"></i>
+                        <span id="countdown">10</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+
 
     <!-- Cropping Modal -->
     <div class="modal fade" id="cropModal" tabindex="-1">
@@ -1104,6 +1428,115 @@ function dismissAlert(alertElement) {
   alertElement.classList.remove('show');
   setTimeout(() => { alertElement.remove(); }, 300);
 }
+
+// Enhanced Delete Account Modal Logic
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteModal = document.getElementById('deleteAccountModal');
+    const deleteButton = document.getElementById('deleteAccountButton');
+    const countdownElement = document.getElementById('countdown');
+    const passwordInput = document.getElementById('delete_password');
+    const confirmCheckbox = document.getElementById('confirmDeletion');
+    const deleteForm = document.getElementById('deleteAccountForm');
+    
+    let countdownInterval;
+    let countdown = 10;
+    
+    // Reset modal when it's shown
+    deleteModal.addEventListener('show.bs.modal', function() {
+        resetModal();
+        startCountdown();
+    });
+    
+    // Clean up when modal is hidden
+    deleteModal.addEventListener('hidden.bs.modal', function() {
+        clearInterval(countdownInterval);
+        resetModal();
+    });
+    
+    // Check form validity when inputs change
+    [passwordInput, confirmCheckbox].forEach(input => {
+        input.addEventListener('change', checkFormValidity);
+        input.addEventListener('input', checkFormValidity);
+    });
+    
+    // Form submission with additional validation
+    deleteForm.addEventListener('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Final confirmation
+        if (!confirm('Are you absolutely sure you want to delete your account? This action cannot be undone!')) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Show loading state
+        deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Deleting...';
+        deleteButton.disabled = true;
+    });
+    
+    function resetModal() {
+        countdown = 10;
+        deleteButton.disabled = true;
+        countdownElement.textContent = countdown;
+        passwordInput.value = '';
+        confirmCheckbox.checked = false;
+        passwordInput.classList.remove('is-invalid', 'is-valid');
+        deleteButton.innerHTML = '<i class="fas fa-trash-alt me-2"></i><span id="countdown">10</span>';
+    }
+    
+    function startCountdown() {
+        countdownInterval = setInterval(function() {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                countdownElement.textContent = 'Delete Account';
+                checkFormValidity();
+            } else {
+                countdownElement.textContent = countdown + (countdown === 1 ? ' second' : ' seconds');
+            }
+        }, 1000);
+    }
+    
+    function checkFormValidity() {
+        const isPasswordValid = passwordInput.value.length > 0;
+        const isCheckboxChecked = confirmCheckbox.checked;
+        const isCountdownFinished = countdown <= 0;
+        
+        // Update password field validation styling
+        if (passwordInput.value.length > 0) {
+            passwordInput.classList.remove('is-invalid');
+            passwordInput.classList.add('is-valid');
+        } else if (passwordInput.value.length === 0 && passwordInput === document.activeElement) {
+            passwordInput.classList.add('is-invalid');
+            passwordInput.classList.remove('is-valid');
+        }
+        
+        // Enable button only if all conditions are met
+        deleteButton.disabled = !(isPasswordValid && isCheckboxChecked && isCountdownFinished);
+    }
+    
+    function validateForm() {
+        let isValid = true;
+        
+        // Validate password
+        if (passwordInput.value.trim() === '') {
+            passwordInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        // Validate checkbox
+        if (!confirmCheckbox.checked) {
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+});
     </script>
 </body>
 </html>
