@@ -16,7 +16,7 @@ $success_message = '';
 $phpmailer_loaded = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && 
     (isset($_POST['action']) && 
-    ($_POST['action'] === 'change_password' || $_POST['action'] === 'change_email'))) {
+    ($_POST['action'] === 'change_password' || $_POST['action'] === 'change_email' || $_POST['action'] === 'delete_account'))) {
     require '../vendor/autoload.php';
     $phpmailer_loaded = true;
 }
@@ -127,97 +127,97 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Handle Password Change Request
-elseif (isset($_POST['action']) && $_POST['action'] === 'change_password') {
-    $current_password = $_POST['current_password'];
-    $new_password = $_POST['new_password'];
-    $confirm_password = $_POST['confirm_password'];
-    
-    // Verify current password
-    $stmt = $conn->prepare("SELECT password, email FROM users WHERE user_id = ?");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    $user_data = $stmt->get_result()->fetch_assoc();
-    
-    if (password_verify($current_password, $user_data['password'])) {
-        if ($new_password === $confirm_password) {
-            // Generate token
-            $token = bin2hex(random_bytes(32));
-            $email = $user_data['email'];
-            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-            
-            // Validate email exists
-            if (empty($email)) {
-                $error_message = "No email address associated with your account!";
-            } else {
-                // Store token and new password
-                $stmt = $conn->prepare("INSERT INTO password_resets (email, token, new_password, purpose) VALUES (?, ?, ?, 'change')");
-                $stmt->bind_param("sss", $email, $token, $hashed_password);
-                $stmt->execute();
+    elseif (isset($_POST['action']) && $_POST['action'] === 'change_password') {
+        $current_password = $_POST['current_password'];
+        $new_password = $_POST['new_password'];
+        $confirm_password = $_POST['confirm_password'];
+        
+        // Verify current password
+        $stmt = $conn->prepare("SELECT password, email FROM users WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $user_data = $stmt->get_result()->fetch_assoc();
+        
+        if (password_verify($current_password, $user_data['password'])) {
+            if ($new_password === $confirm_password) {
+                // Generate token
+                $token = bin2hex(random_bytes(32));
+                $email = $user_data['email'];
+                $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
                 
-                // Send verification email
-                if ($phpmailer_loaded) {
-                    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-                    try {
-                        $mail->isSMTP();
-                        $mail->Host       = 'smtp.gmail.com';
-                        $mail->SMTPAuth   = true;
-                        $mail->Username   = 'moonarrowstudios@gmail.com';
-                        $mail->Password   = 'jbws akjv bxvr xxac';
-                        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
-                        $mail->Port       = 465;
-
-                        $mail->setFrom('noreply@moonnarrowstudios.com', 'MoonArrow Studios');
-                        
-                        // Validate recipient before adding
-                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                            $mail->addAddress($email);
-                        } else {
-                            throw new Exception("Invalid email address: $email");
-                        }
-
-                        $mail->isHTML(true);
-                        $mail->Subject = 'Verify Password Change';
-                        $mail->Body    = '
-                        <div style="font-family: Arial, sans-serif; text-align: center; background-color: #18141D; padding: 20px; color: #FFFFFF;">
-                            <div style="max-width: 500px; margin: auto; background-color: #24222A; border: 1px solid #333; border-radius: 8px; padding: 30px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);">
-                                <div style="margin-bottom: 20px;">
-                                    <img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" alt="MoonArrow Studios Logo" style="width: 120px; height: auto;">
-                                </div>
-                                <h2 style="font-size: 20px; color: #FFFFFF; margin-bottom: 10px;">Confirm Password Change</h2>
-                                <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6;">
-                                    Please verify your password change by clicking the button below.
-                                </p>
-                                <a href="http://localhost/moonarrowstudios/php/verify_password_change.php?token=' . $token . '" 
-                                    style="display: inline-block; margin-top: 20px; padding: 12px 25px; font-size: 14px; color: #FFFFFF; text-decoration: none; background-color: #007BFF; border-radius: 4px;">
-                                    Verify Password Change
-                                </a>
-                                <p style="font-size: 12px; color: #777777; margin-top: 20px;">
-                                    If you didn\'t request this change, please contact our support team immediately.
-                                </p>
-                                <hr style="border-top: 1px solid #444; margin: 20px 0;">
-                                <p style="font-size: 12px; color: #555555;">
-                                    &copy; 2024 MoonArrow Studios. All rights reserved.
-                                </p>
-                            </div>
-                        </div>';
-
-                        $mail->send();
-                        $success_message = "A verification email has been sent. Please check your inbox to complete the password change.";
-                    } catch (Exception $e) {
-                        error_log("Email error: " . $e->getMessage());
-                        $error_message = "Failed to send email. Please try again later.";
-                    }
+                // Validate email exists
+                if (empty($email)) {
+                    $error_message = "No email address associated with your account!";
                 } else {
-                    $error_message = "Email service not available. Please try again later.";
+                    // Store token and new password
+                    $stmt = $conn->prepare("INSERT INTO password_resets (email, token, new_password, purpose) VALUES (?, ?, ?, 'change')");
+                    $stmt->bind_param("sss", $email, $token, $hashed_password);
+                    $stmt->execute();
+                    
+                    // Send verification email
+                    if ($phpmailer_loaded) {
+                        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+                        try {
+                            $mail->isSMTP();
+                            $mail->Host       = 'smtp.gmail.com';
+                            $mail->SMTPAuth   = true;
+                            $mail->Username   = 'moonarrowstudios@gmail.com';
+                            $mail->Password   = 'jbws akjv bxvr xxac';
+                            $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+                            $mail->Port       = 465;
+
+                            $mail->setFrom('noreply@moonnarrowstudios.com', 'MoonArrow Studios');
+                            
+                            // Validate recipient before adding
+                            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                                $mail->addAddress($email);
+                            } else {
+                                throw new Exception("Invalid email address: $email");
+                            }
+
+                            $mail->isHTML(true);
+                            $mail->Subject = 'Verify Password Change';
+                            $mail->Body    = '
+                            <div style="font-family: Arial, sans-serif; text-align: center; background-color: #18141D; padding: 20px; color: #FFFFFF;">
+                                <div style="max-width: 500px; margin: auto; background-color: #24222A; border: 1px solid #333; border-radius: 8px; padding: 30px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);">
+                                    <div style="margin-bottom: 20px;">
+                                        <img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" alt="MoonArrow Studios Logo" style="width: 120px; height: auto;">
+                                    </div>
+                                    <h2 style="font-size: 20px; color: #FFFFFF; margin-bottom: 10px;">Confirm Password Change</h2>
+                                    <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6;">
+                                        Please verify your password change by clicking the button below.
+                                    </p>
+                                    <a href="http://localhost/moonarrowstudios/php/verify_password_change.php?token=' . $token . '" 
+                                        style="display: inline-block; margin-top: 20px; padding: 12px 25px; font-size: 14px; color: #FFFFFF; text-decoration: none; background-color: #007BFF; border-radius: 4px;">
+                                        Verify Password Change
+                                    </a>
+                                    <p style="font-size: 12px; color: #777777; margin-top: 20px;">
+                                        If you didn\'t request this change, please contact our support team immediately.
+                                    </p>
+                                    <hr style="border-top: 1px solid #444; margin: 20px 0;">
+                                    <p style="font-size: 12px; color: #555555;">
+                                        &copy; 2024 MoonArrow Studios. All rights reserved.
+                                    </p>
+                                </div>
+                            </div>';
+
+                            $mail->send();
+                            $success_message = "A verification email has been sent. Please check your inbox to complete the password change.";
+                        } catch (Exception $e) {
+                            error_log("Email error: " . $e->getMessage());
+                            $error_message = "Failed to send email. Please try again later.";
+                        }
+                    } else {
+                        $error_message = "Email service not available. Please try again later.";
+                    }
                 }
+            } else {
+                $error_message = "New passwords do not match!";
             }
         } else {
-            $error_message = "New passwords do not match!";
+            $error_message = "Current password is incorrect!";
         }
-    } else {
-        $error_message = "Current password is incorrect!";
     }
-}
 
     // Handle Email Change Request
     elseif (isset($_POST['action']) && $_POST['action'] === 'change_email') {
@@ -339,94 +339,96 @@ elseif (isset($_POST['action']) && $_POST['action'] === 'change_password') {
         }
     }
     
-    // Handle Account Deletion
+    // Handle Account Deletion Request
     elseif (isset($_POST['action']) && $_POST['action'] === 'delete_account') {
-        $password = trim($_POST['password'] ?? '');
-    $error_message = '';
-    
-    // Validate input
-    if (empty($password)) {
-        $error_message = "Password is required for account deletion.";
-    } else {
-        try {
-            // Begin transaction for data integrity
-            $conn->begin_transaction();
-            
+        $current_password = $_POST['delete_password'];
+        $confirm_delete = isset($_POST['confirm_delete']) ? $_POST['confirm_delete'] : '';
+        
+        if ($confirm_delete !== 'DELETE') {
+            $error_message = "Please type 'DELETE' to confirm account deletion.";
+        } else {
             // Verify password
-            $stmt = $conn->prepare("SELECT password FROM users WHERE user_id = ?");
+            $stmt = $conn->prepare("SELECT password, email, username FROM users WHERE user_id = ?");
             $stmt->bind_param("i", $user_id);
             $stmt->execute();
-            $result = $stmt->get_result();
+            $user_data = $stmt->get_result()->fetch_assoc();
             
-            if ($result->num_rows === 0) {
-                throw new Exception("User not found.");
-            }
-            
-            $user_data = $result->fetch_assoc();
-            
-            if (!password_verify($password, $user_data['password'])) {
-                throw new Exception("Incorrect password. Account deletion cancelled.");
-            }
-            
-            // Get user email before deletion for cleanup
-            $stmt = $conn->prepare("SELECT email FROM users WHERE user_id = ?");
-            $stmt->bind_param("i", $user_id);
-            $stmt->execute();
-            $email_result = $stmt->get_result()->fetch_assoc();
-            $user_email = $email_result['email'];
-            
-            // Delete related data first (foreign key constraints)
-            $cleanup_queries = [
-                "DELETE FROM password_resets WHERE email = ?",
-                "DELETE FROM email_changes WHERE user_id = ?",
-                // Add other related tables as needed
-                // "DELETE FROM user_sessions WHERE user_id = ?",
-                // "DELETE FROM user_preferences WHERE user_id = ?",
-            ];
-            
-            foreach ($cleanup_queries as $query) {
-                $stmt = $conn->prepare($query);
-                if (strpos($query, 'email') !== false) {
-                    $stmt->bind_param("s", $user_email);
-                } else {
-                    $stmt->bind_param("i", $user_id);
-                }
+            if (password_verify($current_password, $user_data['password'])) {
+                // Generate token for account deletion
+                $token = bin2hex(random_bytes(32));
+                $email = $user_data['email'];
+                
+                // Store deletion token
+                $stmt = $conn->prepare("INSERT INTO account_deletions (user_id, email, token, created_at) VALUES (?, ?, ?, NOW())");
+                $stmt->bind_param("iss", $user_id, $email, $token);
                 $stmt->execute();
+                
+                // Send confirmation email
+                if ($phpmailer_loaded) {
+                    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+                    try {
+                        $mail->isSMTP();
+                        $mail->Host       = 'smtp.gmail.com';
+                        $mail->SMTPAuth   = true;
+                        $mail->Username   = 'moonarrowstudios@gmail.com';
+                        $mail->Password   = 'jbws akjv bxvr xxac';
+                        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+                        $mail->Port       = 465;
+
+                        $mail->setFrom('noreply@moonnarrowstudios.com', 'MoonArrow Studios');
+                        
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            $mail->addAddress($email);
+                        } else {
+                            throw new Exception("Invalid email address: $email");
+                        }
+
+                        $mail->isHTML(true);
+                        $mail->Subject = 'Confirm Account Deletion';
+                        $mail->Body    = '
+                        <div style="font-family: Arial, sans-serif; text-align: center; background-color: #18141D; padding: 20px; color: #FFFFFF;">
+                            <div style="max-width: 500px; margin: auto; background-color: #24222A; border: 1px solid #333; border-radius: 8px; padding: 30px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);">
+                                <div style="margin-bottom: 20px;">
+                                    <img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" alt="MoonArrow Studios Logo" style="width: 120px; height: auto;">
+                                </div>
+                                <h2 style="font-size: 20px; color: #FF4444; margin-bottom: 10px;">⚠️ Account Deletion Request</h2>
+                                <p style="font-size: 14px; color: #CCCCCC; line-height: 1.6;">
+                                    We received a request to permanently delete your MoonArrow Studios account: <strong>' . htmlspecialchars($user_data['username']) . '</strong>
+                                </p>
+                                <p style="font-size: 14px; color: #FFAAAA; line-height: 1.6;">
+                                    <strong>WARNING:</strong> This action is irreversible. All your data, posts, and account information will be permanently deleted.
+                                </p>
+                                <a href="http://localhost/moonarrowstudios/php/confirm_account_deletion.php?token=' . $token . '" 
+                                    style="display: inline-block; margin-top: 20px; padding: 12px 25px; font-size: 14px; color: #FFFFFF; text-decoration: none; background-color: #DC3545; border-radius: 4px;">
+                                    Confirm Account Deletion
+                                </a>
+                                <p style="font-size: 12px; color: #777777; margin-top: 20px;">
+                                    If you didn\'t request this deletion, please contact our support team immediately and change your password.
+                                </p>
+                                <p style="font-size: 12px; color: #777777;">
+                                    This deletion link will expire in 24 hours for your security.
+                                </p>
+                                <hr style="border-top: 1px solid #444; margin: 20px 0;">
+                                <p style="font-size: 12px; color: #555555;">
+                                    &copy; 2024 MoonArrow Studios. All rights reserved.
+                                </p>
+                            </div>
+                        </div>';
+
+                        $mail->send();
+                        $success_message = "A confirmation email has been sent. Please check your inbox to complete the account deletion. The link will expire in 24 hours.";
+                    } catch (Exception $e) {
+                        error_log("Email error: " . $e->getMessage());
+                        $error_message = "Failed to send confirmation email. Please try again later.";
+                    }
+                } else {
+                    $error_message = "Email service not available. Please try again later.";
+                }
+            } else {
+                $error_message = "Password is incorrect!";
             }
-            
-            // Finally, delete the user account
-            $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?");
-            $stmt->bind_param("i", $user_id);
-            $stmt->execute();
-            
-            if ($stmt->affected_rows === 0) {
-                throw new Exception("Failed to delete user account.");
-            }
-            
-            // Commit transaction
-            $conn->commit();
-            
-            // Destroy session and redirect
-            session_destroy();
-            
-            // Clear any session cookies
-            if (isset($_COOKIE[session_name()])) {
-                setcookie(session_name(), '', time() - 3600, '/');
-            }
-            
-            header("Location: ../index.php?alert=" . urlencode("Your account has been successfully deleted."));
-            exit();
-            
-        } catch (Exception $e) {
-            // Rollback transaction on error
-            $conn->rollback();
-            $error_message = $e->getMessage();
-            
-            // Log the error for debugging (optional)
-            error_log("Account deletion failed for user_id $user_id: " . $e->getMessage());
         }
     }
-}
     
     // Handle Notification Settings Updates
     elseif (isset($_POST['action']) && $_POST['action'] === 'update_notifications') {
@@ -1090,83 +1092,51 @@ if (isset($_GET['tab'])) {
             </button>
         </div>
     </form>
-    
-    <!-- Delete Account Section -->
-<h4 class="mb-4 mt-5"><i class="fas fa-trash-alt me-2"></i> Delete Account</h4>
-<div class="alert alert-danger">
-    <strong>Warning:</strong> Deleting your account is permanent and cannot be undone. All your data will be removed.
-</div>
-<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
-    <i class="fas fa-trash-alt me-2"></i> Delete Account
-</button>
 
-<!-- Delete Account Modal -->
-<div class="modal fade" id="deleteAccountModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-danger">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Confirm Account Deletion
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" id="deleteAccountForm">
-                <input type="hidden" name="action" value="delete_account">
-                <div class="modal-body">
-                    <div class="alert alert-warning mb-4">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>This action is irreversible!</strong> All your data will be permanently deleted.
-                    </div>
-                    
-                    <div class="mb-4">
-                        <h6 class="text-danger mb-3">What will be deleted:</h6>
-                        <ul class="text-muted">
-                            <li>Your account and profile information</li>
-                            <li>All your saved data</li>
-                            <li>Password reset tokens</li>
-                            <li>Email change requests</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="delete_password" class="form-label fw-bold">
-                            Enter your password to confirm deletion:
-                        </label>
-                        <input type="password" 
-                               class="form-control" 
-                               id="delete_password" 
-                               name="password" 
-                               placeholder="Your current password"
-                               required 
-                               autocomplete="current-password">
-                        <div class="invalid-feedback">
-                            Please enter your password to confirm deletion.
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="confirmDeletion" required>
-                            <label class="form-check-label text-danger fw-bold" for="confirmDeletion">
-                                I understand this action cannot be undone
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Cancel
-                    </button>
-                    <button type="submit" class="btn btn-danger" id="deleteAccountButton" disabled>
-                        <i class="fas fa-trash-alt me-2"></i>
-                        <span id="countdown">10</span>
-                    </button>
-                </div>
-            </form>
-        </div>
+<!-- Account Deletion Section -->
+<div class="mt-5 pt-4 border-top border-danger">
+    <h4 class="mb-4 text-danger"><i class="fas fa-exclamation-triangle me-2"></i> Delete Account</h4>
+    <div class="alert alert-danger" role="alert">
+        <h6 class="alert-heading"><i class="fas fa-warning me-2"></i> Warning: This action is irreversible</h6>
+        <p class="mb-2">Deleting your account will permanently remove:</p>
+        <ul class="mb-2">
+            <li>Your profile and all personal information</li>
+            <li>All your posts, comments, and uploads</li>
+            <li>Your social connections and messages</li>
+            <li>All account settings and preferences</li>
+        </ul>
+        <p class="mb-0"><strong>This action cannot be undone.</strong> Please consider downloading any important data before proceeding.</p>
     </div>
+    
+    <form method="POST" id="deleteAccountForm">
+        <input type="hidden" name="action" value="delete_account">
+        
+        <div class="mb-3">
+            <label for="delete_password" class="form-label">Enter Your Password</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                <input type="password" class="form-control" id="delete_password" name="delete_password" required>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <label for="confirm_delete" class="form-label">Type "DELETE" to confirm</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-exclamation-triangle"></i></span>
+                <input type="text" class="form-control" id="confirm_delete" name="confirm_delete" placeholder="Type DELETE in capital letters" required>
+            </div>
+            <small class="text-muted">You must type "DELETE" exactly as shown to proceed.</small>
+        </div>
+        
+        <div class="text-end">
+            <button type="button" class="btn btn-outline-secondary me-2" onclick="clearDeleteForm()">
+                <i class="fas fa-times me-2"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-danger" id="deleteAccountBtn" disabled>
+                <i class="fas fa-trash-alt me-2"></i> Send Deletion Confirmation Email
+            </button>
+        </div>
+    </form>
 </div>
 
 
@@ -1428,115 +1398,86 @@ function dismissAlert(alertElement) {
   alertElement.classList.remove('show');
   setTimeout(() => { alertElement.remove(); }, 300);
 }
+    </script>
 
-// Enhanced Delete Account Modal Logic
-document.addEventListener('DOMContentLoaded', function() {
-    const deleteModal = document.getElementById('deleteAccountModal');
-    const deleteButton = document.getElementById('deleteAccountButton');
-    const countdownElement = document.getElementById('countdown');
-    const passwordInput = document.getElementById('delete_password');
-    const confirmCheckbox = document.getElementById('confirmDeletion');
+    <script>
+
+// Delete account form handling
+function setupDeleteForm() {
     const deleteForm = document.getElementById('deleteAccountForm');
+    const confirmInput = document.getElementById('confirm_delete');
+    const passwordInput = document.getElementById('delete_password');
+    const deleteBtn = document.getElementById('deleteAccountBtn');
     
-    let countdownInterval;
-    let countdown = 10;
-    
-    // Reset modal when it's shown
-    deleteModal.addEventListener('show.bs.modal', function() {
-        resetModal();
-        startCountdown();
-    });
-    
-    // Clean up when modal is hidden
-    deleteModal.addEventListener('hidden.bs.modal', function() {
-        clearInterval(countdownInterval);
-        resetModal();
-    });
-    
-    // Check form validity when inputs change
-    [passwordInput, confirmCheckbox].forEach(input => {
-        input.addEventListener('change', checkFormValidity);
-        input.addEventListener('input', checkFormValidity);
-    });
-    
-    // Form submission with additional validation
-    deleteForm.addEventListener('submit', function(e) {
-        if (!validateForm()) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Final confirmation
-        if (!confirm('Are you absolutely sure you want to delete your account? This action cannot be undone!')) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Show loading state
-        deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Deleting...';
-        deleteButton.disabled = true;
-    });
-    
-    function resetModal() {
-        countdown = 10;
-        deleteButton.disabled = true;
-        countdownElement.textContent = countdown;
-        passwordInput.value = '';
-        confirmCheckbox.checked = false;
-        passwordInput.classList.remove('is-invalid', 'is-valid');
-        deleteButton.innerHTML = '<i class="fas fa-trash-alt me-2"></i><span id="countdown">10</span>';
+    if (!deleteForm || !confirmInput || !passwordInput || !deleteBtn) {
+        console.error("Could not find delete form elements");
+        return;
     }
     
-    function startCountdown() {
-        countdownInterval = setInterval(function() {
-            countdown--;
-            countdownElement.textContent = countdown;
-            
-            if (countdown <= 0) {
-                clearInterval(countdownInterval);
-                countdownElement.textContent = 'Delete Account';
-                checkFormValidity();
-            } else {
-                countdownElement.textContent = countdown + (countdown === 1 ? ' second' : ' seconds');
-            }
-        }, 1000);
-    }
-    
-    function checkFormValidity() {
+    function validateDeleteForm() {
+        const isConfirmValid = confirmInput.value.trim().toUpperCase() === 'DELETE';
         const isPasswordValid = passwordInput.value.length > 0;
-        const isCheckboxChecked = confirmCheckbox.checked;
-        const isCountdownFinished = countdown <= 0;
+        deleteBtn.disabled = !(isConfirmValid && isPasswordValid);
         
-        // Update password field validation styling
-        if (passwordInput.value.length > 0) {
-            passwordInput.classList.remove('is-invalid');
-            passwordInput.classList.add('is-valid');
-        } else if (passwordInput.value.length === 0 && passwordInput === document.activeElement) {
-            passwordInput.classList.add('is-invalid');
-            passwordInput.classList.remove('is-valid');
+        // Update button appearance
+        if (isConfirmValid && isPasswordValid) {
+            deleteBtn.classList.remove('btn-outline-danger');
+            deleteBtn.classList.add('btn-danger');
+        } else {
+            deleteBtn.classList.remove('btn-danger');
+            deleteBtn.classList.add('btn-outline-danger');
         }
-        
-        // Enable button only if all conditions are met
-        deleteButton.disabled = !(isPasswordValid && isCheckboxChecked && isCountdownFinished);
     }
     
-    function validateForm() {
-        let isValid = true;
+    confirmInput.addEventListener('input', validateDeleteForm);
+    passwordInput.addEventListener('input', validateDeleteForm);
+    
+    deleteForm.addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        // Validate password
-        if (passwordInput.value.trim() === '') {
-            passwordInput.classList.add('is-invalid');
-            isValid = false;
+        if (confirmInput.value.trim().toUpperCase() !== 'DELETE') {
+            showAlert('Please type "DELETE" exactly to confirm account deletion.', 'danger');
+            return;
         }
         
-        // Validate checkbox
-        if (!confirmCheckbox.checked) {
-            isValid = false;
-        }
+        const confirmed = confirm(
+            'Are you absolutely sure you want to delete your account?\n\n' +
+            'This will permanently remove all your data and cannot be undone.\n\n' +
+            'Click OK to send the confirmation email, or Cancel to abort.'
+        );
         
-        return isValid;
+        if (confirmed) {
+            this.submit();
+        }
+    });
+}
+
+function clearDeleteForm() {
+    const passwordInput = document.getElementById('delete_password');
+    const confirmInput = document.getElementById('confirm_delete');
+    const deleteBtn = document.getElementById('deleteAccountBtn');
+    
+    if (passwordInput && confirmInput && deleteBtn) {
+        passwordInput.value = '';
+        confirmInput.value = '';
+        deleteBtn.disabled = true;
+        deleteBtn.classList.remove('btn-danger');
+        deleteBtn.classList.add('btn-outline-danger');
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setupDeleteForm();
+    
+    // If security tab is active, validate form immediately
+    if (window.location.search.includes('tab=security')) {
+        const confirmInput = document.getElementById('confirm_delete');
+        if (confirmInput) {
+            confirmInput.dispatchEvent(new Event('input'));
+        }
     }
 });
-    </script>
+</script>
 </body>
 </html>
