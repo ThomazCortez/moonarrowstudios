@@ -1,6 +1,6 @@
 <?php
 // notification_functions.php - Create this as a separate file
-require '../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -41,6 +41,15 @@ function sendNotificationEmail($conn, $recipient_user_id, $type, $context_data) 
     
     if (!$sender) return false;
     
+    // Helper function to clean content for email display
+    function cleanContentForEmail($content) {
+        // Strip HTML tags and decode HTML entities
+        $cleaned = html_entity_decode(strip_tags($content), ENT_QUOTES, 'UTF-8');
+        // Remove extra whitespace and normalize line breaks
+        $cleaned = preg_replace('/\s+/', ' ', trim($cleaned));
+        return $cleaned;
+    }
+    
     // Prepare email content based on notification type
     $subject = '';
     $body = '';
@@ -58,31 +67,46 @@ function sendNotificationEmail($conn, $recipient_user_id, $type, $context_data) 
         case 'comment_post':
             $subject = 'New Comment - ' . $sender['username'] . ' commented on your post';
             $body = '<p>' . htmlspecialchars($sender['username']) . ' commented on your post:</p>';
+            
+            // Clean the comment content
+            $clean_comment = cleanContentForEmail($context_data['comment_content']);
+            $truncated_comment = substr($clean_comment, 0, 150) . (strlen($clean_comment) > 150 ? '...' : '');
+            
             $body .= '<blockquote style="background-color: #2a2a2a; padding: 15px; border-left: 4px solid #007BFF; margin: 15px 0; font-style: italic;">';
-            $body .= '"' . htmlspecialchars(substr($context_data['comment_content'], 0, 150)) . (strlen($context_data['comment_content']) > 150 ? '...' : '') . '"';
+            $body .= '"' . htmlspecialchars($truncated_comment) . '"';
             $body .= '</blockquote>';
             $button_text = 'View Comment';
-            $button_url = 'http://localhost/moonarrowstudios/php/view_comment.php?id=' . $context_data['comment_id'];
+            $button_url = 'http://localhost/moonarrowstudios/php/admin/view_comment.php?id=' . $context_data['comment_id'];
             break;
             
         case 'comment_asset':
             $subject = 'New Comment - ' . $sender['username'] . ' commented on your asset';
             $body = '<p>' . htmlspecialchars($sender['username']) . ' commented on your asset:</p>';
+            
+            // Clean the comment content
+            $clean_comment = cleanContentForEmail($context_data['comment_content']);
+            $truncated_comment = substr($clean_comment, 0, 150) . (strlen($clean_comment) > 150 ? '...' : '');
+            
             $body .= '<blockquote style="background-color: #2a2a2a; padding: 15px; border-left: 4px solid #007BFF; margin: 15px 0; font-style: italic;">';
-            $body .= '"' . htmlspecialchars(substr($context_data['comment_content'], 0, 150)) . (strlen($context_data['comment_content']) > 150 ? '...' : '') . '"';
+            $body .= '"' . htmlspecialchars($truncated_comment) . '"';
             $body .= '</blockquote>';
             $button_text = 'View Comment';
-            $button_url = 'http://localhost/moonarrowstudios/php/view_comment.php?id=' . $context_data['comment_id'];
+            $button_url = 'http://localhost/moonarrowstudios/php/admin/view_comment.php?id=' . $context_data['comment_id'];
             break;
             
         case 'reply':
             $subject = 'New Reply - ' . $sender['username'] . ' replied to your comment';
             $body = '<p>' . htmlspecialchars($sender['username']) . ' replied to your comment:</p>';
+            
+            // Clean the reply content
+            $clean_reply = cleanContentForEmail($context_data['reply_content']);
+            $truncated_reply = substr($clean_reply, 0, 150) . (strlen($clean_reply) > 150 ? '...' : '');
+            
             $body .= '<blockquote style="background-color: #2a2a2a; padding: 15px; border-left: 4px solid #007BFF; margin: 15px 0; font-style: italic;">';
-            $body .= '"' . htmlspecialchars(substr($context_data['reply_content'], 0, 150)) . (strlen($context_data['reply_content']) > 150 ? '...' : '') . '"';
+            $body .= '"' . htmlspecialchars($truncated_reply) . '"';
             $body .= '</blockquote>';
             $button_text = 'View Reply';
-            $button_url = 'http://localhost/moonarrowstudios/php/view_comment.php?id=' . $context_data['reply_id'];
+            $button_url = 'http://localhost/moonarrowstudios/php/admin/view_comment.php?id=' . $context_data['reply_id'];
             break;
     }
     

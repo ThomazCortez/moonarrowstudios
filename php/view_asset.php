@@ -4,6 +4,8 @@ session_start();
 // Database connection
 require 'db_connect.php';
 
+require_once 'notification_functions.php';
+
 // Fetch the asset by ID
 $asset_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $stmt = $conn->prepare("SELECT assets.*, asset_categories.name AS category_name, users.username, users.profile_picture 

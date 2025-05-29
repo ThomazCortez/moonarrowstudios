@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+require_once 'notification_functions.php';
+
 // Database connection
 require 'db_connect.php';
 
