@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: May 24, 2025 at 02:30 PM
+-- Generation Time: May 29, 2025 at 02:22 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -20,6 +20,26 @@ SET time_zone = "+00:00";
 --
 -- Database: `moonarrowstudios`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `account_deletions`
+--
+
+DROP TABLE IF EXISTS `account_deletions`;
+CREATE TABLE IF NOT EXISTS `account_deletions` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `token` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` datetime GENERATED ALWAYS AS ((`created_at` + interval 24 hour)) STORED,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `token` (`token`),
+  KEY `user_id` (`user_id`),
+  KEY `expires_at` (`expires_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -50,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `assets` (
   PRIMARY KEY (`id`),
   KEY `fk_posts_categories` (`category_id`),
   KEY `fk_user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=113 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=119 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `assets`
@@ -68,26 +88,17 @@ INSERT INTO `assets` (`id`, `title`, `content`, `category_id`, `hashtags`, `imag
 (85, 'favoravel', '<p>favoravel</p>', 11, '#favoravel', '[]', '2025-03-01 13:40:54', '[]', 30, 0, 0, 'uploads/previews/e6c51864a3d91796e797e764126bb6c8.500x500x1.jpg', 'uploads/assets/MC Bin Laden - Ta Tranquilo Ta Favorável (Clipe Oficial).mp3', 'published', 4, '2025-05-23 17:30:12', 0, ''),
 (88, 'c', '<p>c</p>', 12, '#c', '[\"uploads\\/images\\/sun.png\"]', '2025-03-01 14:10:38', '[]', 30, 0, 0, 'uploads/previews/a2572949485_65.jpg', 'uploads/assets/ProjetoPSILourenço12F.rar', 'published', 0, '2025-03-04 14:10:18', 0, ''),
 (90, 'VIRUS', '<p>VIRUS</p>', 6, '#virus', '[]', '2025-03-01 15:43:09', '[]', 30, 0, 0, '', 'uploads/assets/eicar_com.zip', 'published', 0, '2025-04-07 20:21:36', 1, ''),
-(92, 'ZPAX1', '<p>YES1</p>', 5, '', '[\"uploads\\/images\\/IMG_20250128_190627.jpg\",\"uploads\\/images\\/a0084845941_65.jpg\"]', '2025-03-02 11:34:46', '[]', 19, 0, 0, 'uploads/previews/gfoyUJWR_400x400.jpg', '', 'published', 3, '2025-05-14 17:44:30', 3, ''),
 (94, 'video', '<p>video</p>', 1, NULL, '[\"uploads\\/images\\/Captura de ecr\\u00e3 2024-11-30 163813.png\"]', '2025-03-04 18:30:30', '[\"uploads\\/videos\\/Roblox VR 2025.03.02 - 23.32.14.02.mp4\"]', 31, 0, 0, 'uploads/previews/Captura de ecrã 2024-11-30 163813.png', NULL, 'published', 1, '2025-04-28 21:46:24', 0, ''),
 (95, 'abc', '<p>abc</p>', 1, '#abc', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2024-12-03 191655.png\"]', '2025-03-04 18:37:36', '[\"uploads\\/videos\\/Roblox VR 2025.03.02 - 23.32.17.03.DVR.mp4\"]', 31, 0, 0, 'uploads/previews/Captura de ecrã 2024-12-03 191655.png', 'uploads/assets/Captura de ecrã 2024-12-03 191655.png', 'published', 22, '2025-05-23 11:41:07', 1, ''),
-(96, 'report', '<p>report me.</p>', 12, '#report', '[]', '2025-04-08 21:45:09', '[]', 19, 0, 0, '', 'uploads/assets/mine_obradearte.png', 'published', 50, '2025-05-21 17:40:23', 2, ''),
-(97, 'b', '<p>b</p>', 5, '#b', '[\"uploads\\/images\\/Glass_houses_icon.png\"]', '2025-05-07 17:14:56', '[]', 19, 0, 0, 'uploads/previews/Glass_houses_icon.png', 'uploads/assets/v1.png', 'published', 23, '2025-05-22 11:18:20', 1, ''),
-(98, 'animal', '<p>animal</p>', 5, '#animal', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-05-12 171632.png\"]', '2025-05-22 13:51:07', '[]', 19, 0, 0, '', 'uploads/assets/Badger[1].obj', 'published', 2, '2025-05-22 17:06:33', 0, '3d_model'),
-(99, 'animalv2', '<p>animal</p>', 5, '#abc', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-05-12 171632.png\"]', '2025-05-22 15:00:15', '[]', 19, 0, 0, '', 'uploads/assets/Badger[1].obj', 'published', 9, '2025-05-22 17:06:26', 0, ''),
-(100, 'a', '<p>a</p>', 5, '#a', '[\"uploads\\/images\\/$value[1].jpg\"]', '2025-05-22 16:33:09', '[]', 19, 0, 0, '', 'uploads/assets/Tree[1].fbx', 'published', 6, '2025-05-22 19:02:24', 0, ''),
-(101, 'tre', '<p>tre</p>', 17, '#tree', '[\"uploads\\/images\\/Glass_houses_icon.png\"]', '2025-05-22 16:40:23', '[]', 19, 0, 0, '', 'uploads/assets/Tree.glb', 'published', 15, '2025-05-22 17:06:37', 0, ''),
-(102, 'tree2', '<p>tree</p>', 5, '#tree', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-05-12 112437.png\"]', '2025-05-22 17:07:48', '[]', 19, 0, 0, '', 'uploads/assets/Tree.glb', 'published', 48, '2025-05-23 10:24:46', 0, ''),
-(103, 'animal', '<p>animal</p>', 5, '#animal', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-05-19 091350.png\"]', '2025-05-22 17:09:13', '[]', 19, 0, 0, '', 'uploads/assets/Badger[1].obj', 'published', 17, '2025-05-23 13:31:20', 0, ''),
-(104, 'car?', '<p>car? yes.</p>', 5, '#car', '[\"uploads\\/images\\/v1.png\"]', '2025-05-22 17:25:31', '[]', 19, 0, 0, '', 'uploads/assets/Pony_cartoon.obj', 'published', 8, '2025-05-23 10:18:50', 0, ''),
-(105, 'car2', '<p>car2</p>', 5, '#car', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-05-07 170959.png\"]', '2025-05-22 17:26:41', '[]', 19, 0, 0, '', 'uploads/assets/pony-cartoon.zip', 'published', 5, '2025-05-23 10:33:09', 0, ''),
-(106, 'popsicle3', '<p>popsicle</p>', 5, '#popsicle', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-05-12 171632.png\"]', '2025-05-22 18:36:20', '[]', 19, 0, 0, '', NULL, 'published', 10, '2025-05-23 09:08:59', 0, ''),
-(107, 'floor texture', '<p>floor</p>', 6, '#wood', '[\"uploads\\/images\\/WoodFloor054_1K-JPG_Color.jpg\"]', '2025-05-23 10:36:21', '[]', 19, 0, 0, '', 'uploads/assets/WoodFloor054_1K-JPG_Color.jpg', 'published', 15, '2025-05-24 13:08:11', 0, ''),
-(108, 'capoeira', '<p>capoeira</p>', 8, '#capoeira', '[\"uploads\\/images\\/WoodFloor054_1K-JPG_Color.jpg\"]', '2025-05-23 12:00:30', '[]', 19, 0, 0, '', 'uploads/assets/Capoeira.fbx', 'published', 4, '2025-05-23 12:34:53', 0, ''),
-(109, 'capoeirav2', '<p>capoeira</p>', 8, '#capoeira', '[\"uploads\\/images\\/WoodFloor054_1K-JPG_Color.jpg\"]', '2025-05-23 12:05:58', '[]', 19, 0, 0, '', 'uploads/assets/Capoeirav2.fbx', 'published', 14, '2025-05-24 13:07:48', 0, ''),
-(110, 'A Grave Soul', '<p>grave</p>', 11, '#forsaken #intense', '[\"uploads\\/images\\/Glass_houses_icon.png\"]', '2025-05-23 17:32:58', '[]', 30, 0, 0, '', 'uploads/assets/A GRAVE SOUL (NOW RUN)  Last Man Standing Theme (FORSAKEN).mp3', 'published', 23, '2025-05-24 14:06:54', 0, ''),
-(111, 'rain', '<p>rain</p>', 9, '#rain', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-05-12 112437.png\"]', '2025-05-24 13:29:11', '[]', 30, 0, 0, '', 'uploads/assets/Rain Overlay Transparent Video.mp4', 'published', 7, '2025-05-24 14:30:06', 0, ''),
-(112, 'bluu particle', '<p>blue!</p>', 15, '#particle #blue #ball', '[\"uploads\\/images\\/WoodFloor054_1K-JPG_Color.jpg\"]', '2025-05-24 14:12:41', '[]', 30, 0, 0, '', 'uploads/assets/blue particle.gif', 'published', 4, '2025-05-24 14:29:59', 0, '');
+(110, 'A Grave Soul', '<p>grave</p>', 11, '#forsaken #intense', '[\"uploads\\/images\\/Glass_houses_icon.png\"]', '2025-05-23 17:32:58', '[]', 30, 0, 0, '', 'uploads/assets/A GRAVE SOUL (NOW RUN)  Last Man Standing Theme (FORSAKEN).mp3', 'published', 26, '2025-05-28 09:09:30', 0, ''),
+(111, 'rain', '<p>rain</p>', 9, '#rain', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-05-12 112437.png\"]', '2025-05-24 13:29:11', '[]', 30, 0, 0, '', 'uploads/assets/Rain Overlay Transparent Video.mp4', 'published', 8, '2025-05-24 18:07:39', 0, ''),
+(112, 'bluu particle', '<p>blue!</p>', 15, '#particle #blue #ball', '[\"uploads\\/images\\/WoodFloor054_1K-JPG_Color.jpg\"]', '2025-05-24 14:12:41', '[]', 30, 0, 0, '', 'uploads/assets/blue particle.gif', 'published', 6, '2025-05-26 10:47:15', 0, ''),
+(113, 'Sprite?', '<p>Sprite.</p>', 1, '#sprite', '[\"uploads\\/images\\/Field-Enemies-Game-Sprite-Sheets-Pixel-Art3.png\"]', '2025-05-26 10:53:50', '[]', 30, 0, 0, 'uploads/previews/Field-Enemies-Game-Sprite-Sheets-Pixel-Art3.png', 'uploads/assets/Field-Enemies-Game-Sprite-Sheets-Pixel-Art3.png', 'published', 4, '2025-05-28 22:08:28', 0, ''),
+(114, 'Ultrakill Font', '<p>So cool</p>', 17, '#ultrakill', '[\"uploads\\/images\\/v1.png\"]', '2025-05-26 11:04:26', '[]', 30, 0, 0, '', 'uploads/assets/VCR_OSD_MONO_1.001.ttf', 'published', 6, '2025-05-26 13:55:25', 0, ''),
+(115, 'a', '<p>a</p>', 1, '#a', '[]', '2025-05-26 11:13:04', '[]', 30, 0, 0, '', 'uploads/assets/Glass_houses_icon.png', 'published', 1, '2025-05-26 11:13:06', 0, ''),
+(116, 'wolf', '<p>wolf</p>', 8, '', '[]', '2025-05-26 11:19:51', '[]', 30, 0, 0, '', 'uploads/asset_files/Wolf-Blender-2.82a.fbx', 'published', 13, '2025-05-26 12:38:04', 0, ''),
+(117, 'samba', '<p>samba</p>', 8, '#samba', '[]', '2025-05-26 11:32:32', '[]', 30, 0, 0, '', 'uploads/assets/Samba Dancing.fbx', 'published', 9, '2025-05-27 00:10:17', 0, ''),
+(118, 'ultrakill v2 test', '<p>yes</p>', 17, '#ultrakill', '[]', '2025-05-26 13:56:15', '[]', 30, 0, 0, '', 'uploads/assets/VCR_OSD_MONO_1.001.ttf', 'published', 8, '2025-05-28 22:08:35', 0, '');
 
 -- --------------------------------------------------------
 
@@ -206,7 +217,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   KEY `post_id` (`post_id`),
   KEY `user_id` (`user_id`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `comments`
@@ -281,7 +292,11 @@ INSERT INTO `comments` (`id`, `post_id`, `user_id`, `content`, `created_at`, `pa
 (80, 84, 19, '<p>b</p>', '2025-05-22 11:45:12', NULL, 1, 0, 'published', 0, '2025-05-22 10:51:00'),
 (81, 84, 19, '<p>c</p>', '2025-05-22 11:46:28', NULL, 0, 0, 'published', 0, '2025-05-22 10:46:28'),
 (82, 84, 19, '<p>d</p>', '2025-05-22 11:46:59', NULL, 0, 0, 'published', 0, '2025-05-22 10:46:59'),
-(83, 84, 19, '<p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p>a</p>', '2025-05-22 11:50:13', NULL, 0, 0, 'published', 0, '2025-05-22 10:50:13');
+(83, 84, 19, '<p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><p>a</p>', '2025-05-22 11:50:13', NULL, 0, 0, 'published', 0, '2025-05-22 10:50:13'),
+(84, 84, 30, '<p>do you play fortnite</p>', '2025-05-26 18:24:13', NULL, 0, 0, 'published', 0, '2025-05-26 17:24:13'),
+(85, 84, 30, '<p>do you play fortnite</p>', '2025-05-26 18:24:13', NULL, 0, 0, 'published', 0, '2025-05-26 17:24:13'),
+(86, 84, 32, '<p>hi bro</p>', '2025-05-29 13:01:25', NULL, 0, 0, 'published', 0, '2025-05-29 12:01:25'),
+(87, 81, 32, '<p>a</p>', '2025-05-29 13:42:14', NULL, 0, 0, 'published', 0, '2025-05-29 12:42:14');
 
 -- --------------------------------------------------------
 
@@ -390,6 +405,30 @@ INSERT INTO `comment_votes` (`id`, `user_id`, `comment_id`, `vote_type`, `create
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `email_changes`
+--
+
+DROP TABLE IF EXISTS `email_changes`;
+CREATE TABLE IF NOT EXISTS `email_changes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `new_email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `token` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `email_changes`
+--
+
+INSERT INTO `email_changes` (`id`, `user_id`, `new_email`, `token`, `created_at`) VALUES
+(1, 33, 'colortest12345@gmail.com', '15dc907398954e58c5715af2c2275c1caf6b9c8bbb2ccb2434143a732914b7a0', '2025-05-28 18:10:13'),
+(2, 30, 'thomazcfb@gmail.com', '5c2ecbe1979ddb1c0c81632b477dab430c51a34dec9c32ac87d6a418e8ca26ab', '2025-05-28 18:27:39');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `follows`
 --
 
@@ -408,10 +447,12 @@ CREATE TABLE IF NOT EXISTS `follows` (
 
 INSERT INTO `follows` (`follower_id`, `following_id`, `created_at`) VALUES
 (19, 19, '2025-05-18 13:17:54'),
-(19, 30, '2025-05-18 13:25:24'),
+(19, 30, '2025-05-27 09:19:30'),
 (30, 19, '2025-05-06 00:09:09'),
 (31, 19, '2025-04-29 09:25:47'),
-(31, 30, '2025-04-28 23:11:56');
+(31, 30, '2025-04-28 23:11:56'),
+(32, 30, '2025-05-29 11:17:43'),
+(33, 30, '2025-05-29 11:11:24');
 
 -- --------------------------------------------------------
 
@@ -424,35 +465,42 @@ CREATE TABLE IF NOT EXISTS `password_resets` (
   `id` int NOT NULL AUTO_INCREMENT,
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `purpose` enum('reset','change') COLLATE utf8mb4_general_ci DEFAULT 'reset',
+  `new_password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `email` (`email`(250)),
   KEY `token` (`token`),
   KEY `fk_password_resets_users` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `password_resets`
 --
 
-INSERT INTO `password_resets` (`id`, `email`, `token`, `created_at`) VALUES
-(10, 'thomazbarrago@gmail.com', '0af739ae0fe3ec98bfe742fc8b4525258b8779205aa4a86b06552478c05e573e', '2024-12-01 23:01:27'),
-(11, 'thomazbarrago@gmail.com', 'e145eac2b2de24d005f233c4686ee448456d009165acfd9c9228f05408af3505', '2024-12-01 23:04:21'),
-(15, 'thomazbarrago@gmail.com', '7b61562f9131790435631e01dd39aca37a6eb28c326424ca3767980f1416d5af', '2024-12-01 23:28:37'),
-(16, 'thomazbarrago@gmail.com', '0a0654ef25cae8794567f82d67ca5a55e4536a971cbe1213352cf7c1a379d976', '2024-12-01 23:29:06'),
-(17, 'thomazbarrago@gmail.com', '2d8a1b4f61fa1f24905575b4ec1c8c41fe29981a5fbc5300d9b77ee1419a6e1b', '2024-12-01 23:29:54'),
-(18, 'thomazbarrago@gmail.com', 'd9c1675b966781192c31ee253e0ba1adc720715cdb3414e57c2ba0580a40d1c8', '2024-12-01 23:30:19'),
-(19, 'a30743@aemtg.pt', '605ca4715ff8dbf80b6fdac4544ee8fbce088b930089908200bfe03ebe3c5654', '2024-12-01 23:33:16'),
-(22, 'thomazbarrago@gmail.com', 'c6a32518530b2ac0006b7a554f21cab8202087aa84e2e2cb5a61376ecbcd3a7b', '2024-12-28 22:59:48'),
-(23, 'thomazbarrago@gmail.com', '468a14e250b4aa11e3d0bb2114e7f62d780c987d3f36109066932320e3db5995', '2024-12-28 23:04:41'),
-(24, 'thomazbarrago@gmail.com', 'ff3145bafa98deab10ddf6e74de674f83b2cbbf91221275548fb29b54805e5d4', '2024-12-28 23:05:39'),
-(27, 'a30743@aemtg.pt', 'f184962eb5a8322a557962877e8baf9d3b64a059c69f1815274e332bcfbd729c', '2024-12-30 19:27:44'),
-(28, 'thomazbarrago@gmail.com', '87030be9dadf773218f8bd259a900391b059cae417480ce50dce0810ad02c5be', '2024-12-30 22:28:34'),
-(29, 'thomazbarrago@gmail.com', '4f3b22a80b42e7aeeb10b8e54b5fb0fdb73fcb196f8aaa20699d4a1431ed09dd', '2024-12-30 23:10:27'),
-(36, 'thomazbarrago@gmail.com', 'ace925ed753623095ff4776ee8c02cd703b1ac60ed3a4250316b04a41d937a14', '2025-01-21 22:36:54'),
-(38, 'thomazbarrago@gmail.com', '056f30712a7bde03b0edcec9a1234a0109547e97d2273e7f561185bbd0b93bfd', '2025-01-23 22:56:37'),
-(40, 'thomazbarrago@gmail.com', '0974ea1a407dbdf8957ea77bdbf053266fbde0315eb18b4a924aa7cb98eb1451', '2025-01-26 23:33:43'),
-(41, 'thomazbarrago@gmail.com', '99cae380671e56b4b9743b9bd3baa42c9bb5a2db4c67f99dea91a407cda125f8', '2025-01-26 23:36:13');
+INSERT INTO `password_resets` (`id`, `email`, `token`, `purpose`, `new_password`, `created_at`) VALUES
+(10, 'thomazbarrago@gmail.com', '0af739ae0fe3ec98bfe742fc8b4525258b8779205aa4a86b06552478c05e573e', 'reset', NULL, '2024-12-01 23:01:27'),
+(11, 'thomazbarrago@gmail.com', 'e145eac2b2de24d005f233c4686ee448456d009165acfd9c9228f05408af3505', 'reset', NULL, '2024-12-01 23:04:21'),
+(15, 'thomazbarrago@gmail.com', '7b61562f9131790435631e01dd39aca37a6eb28c326424ca3767980f1416d5af', 'reset', NULL, '2024-12-01 23:28:37'),
+(16, 'thomazbarrago@gmail.com', '0a0654ef25cae8794567f82d67ca5a55e4536a971cbe1213352cf7c1a379d976', 'reset', NULL, '2024-12-01 23:29:06'),
+(17, 'thomazbarrago@gmail.com', '2d8a1b4f61fa1f24905575b4ec1c8c41fe29981a5fbc5300d9b77ee1419a6e1b', 'reset', NULL, '2024-12-01 23:29:54'),
+(18, 'thomazbarrago@gmail.com', 'd9c1675b966781192c31ee253e0ba1adc720715cdb3414e57c2ba0580a40d1c8', 'reset', NULL, '2024-12-01 23:30:19'),
+(22, 'thomazbarrago@gmail.com', 'c6a32518530b2ac0006b7a554f21cab8202087aa84e2e2cb5a61376ecbcd3a7b', 'reset', NULL, '2024-12-28 22:59:48'),
+(23, 'thomazbarrago@gmail.com', '468a14e250b4aa11e3d0bb2114e7f62d780c987d3f36109066932320e3db5995', 'reset', NULL, '2024-12-28 23:04:41'),
+(24, 'thomazbarrago@gmail.com', 'ff3145bafa98deab10ddf6e74de674f83b2cbbf91221275548fb29b54805e5d4', 'reset', NULL, '2024-12-28 23:05:39'),
+(28, 'thomazbarrago@gmail.com', '87030be9dadf773218f8bd259a900391b059cae417480ce50dce0810ad02c5be', 'reset', NULL, '2024-12-30 22:28:34'),
+(29, 'thomazbarrago@gmail.com', '4f3b22a80b42e7aeeb10b8e54b5fb0fdb73fcb196f8aaa20699d4a1431ed09dd', 'reset', NULL, '2024-12-30 23:10:27'),
+(36, 'thomazbarrago@gmail.com', 'ace925ed753623095ff4776ee8c02cd703b1ac60ed3a4250316b04a41d937a14', 'reset', NULL, '2025-01-21 22:36:54'),
+(38, 'thomazbarrago@gmail.com', '056f30712a7bde03b0edcec9a1234a0109547e97d2273e7f561185bbd0b93bfd', 'reset', NULL, '2025-01-23 22:56:37'),
+(40, 'thomazbarrago@gmail.com', '0974ea1a407dbdf8957ea77bdbf053266fbde0315eb18b4a924aa7cb98eb1451', 'reset', NULL, '2025-01-26 23:33:43'),
+(41, 'thomazbarrago@gmail.com', '99cae380671e56b4b9743b9bd3baa42c9bb5a2db4c67f99dea91a407cda125f8', 'reset', NULL, '2025-01-26 23:36:13'),
+(46, 'thomazbarrago@gmail.com', 'f1fb8e14e3e8d7ec9d0893c1e74f6b28d7674e16b0309f0604fe060e4683c3df', 'reset', NULL, '2025-05-28 17:32:45'),
+(47, 'thomazbarrago@gmail.com', 'cff16cc6bf89a46733f23fe3666f7680d8bf083b2716a64093e10f53cba4793e', 'reset', NULL, '2025-05-28 17:37:32'),
+(48, 'thomazbarrago@gmail.com', '42403e23bbb19c0657542b750d6889128f0c32b2e810781c0b366fcc6b7ec9de', 'change', '$2y$10$lbLens6qGD/camFI4R4nO.TBgHSBEQV8XC9pewsyHjHB/xJDniCmG', '2025-05-28 17:58:25'),
+(49, 'thomazbarrago@gmail.com', '24290543d3f056ac603fcfa10c142d44a6d42320f54a80c44a754109c80ae392', 'change', '$2y$10$SsHcanf4ITHH0ioARk2TaumqnlL.Snr6bpdS9Ut.yRNbiNB53n0/.', '2025-05-28 17:58:36'),
+(50, 'thomazbarrago@gmail.com', '9af79d174af9303578761fe152b2ae58dd13ec919eb5534783794beaffdcacc1', 'change', '$2y$10$R1.PQck8PE9V2sbDxCNfx.z3YuivJfijfjO27rTrufff2w5yEP2Gu', '2025-05-28 17:58:53'),
+(51, 'thomazbarrago@gmail.com', '4ab3a3bb18f2af00606bb9f1900b87b3d6d98c9319721bc9f9d4848b532c376f', 'change', '$2y$10$b2qaP97HpjVCB793VPEvXOFcYunFaOavQpgL9voxVg0EGNEmLqEVm', '2025-05-28 17:59:05'),
+(52, 'thomazbarrago@gmail.com', '2ee384d917caa027a826834af744cf61586b102e439b63b0fa23331ef53463a9', 'change', '$2y$10$VtJyt.RRnx.EgT0XoquQ6OlYtq74LKJxGVsKMylse7TshudRROxs.', '2025-05-28 18:04:19');
 
 -- --------------------------------------------------------
 
@@ -496,13 +544,13 @@ INSERT INTO `posts` (`id`, `title`, `content`, `category_id`, `hashtags`, `image
 (76, 'bla', '<p>blabla</p>', 21, '#blablabla', '[]', '2025-03-03 20:20:27', '[]', 31, 0, 0, 'published', 1, '2025-03-04 15:13:53', 0),
 (77, 'a', '<p>a</p>', 14, '#a', '[\"uploads\\/images\\/vfx.png\"]', '2025-03-04 15:14:24', '[]', 31, 0, 0, 'published', 2, '2025-05-06 13:04:23', 0),
 (78, 'image', '<p>image</p>', 5, '#image', '[\"uploads\\/images\\/coding-background-9izlympnd0ovmpli.jpg\"]', '2025-03-04 18:04:38', '[]', 31, 0, 0, 'published', 14, '2025-05-05 18:30:50', 1),
-(79, 'video', '<p>video</p>', 20, '#bideo', '[]', '2025-03-04 18:10:34', '[\"uploads\\/videos\\/GABRIEL.mp4\"]', 31, 0, 0, 'published', 120, '2025-05-20 09:34:47', 9),
+(79, 'video', '<p>video</p>', 20, '#bideo', '[]', '2025-03-04 18:10:34', '[\"uploads\\/videos\\/GABRIEL.mp4\"]', 31, 0, 0, 'published', 121, '2025-05-26 12:43:30', 9),
 (80, 'post1', '<p>tes</p>', 16, '#abc', '[]', '2025-04-21 23:18:32', '[]', 19, 0, 0, 'published', 70, '2025-05-17 16:23:50', 0),
-(81, 'abc', '<p>abc</p>', 14, '#a', '[]', '2025-05-07 17:05:41', '[]', 30, 0, 0, 'published', 40, '2025-05-23 11:35:30', 0),
-(82, 'Video Dark', '<p>Don\'t report please</p>', 1, '#kit #escola #d4rk', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-05-12 171632.png\"]', '2025-05-20 09:35:40', '[]', 19, 0, 0, 'published', 38, '2025-05-23 17:18:26', 0),
+(81, 'abc', '<p>abc</p>', 14, '#a', '[]', '2025-05-07 17:05:41', '[]', 30, 0, 0, 'published', 46, '2025-05-29 12:42:11', 0),
+(82, 'Video Dark', '<p>Don\'t report please</p>', 1, '#kit #escola #d4rk', '[\"uploads\\/images\\/Captura de ecr\\u00e3 2025-05-12 171632.png\"]', '2025-05-20 09:35:40', '[]', 19, 1, 0, 'published', 43, '2025-05-26 13:49:13', 0),
 (83, 'Shortest video on MoonArrow Studios', '<p>KITTY</p>', 20, '#as', '[]', '2025-05-20 10:56:41', '[\"uploads\\/videos\\/Shortest Video on Youtube.mp4\"]', 19, 0, 0, 'published', 16, '2025-05-21 17:17:53', 0),
-(84, 'hi', '<p>hi</p>', 17, '#hi', '[]', '2025-05-21 17:21:32', '[]', 30, 0, 0, 'published', 22, '2025-05-23 10:05:30', 2),
-(85, 'q', '<p>q</p>', 18, '#q', '[]', '2025-05-22 10:51:37', '[]', 19, 0, 0, 'published', 4, '2025-05-24 13:17:28', 0);
+(84, 'hi', '<p>hi</p>', 17, '#hi', '[]', '2025-05-21 17:21:32', '[]', 30, 0, 0, 'published', 35, '2025-05-29 12:04:45', 2),
+(85, 'q', '<p>q</p>', 18, '#q', '[]', '2025-05-22 10:51:37', '[]', 19, 1, 0, 'published', 18, '2025-05-28 14:56:34', 0);
 
 -- --------------------------------------------------------
 
@@ -519,7 +567,7 @@ CREATE TABLE IF NOT EXISTS `post_votes` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`post_id`),
   KEY `post_id` (`post_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=120 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `post_votes`
@@ -534,7 +582,9 @@ INSERT INTO `post_votes` (`id`, `user_id`, `post_id`, `vote_type`) VALUES
 (102, 19, 54, 'upvote'),
 (103, 30, 52, 'upvote'),
 (105, 30, 66, 'upvote'),
-(108, 31, 74, 'upvote');
+(108, 31, 74, 'upvote'),
+(121, 30, 85, 'upvote'),
+(122, 30, 82, 'upvote');
 
 -- --------------------------------------------------------
 
@@ -661,6 +711,12 @@ CREATE TABLE IF NOT EXISTS `users` (
   `github` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `portfolio` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `reported_count` int NOT NULL DEFAULT '0',
+  `follow_notifications` tinyint(1) NOT NULL DEFAULT '1',
+  `asset_comment_notifications` tinyint(1) NOT NULL DEFAULT '1',
+  `reply_notifications` tinyint(1) NOT NULL DEFAULT '1',
+  `notification_frequency` enum('instant','hourly','daily','weekly') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'instant',
+  `email_updates` tinyint(1) NOT NULL DEFAULT '1',
+  `comment_notifications` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
@@ -670,18 +726,23 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `created_at`, `profile_picture`, `banner`, `description`, `status`, `youtube`, `linkedin`, `twitter`, `instagram`, `github`, `portfolio`, `reported_count`) VALUES
-(19, 'a30743', 'a30743@aemtg.pt', '$2y$10$749e3jGeEI1/WaUcokVT3OmPEogIU6evldHMSOUdDK16Y9Su9CeDa', 'user', '2024-12-30 18:01:09', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_19_1745193530.png', '\\moonarrowstudios\\uploads\\banners\\banner_19.png', 'HI!', 'active', 'https://www.youtube.com/user/SirKazzio', '', 'https://x.com/sirkazzio', '', '', '', 3),
-(24, 'teste123', 'exemple123123@gmail.com', '$2y$10$UhnjQ/wurSX0ImzToLpZ2eZRpsWGaVmNVcdsAwZpEjfb9B0U9pkDa', 'user', '2024-12-30 22:58:12', NULL, NULL, NULL, 'active', NULL, NULL, NULL, NULL, NULL, NULL, 0),
-(27, 'usertest123', 'usertest@gmail.com', '$2y$10$Y3uiX24QwkjOkJfYc8xM1emMGCB1FFs6bzEUttd/aEajAXxm2.fwS', 'user', '2025-01-21 22:27:42', NULL, NULL, NULL, 'active', NULL, NULL, NULL, NULL, NULL, NULL, 0),
-(30, 'Thomaz123', 'thomazbarrago@gmail.com', '$2y$10$XzPrea2kogbMOXtA2q52HuTHd5n.fTdBfVLAtxlePQIf5UU8nmkyy', 'admin', '2025-01-23 20:59:54', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_30_1746463019.png', '\\moonarrowstudios\\uploads\\banners\\banner_30_1746463019.png', 'Welcome to my profile!!!', 'active', '', '', '', '', '', '', 0),
-(31, 'moonarrowstudios', 'moonarrowstudios@gmail.com', '$2y$10$IABFpbOSzkTphuW2qAYd2OhgM/G.YgQuzEU0E80bs3L8cNC.kPC4y', 'admin', '2025-03-02 16:53:11', NULL, NULL, 'Hello and welcome to MoonArrow Studios!', 'active', '', '', '', '', 'https://github.com/ThomazCortez', 'http://localhost/moonarrowstudios', 3),
-(32, 'SirKazzio', 'sirkazzio@gmail.com', '$2y$10$/hRiWV6MlvEb1SF4niQS5.BUmOaEIXvXEaAhDCphMDG1zKfVzeGUe', 'user', '2025-04-25 13:07:38', NULL, NULL, NULL, 'active', NULL, NULL, NULL, NULL, NULL, NULL, 0),
-(33, 'colortest', 'colortest@gmail.com', '$2y$10$aX9qRhTuo7EnchffeCMDZuYXPRIKhdqYlKfRGQmSOVul8KciSxd8q', 'user', '2025-05-22 12:44:33', NULL, NULL, NULL, 'active', NULL, NULL, NULL, NULL, NULL, NULL, 0);
+INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `created_at`, `profile_picture`, `banner`, `description`, `status`, `youtube`, `linkedin`, `twitter`, `instagram`, `github`, `portfolio`, `reported_count`, `follow_notifications`, `asset_comment_notifications`, `reply_notifications`, `notification_frequency`, `email_updates`, `comment_notifications`) VALUES
+(24, 'teste123', 'exemple123123@gmail.com', '$2y$10$UhnjQ/wurSX0ImzToLpZ2eZRpsWGaVmNVcdsAwZpEjfb9B0U9pkDa', 'user', '2024-12-30 22:58:12', NULL, NULL, NULL, 'active', NULL, NULL, NULL, NULL, NULL, NULL, 0, 1, 1, 1, 'instant', 1, 1),
+(27, 'usertest123', 'usertest@gmail.com', '$2y$10$Y3uiX24QwkjOkJfYc8xM1emMGCB1FFs6bzEUttd/aEajAXxm2.fwS', 'user', '2025-01-21 22:27:42', NULL, NULL, NULL, 'active', NULL, NULL, NULL, NULL, NULL, NULL, 0, 1, 1, 1, 'instant', 1, 1),
+(30, 'Thomaz123', 'thomazbarrago@gmail.com', '$2y$10$UTOy9vxpjWKVoh8fb8osjewCbbj0QHQ6RUTl0MfTGA73WB47FLt36', 'admin', '2025-01-23 20:59:54', '\\moonarrowstudios\\uploads\\profile_pictures\\profile_30_1746463019.png', '\\moonarrowstudios\\uploads\\banners\\banner_30_1746463019.png', 'Welcome to my profile!!!', 'active', '', '', '', '', '', '', 0, 1, 1, 1, 'instant', 1, 1),
+(31, 'moonarrowstudios', 'moonarrowstudios@gmail.com', '$2y$10$IABFpbOSzkTphuW2qAYd2OhgM/G.YgQuzEU0E80bs3L8cNC.kPC4y', 'admin', '2025-03-02 16:53:11', NULL, NULL, 'Hello and welcome to MoonArrow Studios!', 'active', '', '', '', '', 'https://github.com/ThomazCortez', 'http://localhost/moonarrowstudios', 3, 1, 1, 1, 'instant', 1, 1),
+(32, 'SirKazzio', 'sirkazzio@gmail.com', '$2y$10$/hRiWV6MlvEb1SF4niQS5.BUmOaEIXvXEaAhDCphMDG1zKfVzeGUe', 'user', '2025-04-25 13:07:38', NULL, NULL, NULL, 'active', NULL, NULL, NULL, NULL, NULL, NULL, 0, 1, 1, 1, 'instant', 1, 1),
+(33, 'colortest', 'colortest@gmail.com', '$2y$10$aX9qRhTuo7EnchffeCMDZuYXPRIKhdqYlKfRGQmSOVul8KciSxd8q', 'user', '2025-05-22 12:44:33', NULL, NULL, NULL, 'active', NULL, NULL, NULL, NULL, NULL, NULL, 0, 1, 1, 1, 'instant', 1, 1);
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `account_deletions`
+--
+ALTER TABLE `account_deletions`
+  ADD CONSTRAINT `account_deletions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `assets`
