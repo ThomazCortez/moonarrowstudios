@@ -672,12 +672,15 @@ if (isset($_GET['tab'])) {
 
         .social-icon {
             position: absolute;
+            top: 0;
+            bottom: 0;
             left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #adb5bd;
             font-size: 1.2rem;
-            z-index: 10;
+            pointer-events: none;
         }
 
         /* Image upload improvements */
@@ -880,6 +883,88 @@ if (isset($_GET['tab'])) {
     color: #7dd3fc;
   }
 }
+
+/* Card hover effect styles */
+.settings-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform: translateZ(0);
+    will-change: transform;
+    border: 1px solid transparent;
+}
+
+.settings-card::before,
+.settings-card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(88, 166, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+}
+
+.settings-card::before {
+    top: 0;
+    transform: translateX(-105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.settings-card::after {
+    bottom: 0;
+    transform: translateX(105%);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.settings-card:hover {
+    box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
+                0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(88, 166, 255, 0.3) !important;
+}
+
+.settings-card:hover::before,
+.settings-card:hover::after {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.settings-card-body {
+    position: relative;
+    z-index: 1;
+}
+
+.settings-card-body::before,
+.settings-card-body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: rgba(88, 166, 255, 0.3);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    opacity: 0;
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+}
+
+.settings-card-body::before {
+    left: 0;
+    transform: translateY(105%);
+}
+
+.settings-card-body::after {
+    right: 0;
+    transform: translateY(-105%);
+}
+
+.settings-card:hover .card-body::before,
+.settings-card:hover .card-body::after {
+    transform: translateY(0);
+    opacity: 1;
+}
     </style>
 </head>
 <body>
@@ -988,53 +1073,73 @@ if (isset($_GET['tab'])) {
                                 </div>
                                 
                                 <h4 class="mb-4"><i class="fas fa-link me-2"></i> Social Links</h4>
-                                <div class="row g-3">
+                                    <div class="row g-3">
                                     <div class="col-md-6">
-                                        <div class="mb-3 social-input-group">
-                                            <label for="twitter" class="form-label">Twitter</label>
-                                            <i class="fab fa-twitter social-icon"></i>
-                                            <input type="text" class="form-control" id="twitter" name="twitter" placeholder="Your Twitter username" value="<?= htmlspecialchars($user['twitter'] ?? '') ?>">
+                                        <div class="mb-3">
+                                        <label for="twitter" class="form-label">Twitter</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fab fa-twitter"></i></span>
+                                            <input type="url" id="twitter" name="twitter" class="form-control" placeholder="https://twitter.com/yourhandle"
+                                            value="<?= htmlspecialchars($user['twitter'] ?? '') ?>">
+                                        </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3 social-input-group">
-                                            <label for="instagram" class="form-label">Instagram</label>
-                                            <i class="fab fa-instagram social-icon"></i>
-                                            <input type="text" class="form-control" id="instagram" name="instagram" placeholder="Your Instagram username" value="<?= htmlspecialchars($user['instagram'] ?? '') ?>">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3 social-input-group">
-                                            <label for="youtube" class="form-label">YouTube</label>
-                                            <i class="fab fa-youtube social-icon"></i>
-                                            <input type="text" class="form-control" id="youtube" name="youtube" 
-                                                placeholder="Your YouTube channel" value="<?= htmlspecialchars($user['youtube'] ?? '') ?>">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3 social-input-group">
-                                            <label for="linkedin" class="form-label">LinkedIn</label>
-                                            <i class="fab fa-linkedin social-icon"></i>
-                                            <input type="text" class="form-control" id="linkedin" name="linkedin" 
-                                                placeholder="Your LinkedIn profile" value="<?= htmlspecialchars($user['linkedin'] ?? '') ?>">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3 social-input-group">
-                                            <label for="github" class="form-label">GitHub</label>
-                                            <i class="fab fa-github social-icon"></i>
-                                            <input type="text" class="form-control" id="github" name="github" placeholder="Your GitHub username" value="<?= htmlspecialchars($user['github'] ?? '') ?>">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3 social-input-group">
-                                            <label for="portfolio" class="form-label">Portfolio/Website</label>
-                                            <i class="fas fa-globe social-icon"></i>
-                                            <input type="text" class="form-control" id="portfolio" name="portfolio" placeholder="https://your-website.com" value="<?= htmlspecialchars($user['portfolio'] ?? '') ?>">
-                                        </div>
-                                    </div>
-                                </div>
 
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                        <label for="instagram" class="form-label">Instagram</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fab fa-instagram"></i></span>
+                                            <input type="url" id="instagram" name="instagram" class="form-control" placeholder="https://instagram.com/yourhandle"
+                                            value="<?= htmlspecialchars($user['instagram'] ?? '') ?>">
+                                        </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                        <label for="youtube" class="form-label">YouTube</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fab fa-youtube"></i></span>
+                                            <input type="url" id="youtube" name="youtube" class="form-control" placeholder="https://youtube.com/@yourchannel"
+                                            value="<?= htmlspecialchars($user['youtube'] ?? '') ?>">
+                                        </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                        <label for="linkedin" class="form-label">LinkedIn</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fab fa-linkedin"></i></span>
+                                            <input type="url" id="linkedin" name="linkedin" class="form-control" placeholder="https://linkedin.com/in/yourprofile"
+                                            value="<?= htmlspecialchars($user['linkedin'] ?? '') ?>">
+                                        </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                        <label for="github" class="form-label">GitHub</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fab fa-github"></i></span>
+                                            <input type="url" id="github" name="github" class="form-control" placeholder="https://github.com/yourusername"
+                                            value="<?= htmlspecialchars($user['github'] ?? '') ?>">
+                                        </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                        <label for="portfolio" class="form-label">Portfolio/Website</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                            <input type="url" id="portfolio" name="portfolio" class="form-control" placeholder="https://your-website.com"
+                                            value="<?= htmlspecialchars($user['portfolio'] ?? '') ?>">
+                                        </div>
+                                        </div>
+                                    </div>
+                                    </div>
                                 <div class="mt-4 text-end">
                                     <button type="submit" class="btn btn-primary btn-save">
                                         <i class="fas fa-save me-2"></i> Save Profile Changes
@@ -1449,28 +1554,6 @@ if (isset($_GET['tab'])) {
                 showAlert('Password must be at least 8 characters long!', 'warning');
             }
         });
-
-        document.addEventListener('DOMContentLoaded', function() {
-    function positionSocialIcons() {
-        document.querySelectorAll('.social-icon').forEach(icon => {
-            const input = icon.nextElementSibling;
-            if (input && input.classList.contains('form-control')) {
-                const group = icon.closest('.social-input-group');
-                const label = group.querySelector('.form-label');
-                const labelHeight = label.offsetHeight + parseInt(window.getComputedStyle(label).marginBottom);
-                const inputHeight = input.offsetHeight;
-                icon.style.top = `${labelHeight + (inputHeight / 2)}px`;
-                icon.style.transform = 'translateY(-50%)';
-            }
-        });
-    }
-
-    // Initial positioning
-    positionSocialIcons();
-    
-    // Reposition on window resize
-    window.addEventListener('resize', positionSocialIcons);
-});
 
 // Alert Functions
 function showAlert(message, type = 'info') {
