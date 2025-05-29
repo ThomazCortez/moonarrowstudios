@@ -9,8 +9,22 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Initialize empty success message
+// Initialize messages
 $success_message = '';
+$error_message = '';
+
+// Check for session messages (from redirects)
+if (isset($_SESSION['success_message']) && !empty($_SESSION['success_message'])) {
+    $success_message = $_SESSION['success_message'];
+    // Clear the session message immediately after reading
+    unset($_SESSION['success_message']);
+}
+
+if (isset($_SESSION['error_message']) && !empty($_SESSION['error_message'])) {
+    $error_message = $_SESSION['error_message'];
+    // Clear the session message immediately after reading
+    unset($_SESSION['error_message']);
+}
 
 // Load PHPMailer if needed
 $phpmailer_loaded = false;
@@ -878,7 +892,7 @@ if (isset($_GET['tab'])) {
             });
         <?php endif; ?>
 
-        <?php if (isset($error_message)): ?>
+        <?php if (!empty($error_message)): ?>
             document.addEventListener('DOMContentLoaded', function() {
                 showAlert(<?= json_encode($error_message) ?>, 'danger');
             });
@@ -1460,6 +1474,8 @@ if (isset($_GET['tab'])) {
 
 // Alert Functions
 function showAlert(message, type = 'info') {
+// Guard against empty messages
+if (!message || message.trim() === '') return;
   const alertContainer = document.getElementById('alertContainer');
   const alertElement = document.createElement('div');
   alertElement.className = `custom-alert custom-alert-${type}`;
