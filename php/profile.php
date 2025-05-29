@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'db_connect.php';
+include 'notification_functions.php';
 
 // Get user ID from URL or session
 $user_id = isset($_GET['id']) ? (int)$_GET['id'] : ($_SESSION['user_id'] ?? null);
@@ -180,6 +181,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in && !$viewing_own_prof
         $stmt = $conn->prepare("INSERT IGNORE INTO follows (follower_id, following_id) VALUES (?, ?)");
         $stmt->bind_param("ii", $_SESSION['user_id'], $user_id);
         $stmt->execute();
+
+        // Send notification
+        notifyNewFollower($conn, $_SESSION['user_id'], $user_id);
+        
     } elseif (isset($_POST['unfollow'])) {
         $stmt = $conn->prepare("DELETE FROM follows WHERE follower_id = ? AND following_id = ?");
         $stmt->bind_param("ii", $_SESSION['user_id'], $user_id);

@@ -430,14 +430,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // Handle Notification Settings Updates
+    // Handle Notification Settings Updates (Updated version)
     elseif (isset($_POST['action']) && $_POST['action'] === 'update_notifications') {
         $email_updates = isset($_POST['email_updates']) ? 1 : 0;
+        $follow_notifications = isset($_POST['follow_notifications']) ? 1 : 0;
         $comment_notifications = isset($_POST['comment_notifications']) ? 1 : 0;
-        $message_notifications = isset($_POST['message_notifications']) ? 1 : 0;
+        $asset_comment_notifications = isset($_POST['asset_comment_notifications']) ? 1 : 0;
+        $reply_notifications = isset($_POST['reply_notifications']) ? 1 : 0;
+        $notification_frequency = $_POST['notification_frequency'];
         
-        $stmt = $conn->prepare("UPDATE users SET email_updates = ?, comment_notifications = ?, message_notifications = ? WHERE user_id = ?");
-        $stmt->bind_param("iiii", $email_updates, $comment_notifications, $message_notifications, $user_id);
+        $stmt = $conn->prepare("UPDATE users SET email_updates = ?, follow_notifications = ?, comment_notifications = ?, asset_comment_notifications = ?, reply_notifications = ?, notification_frequency = ? WHERE user_id = ?");
+        $stmt->bind_param("iiiiisi", $email_updates, $follow_notifications, $comment_notifications, $asset_comment_notifications, $reply_notifications, $notification_frequency, $user_id);
         $stmt->execute();
         
         $success_message = "Notification preferences updated successfully!";
@@ -1134,6 +1137,110 @@ if (isset($_GET['tab'])) {
             </button>
             <button type="submit" class="btn btn-danger" id="deleteAccountBtn" disabled>
                 <i class="fas fa-trash-alt me-2"></i> Send Deletion Confirmation Email
+            </button>
+        </div>
+    </form>
+</div>
+</div>
+<!-- Notifications Tab -->
+<div class="tab-pane fade <?php echo ($active_tab == 'notifications') ? 'show active' : ''; ?> animated-tab animate__animated animate__fadeIn" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
+    <h4 class="mb-4"><i class="fas fa-bell me-2"></i> Notification Preferences</h4>
+    
+    <form method="POST" id="notificationsForm">
+        <input type="hidden" name="action" value="update_notifications">
+        
+        <!-- Email Updates Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-envelope me-2"></i> Email Notifications</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="email_updates" name="email_updates" <?php echo ($user['email_updates'] == 1) ? 'checked' : ''; ?>>
+                            <label class="form-check-label" for="email_updates">
+                                <strong>General Updates</strong>
+                                <br><small class="text-muted">Receive newsletters and platform updates</small>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="follow_notifications" name="follow_notifications" <?php echo ($user['follow_notifications'] == 1) ? 'checked' : ''; ?>>
+                            <label class="form-check-label" for="follow_notifications">
+                                <strong>New Followers</strong>
+                                <br><small class="text-muted">Get notified when someone follows you</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Notifications Section -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-comments me-2"></i> Activity Notifications</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="comment_notifications" name="comment_notifications" <?php echo ($user['comment_notifications'] == 1) ? 'checked' : ''; ?>>
+                            <label class="form-check-label" for="comment_notifications">
+                                <strong>Comments on Posts</strong>
+                                <br><small class="text-muted">Get notified when someone comments on your posts</small>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="asset_comment_notifications" name="asset_comment_notifications" <?php echo ($user['asset_comment_notifications'] == 1) ? 'checked' : ''; ?>>
+                            <label class="form-check-label" for="asset_comment_notifications">
+                                <strong>Comments on Assets</strong>
+                                <br><small class="text-muted">Get notified when someone comments on your assets</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="reply_notifications" name="reply_notifications" <?php echo ($user['reply_notifications'] == 1) ? 'checked' : ''; ?>>
+                            <label class="form-check-label" for="reply_notifications">
+                                <strong>Replies to Comments</strong>
+                                <br><small class="text-muted">Get notified when someone replies to your comments</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frequency Settings -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-clock me-2"></i> Notification Frequency</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="notification_frequency" class="form-label">Email Frequency</label>
+                    <select class="form-select" id="notification_frequency" name="notification_frequency">
+                        <option value="instant" <?php echo ($user['notification_frequency'] == 'instant') ? 'selected' : ''; ?>>Instant</option>
+                        <option value="hourly" <?php echo ($user['notification_frequency'] == 'hourly') ? 'selected' : ''; ?>>Hourly Digest</option>
+                        <option value="daily" <?php echo ($user['notification_frequency'] == 'daily') ? 'selected' : ''; ?>>Daily Digest</option>
+                        <option value="weekly" <?php echo ($user['notification_frequency'] == 'weekly') ? 'selected' : ''; ?>>Weekly Digest</option>
+                    </select>
+                    <small class="text-muted">Choose how often you want to receive email notifications</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary btn-save">
+                <i class="fas fa-save me-2"></i> Save Notification Preferences
             </button>
         </div>
     </form>
