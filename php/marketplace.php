@@ -1375,7 +1375,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <button type="submit" class="btn btn-primary">Search</button>
             </form>
             <?php if (isset($_SESSION['user_id'])): ?>
-                <button class="btn btn-success animate__animated animate__fadeInRight" data-bs-toggle="modal" data-bs-target="#createAssetModal">Create Asset</button>
+                <button class="btn btn-primary animate__animated animate__fadeInRight" data-bs-toggle="modal" data-bs-target="#createAssetModal">Create Asset</button>
             <?php endif; ?>
         </div>
         <hr>

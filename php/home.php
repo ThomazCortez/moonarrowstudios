@@ -500,12 +500,6 @@ function truncateComment($html, $length = 80) {
     .weather-temp { font-size: 1.5rem; }
     .weather-icon { font-size: 1.5rem; }
     }
-
-    /* Custom scrollbar */
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: var(--color-canvas-default); }
-    ::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--color-fg-muted); }
   </style>
 </head>
 <body>
@@ -682,7 +676,7 @@ function truncateComment($html, $length = 80) {
         function setRandomGreeting() {
         const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
         const greetingElement = document.getElementById('greeting-text');
-        const text = `${randomGreeting}, ${currentUser.username}`;
+        const text = `${randomGreeting}, ${currentUser.username}!`;
         
         greetingElement.innerHTML = '<span class="cursor"></span>';
         let i = 0;

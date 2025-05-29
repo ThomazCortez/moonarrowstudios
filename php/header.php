@@ -553,6 +553,15 @@ $baseUrl = '/moonarrowstudios/'; // Set your base URL here
         .profile-btn {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--color-border-default); }
+    ::-webkit-scrollbar-thumb { background: #0b5ed7; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--color-accent-fg); }
+    
+
+
     </style>
 </head>
 
