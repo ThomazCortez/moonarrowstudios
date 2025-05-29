@@ -133,7 +133,7 @@ function sendNotificationEmail($conn, $recipient_user_id, $type, $context_data) 
                     <img src="https://i.ibb.co/q0Y1L5q/horizontal-logo.png" alt="MoonArrow Studios Logo" style="width: 120px; height: auto;">
                 </div>
                 <h2 style="font-size: 20px; color: #FFFFFF; margin-bottom: 10px;">🔔 Notification</h2>
-                <div style="text-align: left;">
+                <div style="text-align: center;">
                     ' . $body . '
                 </div>
                 <a href="' . $button_url . '" 
