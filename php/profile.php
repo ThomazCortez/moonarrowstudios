@@ -29,6 +29,12 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $follower_count = $stmt->get_result()->fetch_assoc()['follower_count'];
 
+// After fetching follower count, add following count
+$stmt = $conn->prepare("SELECT COUNT(*) as following_count FROM follows WHERE follower_id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$following_count = $stmt->get_result()->fetch_assoc()['following_count'];
+
 // Posts filtering and pagination
 $post_search = $_GET['post_search'] ?? '';
 $post_category_filter = (int)($_GET['post_category'] ?? 0);
@@ -206,510 +212,672 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
     <!-- Add Animate.css CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        .banner-container {
-    height: 200px;
-    overflow: visible;
-    position: relative;
-    margin-bottom: 80px;
-    width: 100vw; /* Full viewport width */
-    margin-left: calc(-50vw + 50%); /* Center and extend to edges */
-    margin-right: calc(-50vw + 50%);
-}
-
-/* Prevent horizontal scrollbar */
-body {
-    overflow-x: hidden;
-}
-
-html {
-    overflow-x: hidden;
-}
-
-.banner-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.profile-picture {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: 4px solid var(--color-canvas-default);
-    position: absolute;
-    bottom: -75px;
-    left: 50px;
-    object-fit: cover;
-}
-
-.profile-info {
-    margin-left: 50px;
-    margin-top: 20px;
-}
-
-.username {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.description {
-    color: var(--color-fg-muted);
-    margin-bottom: 20px;
-    max-width: 600px;
-}
-
-.filter-section {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: var(--color-canvas-subtle);
-    border-radius: 6px;
-}
-
-.posts-container, .assets-container {
-    margin-top: 20px;
-}
-
-.profile-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.username-container {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.follow-button {
-    position: static;
-}
-
-.user-stats {
-    margin-bottom: 20px;
-}
-
-.user-stats p {
-    margin: 0;
-    color: var(--color-fg-muted);
-}
-
-.card {
-    background-color: var(--color-card-bg);
-    border: 1px solid var(--color-card-border);
-    border-radius: 6px;
-    margin-bottom: 16px;
-    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-}
-
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.card-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.card-body {
-    padding: 16px;
-}
-
-.hashtags .badge {
-    margin-right: 4px;
-    margin-bottom: 4px;
-}
-
-.social-links {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.social-links a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    color: var(--color-canvas-default);
-    transition: transform 0.2s, opacity 0.2s;
-}
-
-.social-links a:hover {
-    transform: scale(1.1);
-    opacity: 0.9;
-}
-
-.youtube-icon {
-    background-color: #FF0000;
-}
-
-.linkedin-icon {
-    background-color: #0077B5;
-}
-
-.twitter-icon {
-    background-color: #1DA1F2;
-}
-
-.instagram-icon {
-    background-color: #E4405F;
-}
-
-.github-icon {
-    background-color: #333;
-}
-
-.portfolio-icon {
-    background-color: #6c757d;
-}
-
-:root {
-    --color-canvas-default: #ffffff;
-    --color-canvas-subtle: #f6f8fa;
-    --color-border-default: #d0d7de;
-    --color-border-muted: #d8dee4;
-    --color-btn-primary-bg: #2da44e;
-    --color-btn-primary-hover-bg: #2c974b;
-    --color-fg-default: #1F2328;
-    --color-fg-muted: #656d76;
-    --color-accent-fg: #0969da;
-    --color-input-bg: #ffffff;
-    --color-card-bg: #ffffff;
-    --color-card-border: #d0d7de;
-}
-
-@media (prefers-color-scheme: dark) {
+    /* CSS Variables */
     :root {
-        --color-canvas-default: #0d1117;
-        --color-canvas-subtle: #161b22;
-        --color-border-default: #30363d;
-        --color-border-muted: #21262d;
-        --color-btn-primary-bg: #238636;
-        --color-btn-primary-hover-bg: #2ea043;
-        --color-fg-default: #c9d1d9;
-        --color-fg-muted: #8b949e;
-        --color-accent-fg: #58a6ff;
-        --color-input-bg: #0d1117;
-        --color-card-bg: #161b22;
-        --color-card-border: #30363d;
+        --color-canvas-default: #ffffff;
+        --color-canvas-subtle: #f6f8fa;
+        --color-border-default: #d0d7de;
+        --color-border-muted: #d8dee4;
+        --color-btn-primary-bg: #2da44e;
+        --color-btn-primary-hover-bg: #2c974b;
+        --color-fg-default: #1F2328;
+        --color-fg-muted: #656d76;
+        --color-fg-secondary: #475569;
+        --color-accent-fg: #0969da;
+        --color-input-bg: #ffffff;
+        --color-card-bg: #ffffff;
+        --color-card-border: #d0d7de;
+        --color-success: #10b981;
+        --color-warning: #f59e0b;
+        --color-danger: #ef4444;
     }
-}
 
-.report-button {
-    margin-left: auto;
-}
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --color-canvas-default: #0d1117;
+            --color-canvas-subtle: #161b22;
+            --color-border-default: #30363d;
+            --color-border-muted: #21262d;
+            --color-btn-primary-bg: #238636;
+            --color-btn-primary-hover-bg: #2ea043;
+            --color-fg-default: #c9d1d9;
+            --color-fg-muted: #8b949e;
+            --color-fg-secondary: #cbd5e1;
+            --color-accent-fg: #58a6ff;
+            --color-input-bg: #0d1117;
+            --color-card-bg: #161b22;
+            --color-card-border: #30363d;
+            --color-success: #22c55e;
+            --color-warning: #fbbf24;
+            --color-danger: #f87171;
+        }
+    }
 
-/* Card hover effect styles */
-.card {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    transform: translateZ(0);
-    will-change: transform;
-    border: 1px solid transparent;
-}
+    /* Layout and Structure */
+    body, html {
+        overflow-x: hidden;
+    }
 
-.card::before,
-.card::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: rgba(88, 166, 255, 0.3);
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 2;
-    opacity: 0;
-}
+    .banner-container {
+        height: 200px;
+        overflow: visible;
+        position: relative;
+        margin-bottom: 80px;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        margin-right: calc(-50vw + 50%);
+    }
 
-.card::before {
-    top: 0;
-    transform: translateX(-105%);
-    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-}
+    .banner-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-.card::after {
-    bottom: 0;
-    transform: translateX(105%);
-    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-}
+    .profile-picture {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 4px solid var(--color-canvas-default);
+        position: absolute;
+        bottom: -75px;
+        left: 50px;
+        object-fit: cover;
+    }
 
-.card:hover {
-    box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
-                0 4px 20px rgba(0, 0, 0, 0.3) !important;
-    border-color: rgba(88, 166, 255, 0.3) !important;
-}
+    /* Profile Info - New Design */
+    .profile-info {
+        margin-left: 50px;
+        margin-top: 30px;
+        max-width: 800px;
+    }
 
-.card:hover::before,
-.card:hover::after {
-    transform: translateX(0);
-    opacity: 1;
-}
+    .profile-header {
+        margin-bottom: 32px;
+    }
 
-.card-body {
-    position: relative;
-    z-index: 1;
-}
+    .username-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
 
-.card-body::before,
-.card-body::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 2px;
-    background: rgba(88, 166, 255, 0.3);
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 2;
-    opacity: 0;
-    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-}
+    .username {
+        font-size: 32px;
+        font-weight: 600;
+        margin: 0;
+        color: var(--color-fg-default);
+        letter-spacing: -0.025em;
+    }
 
-.card-body::before {
-    left: 0;
-    transform: translateY(105%);
-}
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
 
-.card-body::after {
-    right: 0;
-    transform: translateY(-105%);
-}
+    .btn-follow {
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        border: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
 
-.card:hover .card-body::before,
-.card:hover .card-body::after {
-    transform: translateY(0);
-    opacity: 1;
-}
+    .btn-follow.btn-primary:hover {
+        transform: translateY(-1px);
+    }
 
-/* Custom animate.css animation durations */
-.animate__animated.animate__faster {
-    animation-duration: 0.4s;
-}
+    .btn-follow.btn-outline-primary {
+        background-color: transparent;
+        border: 1px solid var(--color-border-default);
+        color: var(--color-fg-default);
+    }
 
-.animate__animated.animate__fast {
-    animation-duration: 0.6s;
-}
+    .btn-follow.btn-outline-primary:hover {
+        background-color: var(--color-canvas-subtle);
+        transform: translateY(-1px);
+    }
 
-/* Staggered animations for cards */
-.staggered-animation {
-    opacity: 0;
-}
+    .report-btn {
+        background: none;
+        border: none;
+        color: var(--color-danger);
+        padding: 8px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        font-size: 14px;
+        cursor: pointer;
+    }
 
-/* Badge animation */
-.badge {
-    transition: all 0.3s ease;
-}
+    .report-btn:hover {
+        color: var(--color-danger);
+        background-color: rgba(239, 68, 68, 0.1);
+    }
 
-.badge:hover {
-    transform: scale(1.15);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
+    /* User Stats */
+    .user-stats {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 24px;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--color-border-default);
+    }
 
-/* Tab transition effects */
-.tab-pane {
-    transition: opacity 0.3s ease-in-out;
-}
+    /* If viewing own profile: make the border only go as far as the content */
+    .user-stats.own-profile {
+        width: fit-content;
+        border-bottom: 1px solid var(--color-border-default);
+    }
 
-.tab-pane.fade {
-    opacity: 0;
-}
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
 
-.tab-pane.fade.show {
-    opacity: 1;
-}
+    .stat-number {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--color-fg-default);
+        margin: 0;
+    }
 
-/* Alert Container */
-.alert-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1050;
-  pointer-events: none;
-}
+    .stat-label {
+        font-size: 13px;
+        color: var(--color-fg-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0;
+    }
 
-/* Base Alert Styles */
-.custom-alert {
-  position: relative;
-  margin: 16px auto;
-  max-width: 500px;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  pointer-events: auto;
-  overflow: hidden;
-  transform: translateY(-100%);
-  opacity: 0;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s linear;
-}
+    .join-date {
+        font-size: 14px;
+        color: var(--color-fg-muted);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
 
-.custom-alert.show {
-  transform: translateY(0);
-  opacity: 1;
-}
+    /* Description */
+    .description {
+        font-size: 16px;
+        line-height: 1.7;
+        color: var(--color-fg-secondary);
+        margin-bottom: 32px;
+        max-width: 600px;
+    }
 
-.custom-alert.hiding {
-  transform: translateY(-100%);
-  opacity: 0;
-}
+    /* Social Links - New Design */
+    .social-section {
+        margin-bottom: 32px;
+    }
 
-/* Progress Bar */
-.custom-alert .progress {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  width: 100%;
-  border-radius: 0;
-  background-color: rgba(0, 0, 0, 0.1);
-  padding: 0;
-  margin: 0;
-}
+    .social-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--color-fg-default);
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-.custom-alert .progress-bar {
-  transition: width linear 5000ms;
-  width: 100%;
-  height: 100%;
-}
+    .social-links {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
 
-/* Alert Content */
-.custom-alert-content {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-}
+    .social-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background-color: var(--color-canvas-subtle);
+        border: 1px solid var(--color-border-default);
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--color-fg-default);
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        min-width: 120px;
+    }
 
-.custom-alert-icon {
-  margin-right: 12px;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    .social-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-decoration: none;
+        color: var(--color-fg-default);
+    }
 
-.custom-alert-message {
-  flex-grow: 1;
-}
+    .social-link i {
+        font-size: 16px;
+        width: 16px;
+        text-align: center;
+    }
 
-.custom-alert-close {
-  background: transparent;
-  border: none;
-  color: inherit;
-  opacity: 0.7;
-  padding: 0 4px;
-  cursor: pointer;
-}
+    /* Platform-specific colors */
+    .social-link.youtube:hover {
+        border-color: #ff0000;
+        color: #ff0000;
+    }
 
-.custom-alert-close:hover {
-  opacity: 1;
-}
+    .social-link.linkedin:hover {
+        border-color: #0077b5;
+        color: #0077b5;
+    }
 
-/* Alert Types - Light Mode */
-.custom-alert-success {
-  background-color: #d1e7dd;
-  color: #0f5132;
-}
+    .social-link.twitter:hover {
+        border-color: #1da1f2;
+        color: #1da1f2;
+    }
 
-.custom-alert-danger {
-  background-color: #f8d7da;
-  color: #842029;
-}
+    .social-link.instagram:hover {
+        border-color: #e4405f;
+        color: #e4405f;
+    }
 
-.custom-alert-warning {
-  background-color: #fff3cd;
-  color: #664d03;
-}
+    .social-link.github:hover {
+        border-color: #333;
+        color: #333;
+    }
 
-.custom-alert-info {
-  background-color: #cff4fc;
-  color: #055160;
-}
+    .social-link.portfolio:hover {
+        border-color: var(--color-accent-fg);
+        color: var(--color-accent-fg);
+    }
 
-/* Progress Bar Colors */
-.custom-alert-success .progress-bar {
-  background-color: #198754;
-}
+    /* Dark mode social link adjustments */
+    @media (prefers-color-scheme: dark) {
+        .social-link.github:hover {
+            border-color: #f1f5f9;
+            color: #f1f5f9;
+        }
+    }
 
-.custom-alert-danger .progress-bar {
-  background-color: #dc3545;
-}
+    /* Page Components */
+    .filter-section {
+        margin: 20px 0;
+        padding: 15px;
+        background-color: var(--color-canvas-subtle);
+        border-radius: 6px;
+    }
 
-.custom-alert-warning .progress-bar {
-  background-color: #ffc107;
-}
+    .posts-container, .assets-container {
+        margin-top: 20px;
+    }
 
-.custom-alert-info .progress-bar {
-  background-color: #0dcaf0;
-}
+    /* Cards */
+    .card {
+        background-color: var(--color-card-bg);
+        border: 1px solid var(--color-card-border);
+        border-radius: 6px;
+        margin-bottom: 16px;
+        transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform: translateZ(0);
+        will-change: transform;
+        border: 1px solid transparent;
+    }
 
-/* Dark Mode Styles */
-@media (prefers-color-scheme: dark) {
-  .custom-alert-success {
-    background-color: #12281e;
-    color: #7ee2b8;
-  }
-  .custom-alert-danger {
-    background-color: #2e0a12;
-    color: #fda4af;
-  }
-  .custom-alert-warning {
-    background-color: #2e2a0e;
-    color: #fde047;
-  }
-  .custom-alert-info {
-    background-color: #092c42;
-    color: #7dd3fc;
-  }
-}
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-/* Pagination Styles */
-.pagination {
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    gap: 5px;
-}
+    .card::before,
+    .card::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: rgba(88, 166, 255, 0.3);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 2;
+        opacity: 0;
+    }
 
-.pagination .page-item .page-link {
-    color: var(--color-fg-default);
-    background-color: var(--color-card-bg);
-    border: 1px solid var(--color-border-default);
-    padding: 0.5rem 0.75rem;
-    margin: 0 0.25rem;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-}
+    .card::before {
+        top: 0;
+        transform: translateX(-105%);
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+    }
 
-.pagination .page-item .page-link:hover {
-    background-color: var(--color-canvas-subtle);
-}
+    .card::after {
+        bottom: 0;
+        transform: translateX(105%);
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+    }
 
-.pagination .page-item.active .page-link {
-    background-color: var(--color-accent-fg);
-    color: #ffffff;
-    border-color: var(--color-accent-fg);
-}
+    .card:hover {
+        box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
+                    0 4px 20px rgba(0, 0, 0, 0.3) !important;
+        border-color: rgba(88, 166, 255, 0.3) !important;
+    }
 
-.pagination .page-item.disabled .page-link {
-    color: var(--color-fg-muted);
-    pointer-events: none;
-    background-color: var(--color-canvas-subtle);
-}
+    .card:hover::before,
+    .card:hover::after {
+        transform: translateX(0);
+        opacity: 1;
+    }
 
-.pagination-wrapper {
-    margin-top: auto;
-    padding: 20px 0;
-    display: flex;
-    justify-content: center;
-}
+    .card-body {
+        padding: 16px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .card-body::before,
+    .card-body::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 2px;
+        background: rgba(88, 166, 255, 0.3);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 2;
+        opacity: 0;
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+    }
+
+    .card-body::before {
+        left: 0;
+        transform: translateY(105%);
+    }
+
+    .card-body::after {
+        right: 0;
+        transform: translateY(-105%);
+    }
+
+    .card:hover .card-body::before,
+    .card:hover .card-body::after {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    /* Hashtags */
+    .hashtags .badge {
+        margin-right: 4px;
+        margin-bottom: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .badge:hover {
+        transform: scale(1.15);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* Animations */
+    .animate__animated.animate__faster {
+        animation-duration: 0.4s;
+    }
+
+    .animate__animated.animate__fast {
+        animation-duration: 0.6s;
+    }
+
+    .staggered-animation {
+        opacity: 0;
+    }
+
+    /* Tabs */
+    .tab-pane {
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .tab-pane.fade {
+        opacity: 0;
+    }
+
+    .tab-pane.fade.show {
+        opacity: 1;
+    }
+
+    /* Alerts */
+    .alert-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        pointer-events: none;
+    }
+
+    .custom-alert {
+        position: relative;
+        margin: 16px auto;
+        max-width: 500px;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        pointer-events: auto;
+        overflow: hidden;
+        transform: translateY(-100%);
+        opacity: 0;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s linear;
+    }
+
+    .custom-alert.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .custom-alert.hiding {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    .custom-alert .progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        width: 100%;
+        border-radius: 0;
+        background-color: rgba(0, 0, 0, 0.1);
+        padding: 0;
+        margin: 0;
+    }
+
+    .custom-alert .progress-bar {
+        transition: width linear 5000ms;
+        width: 100%;
+        height: 100%;
+    }
+
+    .custom-alert-content {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+    }
+
+    .custom-alert-icon {
+        margin-right: 12px;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .custom-alert-message {
+        flex-grow: 1;
+    }
+
+    .custom-alert-close {
+        background: transparent;
+        border: none;
+        color: inherit;
+        opacity: 0.7;
+        padding: 0 4px;
+        cursor: pointer;
+    }
+
+    .custom-alert-close:hover {
+        opacity: 1;
+    }
+
+    /* Alert Types */
+    .custom-alert-success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .custom-alert-danger {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    .custom-alert-warning {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+
+    .custom-alert-info {
+        background-color: #cff4fc;
+        color: #055160;
+    }
+
+    .custom-alert-success .progress-bar {
+        background-color: #198754;
+    }
+
+    .custom-alert-danger .progress-bar {
+        background-color: #dc3545;
+    }
+
+    .custom-alert-warning .progress-bar {
+        background-color: #ffc107;
+    }
+
+    .custom-alert-info .progress-bar {
+        background-color: #0dcaf0;
+    }
+
+    /* Dark Mode Alerts */
+    @media (prefers-color-scheme: dark) {
+        .custom-alert-success {
+            background-color: #12281e;
+            color: #7ee2b8;
+        }
+        .custom-alert-danger {
+            background-color: #2e0a12;
+            color: #fda4af;
+        }
+        .custom-alert-warning {
+            background-color: #2e2a0e;
+            color: #fde047;
+        }
+        .custom-alert-info {
+            background-color: #092c42;
+            color: #7dd3fc;
+        }
+    }
+
+    /* Pagination */
+    .pagination {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .pagination .page-item .page-link {
+        color: var(--color-fg-default);
+        background-color: var(--color-card-bg);
+        border: 1px solid var(--color-border-default);
+        padding: 0.5rem 0.75rem;
+        margin: 0 0.25rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .pagination .page-item .page-link:hover {
+        background-color: var(--color-canvas-subtle);
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: var(--color-accent-fg);
+        color: #ffffff;
+        border-color: var(--color-accent-fg);
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: var(--color-fg-muted);
+        pointer-events: none;
+        background-color: var(--color-canvas-subtle);
+    }
+
+    .pagination-wrapper {
+        margin-top: auto;
+        padding: 20px 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .banner-container {
+            margin-bottom: 60px;
+        }
         
-    </style>
+        .profile-info {
+            margin-left: 20px;
+            margin-right: 20px;
+            margin-top: 20px;
+        }
+
+        .profile-picture {
+            left: 20px;
+        }
+
+        .username-section {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .username {
+            font-size: 28px;
+        }
+
+        .user-stats {
+            flex-direction: column;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .stat-item {
+            flex-direction: row;
+            gap: 8px;
+        }
+
+        .social-links {
+            flex-direction: column;
+        }
+
+        .social-link {
+            min-width: auto;
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+</style>
 </head>
 <body>
     <div id="alertContainer" class="alert-container"></div>
@@ -731,78 +899,107 @@ html {
         </div>
 
         <div class="container">
-            <div class="profile-info animate__animated animate__fadeInUp">
-                <div class="profile-header">
-                    <div class="username-container">
-                        <h1 class="username mb-0 animate__animated animate__fadeInLeft"><?= htmlspecialchars($user['username']) ?></h1>
-                        <?php if ($is_logged_in && !$viewing_own_profile): ?>
-                            <div class="d-flex gap-2 animate__animated animate__fadeIn">
-                                <form method="POST" class="mb-0">
-                                    <?php if ($is_following): ?>
-                                        <button type="submit" name="unfollow" class="btn btn-outline-primary">Unfollow</button>
-                                    <?php else: ?>
-                                        <button type="submit" name="follow" class="btn btn-primary">Follow</button>
-                                    <?php endif; ?>
-                                </form>
-                                
-                                <button type="button" class="btn text-danger report-btn" data-bs-toggle="modal" data-bs-target="#reportModal">
-                                    <i class="bi bi-flag-fill"></i> Report User
-                                </button>
-                            </div>
-                        <?php endif; ?>
+        <div class="profile-info animate__animated animate__fadeInUp">
+            <div class="profile-header">
+                <div class="username-section">
+                    <h1 class="username animate__animated animate__fadeInLeft"><?= htmlspecialchars($user['username']) ?></h1>
+                    <?php if ($is_logged_in && !$viewing_own_profile): ?>
+                        <div class="action-buttons animate__animated animate__fadeIn">
+                            <form method="POST" class="mb-0" style="display: inline;">
+                                <?php if ($is_following): ?>
+                                    <button type="submit" name="unfollow" class="btn-follow btn-outline-primary">Unfollow</button>
+                                <?php else: ?>
+                                    <button type="submit" name="follow" class="btn-follow btn-primary">Follow</button>
+                                <?php endif; ?>
+                            </form>
+                            
+                            <button type="button" class="report-btn" data-bs-toggle="modal" data-bs-target="#reportModal" title="Report User">
+                                <i class="bi bi-flag"> Report User</i>
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="user-stats <?= $viewing_own_profile ? 'own-profile' : '' ?> animate__animated animate__fadeIn">
+                    <div class="stat-item">
+                        <p class="stat-number"><?= htmlspecialchars($follower_count) ?></p>
+                        <p class="stat-label">Followers</p>
+                    </div>
+                    <div class="stat-item">
+                        <p class="stat-number"><?= htmlspecialchars($following_count) ?></p>
+                        <p class="stat-label">Following</p>
+                    </div>
+                    <div class="stat-item">
+                        <p class="stat-number"><?= htmlspecialchars($total_posts) ?></p>
+                        <p class="stat-label">Posts</p>
+                    </div>
+                    <div class="stat-item">
+                        <p class="stat-number"><?= htmlspecialchars($total_assets) ?></p>
+                        <p class="stat-label">Assets</p>
+                    </div>
+                    <div class="join-date">
+                        <i class="bi bi-calendar3"></i>
+                        <span>Joined <?= htmlspecialchars($user['formatted_join_date']) ?></span>
                     </div>
                 </div>
+            </div>
 
-                <div class="user-stats animate__animated animate__fadeIn">
-                    <p class="mb-1">Joined <?= htmlspecialchars($user['formatted_join_date']) ?></p>
-                    <p class="mb-1">Followers: <?= htmlspecialchars($follower_count) ?></p>
+            <?php if ($user['description']): ?>
+                <div class="description animate__animated animate__fadeIn">
+                    <p><?= nl2br(htmlspecialchars($user['description'])) ?></p>
                 </div>
+            <?php endif; ?>
 
-                <?php if ($user['description']): ?>
-                    <p class="description animate__animated animate__fadeIn "><?= nl2br(htmlspecialchars($user['description'])) ?></p>
-                <?php endif; ?>
-
-                <!-- Social Links Section -->
-                <?php if ($user['youtube'] || $user['linkedin'] || $user['twitter'] || $user['instagram'] || $user['github'] || $user['portfolio']): ?>
-                    <div class="social-links animate__animated animate__fadeInUp s">
+            <!-- Social Links Section -->
+            <?php if ($user['youtube'] || $user['linkedin'] || $user['twitter'] || $user['instagram'] || $user['github'] || $user['portfolio']): ?>
+                <div class="social-section animate__animated animate__fadeInUp">
+                    <h3 class="social-title">Social Links</h3>
+                    <div class="social-links">
                         <?php if ($user['youtube']): ?>
-                            <a href="<?= htmlspecialchars($user['youtube']) ?>" target="_blank" class="youtube-icon" title="YouTube">
+                            <a href="<?= htmlspecialchars($user['youtube']) ?>" target="_blank" class="social-link youtube">
                                 <i class="bi bi-youtube"></i>
+                                <span>YouTube</span>
                             </a>
                         <?php endif; ?>
                         
                         <?php if ($user['linkedin']): ?>
-                            <a href="<?= htmlspecialchars($user['linkedin']) ?>" target="_blank" class="linkedin-icon" title="LinkedIn">
+                            <a href="<?= htmlspecialchars($user['linkedin']) ?>" target="_blank" class="social-link linkedin">
                                 <i class="bi bi-linkedin"></i>
+                                <span>LinkedIn</span>
                             </a>
                         <?php endif; ?>
                         
                         <?php if ($user['twitter']): ?>
-                            <a href="<?= htmlspecialchars($user['twitter']) ?>" target="_blank" class="twitter-icon" title="Twitter">
+                            <a href="<?= htmlspecialchars($user['twitter']) ?>" target="_blank" class="social-link twitter">
                                 <i class="bi bi-twitter"></i>
+                                <span>Twitter</span>
                             </a>
                         <?php endif; ?>
                         
                         <?php if ($user['instagram']): ?>
-                            <a href="<?= htmlspecialchars($user['instagram']) ?>" target="_blank" class="instagram-icon" title="Instagram">
+                            <a href="<?= htmlspecialchars($user['instagram']) ?>" target="_blank" class="social-link instagram">
                                 <i class="bi bi-instagram"></i>
+                                <span>Instagram</span>
                             </a>
                         <?php endif; ?>
                         
                         <?php if ($user['github']): ?>
-                            <a href="<?= htmlspecialchars($user['github']) ?>" target="_blank" class="github-icon" title="GitHub">
+                            <a href="<?= htmlspecialchars($user['github']) ?>" target="_blank" class="social-link github">
                                 <i class="bi bi-github"></i>
+                                <span>GitHub</span>
                             </a>
                         <?php endif; ?>
                         
                         <?php if ($user['portfolio']): ?>
-                            <a href="<?= htmlspecialchars($user['portfolio']) ?>" target="_blank" class="portfolio-icon" title="Portfolio">
-                                <i class="bi bi-briefcase-fill"></i>
+                            <a href="<?= htmlspecialchars($user['portfolio']) ?>" target="_blank" class="social-link portfolio">
+                                <i class="bi bi-briefcase"></i>
+                                <span>Portfolio</span>
                             </a>
                         <?php endif; ?>
                     </div>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php endif; ?>
+        </div>
 
             <hr class="my-4 animate__animated animate__fadeIn s">
 
