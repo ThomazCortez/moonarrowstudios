@@ -1590,7 +1590,8 @@ while ($asset = $result->fetch_assoc()):
                             Asset File 
                         </label>
                         <input type="file" name="asset_file" id="asset_file" class="form-control" required>
-                        <div class="form-text">
+                        <div id="fileHelp" class="form-text">
+                            Select a category to see allowed file types
                         </div>
                     </div>
                     <div class="mb-3 animate__animated animate__fadeIn">
@@ -1600,6 +1601,7 @@ while ($asset = $result->fetch_assoc()):
                         <small>(Optional)</small>
                         <input type="file" name="preview_image" id="preview_image" class="form-control" accept="image/*">
                         <div class="form-text">
+                            Allowed: JPG, PNG, GIF, SVG
                         </div>
                     </div>
                     <div class="mt-3 animate__animated animate__fadeIn d-grid">
@@ -1671,6 +1673,65 @@ document.addEventListener('DOMContentLoaded', function() {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+// File type restrictions per category
+const categoryFileTypes = {
+    1: '.png,.jpg,.jpeg,.gif,.svg', // 2D Sprites
+    5: '.obj,.fbx,.gltf,.glb,.dae,.ply,.stl,.3ds', // 3D Models
+    6: '.png,.jpg,.jpeg,.tga,.hdr,.exr', // Textures & Materials
+    7: '.png,.jpg,.jpeg,.svg,.psd,.ai', // UI & Icons
+    8: '.fbx,.blend,.ma,.mb,.unity,.unreal', // Animations & Rigs
+    9: '.mp4,.mov,.avi,.flv,.vfx,.unity,.unreal', // VFX
+    10: '.mp3,.wav,.ogg,.flac', // Sound Effects
+    11: '.mp3,.wav,.ogg,.flac,.mid', // Background Music
+    12: '.mp3,.wav,.ogg', // Voiceovers
+    15: '.unity,.unreal,.json,.xml,.vfx', // Particle Effects
+    17: '.ttf,.otf,.woff,.woff2', // Game-Specific Fonts
+    18: '.png,.jpg,.jpeg,.svg,.psd,.ai' // HUD Elements
+};
+
+// Help text descriptions
+const categoryHelpText = {
+    1: 'Allowed: PNG, JPG, GIF, SVG',
+    5: 'Allowed: OBJ, FBX, GLTF, GLB, DAE, PLY, STL, 3DS',
+    6: 'Allowed: PNG, JPG, TGA, HDR, EXR',
+    7: 'Allowed: PNG, JPG, SVG, PSD, AI',
+    8: 'Allowed: FBX, BLEND, MA, MB, UNITY, UNREAL',
+    9: 'Allowed: MP4, MOV, AVI, FLV, VFX, UNITY, UNREAL',
+    10: 'Allowed: MP3, WAV, OGG, FLAC',
+    11: 'Allowed: MP3, WAV, OGG, FLAC, MID',
+    12: 'Allowed: MP3, WAV, OGG',
+    15: 'Allowed: UNITY, UNREAL, JSON, XML, VFX',
+    17: 'Allowed: TTF, OTF, WOFF, WOFF2',
+    18: 'Allowed: PNG, JPG, SVG, PSD, AI'
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('category');
+    const assetFileInput = document.getElementById('asset_file');
+    const fileHelp = document.getElementById('fileHelp');
+    
+    categorySelect.addEventListener('change', function() {
+        const categoryId = this.value;
+        
+        if (categoryId in categoryFileTypes) {
+            assetFileInput.accept = categoryFileTypes[categoryId];
+            fileHelp.textContent = categoryHelpText[categoryId];
+        } else {
+            assetFileInput.accept = '';
+            fileHelp.textContent = 'Select a category to see allowed file types';
+        }
+    });
+    
+    // Initialize when modal is shown
+    $('#createAssetModal').on('shown.bs.modal', function() {
+        const initialCategory = categorySelect.value;
+        if (initialCategory in categoryFileTypes) {
+            assetFileInput.accept = categoryFileTypes[initialCategory];
+            fileHelp.textContent = categoryHelpText[initialCategory];
+        }
     });
 });
 </script>
