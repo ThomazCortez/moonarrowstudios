@@ -62,12 +62,12 @@ function formatTimeAgo($datetime) {
     }
 }
 
-// Fetch Latest from Following
+// Fetch Latest from Following (add downvotes)
 $following_posts = [];
 if (isset($current_user_id)) {
     try {
         $stmt = $pdo->prepare("
-            SELECT p.id, p.title, p.created_at, p.upvotes, u.username 
+            SELECT p.id, p.title, p.created_at, p.upvotes, p.downvotes, u.username 
             FROM posts p 
             JOIN users u ON p.user_id = u.user_id 
             WHERE p.user_id IN (SELECT following_id FROM follows WHERE follower_id = ?)
@@ -81,17 +81,18 @@ if (isset($current_user_id)) {
     }
 }
 
-// Fetch Recent Comments
+// Fetch Recent Comments (add downvotes)
 $recent_comments = [];
 try {
     $stmt = $pdo->prepare("
-        SELECT c.id, c.content, c.created_at, u.username, c.upvotes 
+        SELECT c.id, c.content, c.created_at, u.username, c.upvotes, c.downvotes 
         FROM comments c 
         JOIN users u ON c.user_id = u.user_id 
+        WHERE c.user_id != ?  -- Exclude current user's comments
         ORDER BY c.created_at DESC 
         LIMIT 3
     ");
-    $stmt->execute();
+    $stmt->execute([$current_user_id]);  // Pass current user ID to query
     $recent_comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log("Error fetching recent comments: " . $e->getMessage());
@@ -117,6 +118,30 @@ if (isset($current_user_id)) {
         $new_followers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         error_log("Error fetching new followers: " . $e->getMessage());
+    }
+}
+
+// Fetch Recent Assets from Following
+$recent_assets = [];
+if (isset($current_user_id)) {
+    try {
+        $stmt = $pdo->prepare("
+            SELECT a.id AS asset_id, a.title, a.created_at, u.username, 
+                   COALESCE(SUM(CASE WHEN av.vote_type = 'upvote' THEN 1 ELSE 0 END), 0) AS upvotes,
+                   COALESCE(SUM(CASE WHEN av.vote_type = 'downvote' THEN 1 ELSE 0 END), 0) AS downvotes 
+            FROM assets a
+            JOIN users u ON a.user_id = u.user_id
+            LEFT JOIN asset_votes av ON a.id = av.asset_id
+            WHERE a.user_id IN (SELECT following_id FROM follows WHERE follower_id = ?)
+            AND a.status = 'published'
+            GROUP BY a.id
+            ORDER BY a.created_at DESC 
+            LIMIT 3
+        ");
+        $stmt->execute([$current_user_id]);
+        $recent_assets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error fetching recent assets: " . $e->getMessage());
     }
 }
 
@@ -177,13 +202,21 @@ function truncateComment($html, $length = 80) {
       color: var(--color-fg-default);
       transition: all 0.3s ease;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+      overflow-x: hidden; /* Prevent horizontal scroll */
     }
 
     .main-container {
       background-color: var(--color-canvas-default);
       min-height: 100vh;
       padding-top: 3rem;
-      padding-bottom: 3rem;
+      padding-bottom: 4rem; /* Increased bottom padding */
+      overflow: hidden; /* Prevent content overflow */
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
     }
 
     /* Greeting Section */
@@ -193,7 +226,6 @@ function truncateComment($html, $length = 80) {
     align-items: center;
     margin-bottom: 4rem;
     animation: fadeInUp 0.6s ease-out;
-    /* Ensure items are centered on cross-axis */
     align-items: center;
     }
 
@@ -202,10 +234,9 @@ function truncateComment($html, $length = 80) {
     height: 3em;
     margin-right: 0.5em;
     object-fit: contain;
-    /* Remove vertical-align (doesn't work in flex) and adjust position */
     transform: scaleX(-1);
-    align-self: center; /* Explicitly center in flex container */
-    margin-top: 0.2em; /* Fine-tune vertical position if needed */
+    align-self: center;
+    margin-top: 0.2em;
     }
 
     .greeting-title {
@@ -228,11 +259,11 @@ function truncateComment($html, $length = 80) {
 .weather-widget {
   position: absolute;
   left: 2rem;
-  background: transparent; /* Removed background */
-  border: none; /* Removed border */
-  border-radius: 0; /* Removed border radius */
-  padding: 0; /* Removed padding */
-  box-shadow: none; /* Removed shadow */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
   animation: fadeInLeft 0.6s ease-out 0.3s both;
   min-width: 200px;
 }
@@ -270,8 +301,8 @@ function truncateComment($html, $length = 80) {
 }
 
 .weather-details {
-  border-top: none; /* Removed border */
-  padding-top: 0; /* Removed padding */
+  border-top: none;
+  padding-top: 0;
 }
 
 .weather-time {
@@ -285,7 +316,6 @@ function truncateComment($html, $length = 80) {
   font-size: 0.9rem;
   color: var(--color-fg-muted);
 }
-
 
     /* Search Section - Prominent without card */
     .search-section {
@@ -375,10 +405,21 @@ function truncateComment($html, $length = 80) {
       background-color: #0b5ed7;
     }
 
-    /* Content Cards */
+    /* Content Cards - Fixed container and hover effects */
     .content-grid {
       animation: fadeInUp 0.6s ease-out 0.4s both;
+      margin-bottom: 2rem; /* Add bottom margin to prevent overflow */
     }
+    
+    .row {
+      margin: 0 -0.75rem; /* Adjusted margin for better spacing */
+    }
+    
+    .col-lg-4, .col-md-6 {
+      padding: 0 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    
     .card {
       border: 1px solid var(--color-card-border);
       background-color: var(--color-card-bg);
@@ -386,12 +427,52 @@ function truncateComment($html, $length = 80) {
       box-shadow: var(--color-shadow-sm);
       transition: all 0.3s ease;
       height: 100%;
+      overflow: hidden; /* Prevent content overflow */
+      position: relative; /* For proper positioning */
     }
+    
+.card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card::before,
+    .card::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: rgba(88, 166, 255, 0.3);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 2;
+        opacity: 0;
+    }
+
+    .card::before {
+        top: 0;
+        transform: translateX(-105%);
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+    }
+
+    .card::after {
+        bottom: 0;
+        transform: translateX(105%);
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+    }
+
     .card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--color-shadow-md);
-      border-color: var(--color-accent-fg);
+        box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
+                    0 4px 20px rgba(0, 0, 0, 0.3) !important;
+        border-color: rgba(88, 166, 255, 0.3) !important;
     }
+
+    .card:hover::before,
+    .card:hover::after {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
     .card-header {
       background: linear-gradient(135deg, var(--color-canvas-subtle), var(--color-card-bg));
       border-bottom: 1px solid var(--color-border-muted);
@@ -417,6 +498,7 @@ function truncateComment($html, $length = 80) {
     }
     .card-body {
       padding: 0;
+      overflow: hidden; /* Prevent body overflow */
     }
     .content-item {
       padding: 1.25rem;
@@ -454,6 +536,93 @@ function truncateComment($html, $length = 80) {
       padding: 3rem 2rem;
     }
 
+    /* Grid system classes */
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    
+    .col-lg-4 {
+      flex: 0 0 33.333333%;
+      max-width: 33.333333%;
+    }
+    
+    .col-md-6 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+    
+    .d-flex {
+      display: flex !important;
+    }
+    
+    .align-items-center {
+      align-items: center !important;
+    }
+    
+    .me-2 {
+      margin-right: 0.5rem !important;
+    }
+    
+    .me-3 {
+      margin-right: 1rem !important;
+    }
+
+    /* Button and form styles */
+    .form-control {
+      display: block;
+      width: 100%;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--color-fg-default);
+      background-color: var(--color-input-bg);
+      background-image: none;
+      border: 1px solid var(--color-border-default);
+      border-radius: 0.375rem;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .btn {
+      display: inline-block;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--color-fg-default);
+      text-align: center;
+      text-decoration: none;
+      vertical-align: middle;
+      cursor: pointer;
+      user-select: none;
+      background-color: transparent;
+      border: 1px solid transparent;
+      padding: 0.375rem 0.75rem;
+      font-size: 1rem;
+      border-radius: 0.375rem;
+      transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .btn-group {
+      position: relative;
+      display: inline-flex;
+      vertical-align: middle;
+    }
+
+    .btn-group .btn {
+      position: relative;
+      flex: 1 1 auto;
+    }
+
+    .btn-group .btn:not(:last-child) {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .btn-group .btn:not(:first-child) {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      margin-left: -1px;
+    }
+
     /* Animations */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(20px); }
@@ -471,13 +640,12 @@ function truncateComment($html, $length = 80) {
     .cursor {
     display: inline-block;
     width: 2px;
-    height: 1.05em; /* Adjust height slightly to better match character height */
+    height: 1.05em;
     background-color: var(--color-accent-fg);
     animation: blink 1s step-end infinite;
     position: relative;
-    top: 0.2em; /* Adjust downward to align with text baseline */
+    top: 0.2em;
     }
-
 
     /* Responsive adjustments */
     @media (max-width: 1200px) {
@@ -486,6 +654,11 @@ function truncateComment($html, $length = 80) {
         transform: none;
         margin: 0 auto 2rem auto;
         max-width: 300px;
+    }
+    
+    .col-lg-4 {
+      flex: 0 0 50%;
+      max-width: 50%;
     }
     }
 
@@ -499,6 +672,15 @@ function truncateComment($html, $length = 80) {
     }
     .weather-temp { font-size: 1.5rem; }
     .weather-icon { font-size: 1.5rem; }
+    
+    .col-lg-4, .col-md-6 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+    
+    .greeting-title {
+      font-size: 2rem;
+    }
     }
   </style>
 </head>
@@ -553,7 +735,8 @@ function truncateComment($html, $length = 80) {
                 </div>
             </div>
 
-            <!-- Content Grid -->
+            
+<!-- Content Grid -->
             <div class="row g-4 content-grid">
                 <!-- Latest from Following -->
                 <div class="col-lg-4 col-md-6">
@@ -562,12 +745,12 @@ function truncateComment($html, $length = 80) {
                             <div class="card-icon me-3">
                                 <i class="bi bi-people"></i>
                             </div>
-                            <h5 class="card-title">Latest from Following</h5>
+                            <h5 class="card-title">Recent Posts from Following</h5>
                         </div>
                         <div class="card-body" id="following-content">
                             <?php if (!empty($following_posts)): ?>
                                 <?php foreach ($following_posts as $post): ?>
-                                    <div class="content-item">
+                                    <div class="content-item clickable-item" onclick="window.location.href='view_post.php?id=<?= $post['id'] ?>'">
                                         <div class="item-title"><?= htmlspecialchars($post['title']) ?></div>
                                         <div class="item-meta">
                                             <span class="meta-item">
@@ -577,7 +760,10 @@ function truncateComment($html, $length = 80) {
                                                 <i class="bi bi-clock"></i><?= formatTimeAgo($post['created_at']) ?>
                                             </span>
                                             <span class="meta-item">
-                                                <i class="bi bi-heart"></i><?= $post['upvotes'] ?>
+                                                <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?>
+                                            </span>
+                                            <span class="meta-item">
+                                                <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?>
                                             </span>
                                         </div>
                                     </div>
@@ -601,7 +787,7 @@ function truncateComment($html, $length = 80) {
                         <div class="card-body" id="comments-content">
                             <?php if (!empty($recent_comments)): ?>
                                 <?php foreach ($recent_comments as $comment): ?>
-                                    <div class="content-item">
+                                    <div class="content-item clickable-item" onclick="window.location.href='admin/view_comment.php?id=<?= $comment['id'] ?>'">
                                         <div class="item-title">"<?= htmlspecialchars(truncateComment($comment['content'])) ?>"</div>
                                         <div class="item-meta">
                                             <span class="meta-item">
@@ -611,7 +797,10 @@ function truncateComment($html, $length = 80) {
                                                 <i class="bi bi-clock"></i><?= formatTimeAgo($comment['created_at']) ?>
                                             </span>
                                             <span class="meta-item">
-                                                <i class="bi bi-arrow-up"></i><?= $comment['upvotes'] ?>
+                                                <i class="bi bi-caret-up-fill"></i><?= $comment['upvotes'] ?>
+                                            </span>
+                                            <span class="meta-item">
+                                                <i class="bi bi-caret-down-fill"></i><?= $comment['downvotes'] ?>
                                             </span>
                                         </div>
                                     </div>
@@ -635,7 +824,7 @@ function truncateComment($html, $length = 80) {
                         <div class="card-body" id="followers-content">
                             <?php if (!empty($new_followers)): ?>
                                 <?php foreach ($new_followers as $follower): ?>
-                                    <div class="content-item">
+                                    <div class="content-item clickable-item" onclick="window.location.href='profile.php?id=<?= $follower['follower_id'] ?>'">
                                         <div class="item-title"><?= htmlspecialchars($follower['username']) ?> started following you</div>
                                         <div class="item-meta">
                                             <span class="meta-item">
@@ -652,6 +841,43 @@ function truncateComment($html, $length = 80) {
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <div class="empty-state">No new followers recently</div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Assets from Following -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center">
+                            <div class="card-icon me-3">
+                                <i class="bi bi-box"></i>
+                            </div>
+                            <h5 class="card-title">Recent Assets from Following</h5>
+                        </div>
+                        <div class="card-body" id="assets-content">
+                            <?php if (!empty($recent_assets)): ?>
+                                <?php foreach ($recent_assets as $asset): ?>
+                                    <div class="content-item clickable-item" onclick="window.location.href='view_asset.php?id=<?= $asset['asset_id'] ?>'">
+                                        <div class="item-title"><?= htmlspecialchars($asset['title']) ?></div>
+                                        <div class="item-meta">
+                                            <span class="meta-item">
+                                                <i class="bi bi-person"></i><?= htmlspecialchars($asset['username']) ?>
+                                            </span>
+                                            <span class="meta-item">
+                                                <i class="bi bi-clock"></i><?= formatTimeAgo($asset['created_at']) ?>
+                                            </span>
+                                            <span class="meta-item">
+                                                <i class="bi bi-caret-up-fill"></i><?= $asset['upvotes'] ?>
+                                            </span>
+                                            <span class="meta-item">
+                                                <i class="bi bi-caret-down-fill"></i><?= $asset['downvotes'] ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="empty-state">No recent assets from people you follow</div>
                             <?php endif; ?>
                         </div>
                     </div>
