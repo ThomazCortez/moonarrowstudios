@@ -266,6 +266,16 @@ function truncateComment($html, $length = 80) {
   box-shadow: none;
   animation: fadeInLeft 0.6s ease-out 0.3s both;
   min-width: 200px;
+  
+  /* Hide by default on screens 1200px and below */
+  display: none;
+}
+
+/* Show weather widget only on screens larger than 1200px */
+@media (min-width: 1201px) {
+  .weather-widget {
+    display: block;
+  }
 }
 
 .weather-main {
@@ -649,18 +659,16 @@ function truncateComment($html, $length = 80) {
 
     /* Responsive adjustments */
     @media (max-width: 1200px) {
+    /* Remove the position:static rule since we're hiding it */
     .weather-widget {
-        position: static;
-        transform: none;
-        margin: 0 auto 2rem auto;
-        max-width: 300px;
+        display: none !important;
     }
     
     .col-lg-4 {
       flex: 0 0 50%;
       max-width: 50%;
     }
-    }
+}
 
     @media (max-width: 768px) {
     .weather-widget {
@@ -669,6 +677,10 @@ function truncateComment($html, $length = 80) {
         min-width: auto;
         padding: 0;
         top: 1rem;
+    }
+
+    .weather-widget {
+        display: none !important;
     }
     .weather-temp { font-size: 1.5rem; }
     .weather-icon { font-size: 1.5rem; }
@@ -682,6 +694,31 @@ function truncateComment($html, $length = 80) {
       font-size: 2rem;
     }
     }
+
+    .content-item:hover .item-title {
+  color: var(--color-accent-fg);
+  transform: translateX(4px);
+}
+
+.content-item:hover .item-meta {
+  color: var(--color-accent-fg);
+  opacity: 0.8;
+}
+
+.item-title {
+  font-weight: 600;
+  color: var(--color-fg-default);
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: all 0.3s ease; /* Add this line */
+}
+
+.item-meta {
+  font-size: 0.875rem;
+  color: var(--color-fg-muted);
+  transition: all 0.3s ease; /* Add this line */
+}
   </style>
 </head>
 <body>
@@ -768,6 +805,11 @@ function truncateComment($html, $length = 80) {
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
+                                <div class="text-center mt-2 mb-2">
+                                    <a href="following_posts.php" class="text-decoration-none">
+                                         View More
+                                    </a>
+                                </div>
                             <?php else: ?>
                                 <div class="empty-state">No recent posts from people you follow</div>
                             <?php endif; ?>
@@ -805,6 +847,11 @@ function truncateComment($html, $length = 80) {
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
+                                <div class="text-center mt-2 mb-2">
+                                    <a href="recent_comments.php" class="text-decoration-none">
+                                         View More
+                                    </a>
+                                </div>
                             <?php else: ?>
                                 <div class="empty-state">No recent comments on your content</div>
                             <?php endif; ?>
@@ -839,6 +886,11 @@ function truncateComment($html, $length = 80) {
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
+                                <div class="text-center mt-2 mb-2">
+                                    <a href="followers.php" class="text-decoration-none">
+                                         View More
+                                    </a>
+                                </div>
                             <?php else: ?>
                                 <div class="empty-state">No new followers recently</div>
                             <?php endif; ?>
@@ -876,6 +928,11 @@ function truncateComment($html, $length = 80) {
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
+                                <div class="text-center mt-2">
+                                    <a href="following_assets.php" class="text-decoration-none">
+                                         View More
+                                    </a>
+                                </div>
                             <?php else: ?>
                                 <div class="empty-state">No recent assets from people you follow</div>
                             <?php endif; ?>
