@@ -1073,29 +1073,30 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         if (!hasError) {
-            // Show loader and disable button
+            // Show loader and change button text
             const submitButton = document.getElementById('submitPostButton');
             const buttonText = submitButton.querySelector('.button-text');
             const spinner = submitButton.querySelector('.spinner-border');
             
             buttonText.textContent = 'Posting...';
             spinner.classList.remove('d-none');
-            submitButton.disabled = true;
             
+            // IMPORTANT: Don't disable the button - it breaks form submission
             // Set content value
             contentInput.value = quillContent;
+            
+            // We're not preventing default - form will submit normally
         }
     });
     
-    // Reset button state when modal is closed
-    document.getElementById('createPostModal').addEventListener('hidden.bs.modal', function() {
+    // Reset button state when modal is shown
+    document.getElementById('createPostModal').addEventListener('show.bs.modal', function() {
         const submitButton = document.getElementById('submitPostButton');
         const buttonText = submitButton.querySelector('.button-text');
         const spinner = submitButton.querySelector('.spinner-border');
         
         buttonText.textContent = 'Post';
         spinner.classList.add('d-none');
-        submitButton.disabled = false;
     });
 
     // Hashtag handling

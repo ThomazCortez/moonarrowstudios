@@ -4337,7 +4337,11 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
             
             <?php if (isset($_SESSION['user_id'])): ?> 
                 <div id="comment-editor" class="mb-3 animate__animated animate__fadeIn animate__delay-1s"></div>
-                <button class="btn btn-primary animate__animated animate__fadeIn animate__delay-1s" id="submit-comment" data-asset-id="<?= $asset_id ?>">Submit Comment</button> 
+                <!-- Updated button with loader -->
+                <button class="btn btn-primary animate__animated animate__fadeIn animate__delay-1s" id="submit-comment" data-asset-id="<?= $asset_id ?>">
+                    <span class="button-text">Submit Comment</span>
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button> 
             <?php else: ?> 
                 <p class="animate__animated animate__fadeIn animate__delay-1s">You must <a href="sign_in/sign_in_html.php" class="text-decoration-none">sign in</a> to comment and reply.</p> 
             <?php endif; ?>
@@ -4584,8 +4588,9 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
 
     // Get asset ID from submit button
     const assetId = document.getElementById('submit-comment').getAttribute('data-asset-id');
-
-    document.getElementById('submit-comment').addEventListener('click', () => {
+    const commentButton = document.getElementById('submit-comment');
+    
+    commentButton.addEventListener('click', () => {
         const content = quill.root.innerHTML;
         const plainText = quill.getText().trim();
 
@@ -4593,6 +4598,12 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
             showAlert('Comment cannot be empty.', 'warning');
             return;
         }
+
+        // Show loader
+        const buttonText = commentButton.querySelector('.button-text');
+        const spinner = commentButton.querySelector('.spinner-border');
+        buttonText.textContent = 'Submitting...';
+        spinner.classList.remove('d-none');
 
         fetch('asset/submit_comment.php', {
             method: 'POST',
@@ -4605,11 +4616,21 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
             if (data.success) {
                 location.reload();
             } else {
+                // Reset button on error
+                buttonText.textContent = 'Submit Comment';
+                spinner.classList.add('d-none');
                 showAlert(data.error || 'An error occurred.', 'danger');
             }
-        }).catch(err => console.error('Error:', err));
+        }).catch(err => {
+            console.error('Error:', err);
+            // Reset button on error
+            buttonText.textContent = 'Submit Comment';
+            spinner.classList.add('d-none');
+            showAlert('Network error. Please try again.', 'danger');
+        });
     });
 
+    // Reply handling
     document.getElementById('comments-container').addEventListener('click', (e) => {
         if (e.target.classList.contains('reply-btn')) {
             const parentCommentId = e.target.dataset.commentId;
@@ -4633,7 +4654,10 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
 
                 submitReplyButton = document.createElement('button');
                 submitReplyButton.id = `submit-reply-${parentCommentId}`;
-                submitReplyButton.textContent = 'Submit Reply';
+                submitReplyButton.innerHTML = `
+                    <span class="button-text">Submit Reply</span>
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                `;
                 submitReplyButton.classList.add('btn', 'btn-primary', 'mt-2');
                 e.target.parentElement.appendChild(submitReplyButton);
 
@@ -4646,6 +4670,13 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
                         return;
                     }
 
+                    // Show loader
+                    const buttonText = submitReplyButton.querySelector('.button-text');
+                    const spinner = submitReplyButton.querySelector('.spinner-border');
+                    buttonText.textContent = 'Submitting...';
+                    spinner.classList.remove('d-none');
+                    submitReplyButton.disabled = true;
+
                     fetch('asset/submit_comment.php', {
                         method: 'POST',
                         headers: {
@@ -4657,9 +4688,20 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
                         if (data.success) {
                             location.reload();
                         } else {
+                            // Reset button on error
+                            buttonText.textContent = 'Submit Reply';
+                            spinner.classList.add('d-none');
+                            submitReplyButton.disabled = false;
                             showAlert(data.error || 'An error occurred.', 'danger');
                         }
-                    }).catch(err => console.error('Error:', err));
+                    }).catch(err => {
+                        console.error('Error:', err);
+                        // Reset button on error
+                        buttonText.textContent = 'Submit Reply';
+                        spinner.classList.add('d-none');
+                        submitReplyButton.disabled = false;
+                        showAlert('Network error. Please try again.', 'danger');
+                    });
                 });
             } else {
                 replyQuill = Quill.find(replyEditor);
@@ -4840,7 +4882,7 @@ if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
     });
 });
 
-// Modify the post display section to show hashtags as badges
+// Modify the asset display section to show hashtags as badges
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.card-text').forEach(element => {
         if (element.innerHTML.includes('<strong>Hashtags:</strong>')) {

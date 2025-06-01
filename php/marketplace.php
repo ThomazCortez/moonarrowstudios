@@ -1145,8 +1145,30 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         if (!hasError) {
+            // Show loader and change button text
+            const submitButton = document.getElementById('submitAssetButton');
+            const buttonText = submitButton.querySelector('.button-text');
+            const spinner = submitButton.querySelector('.spinner-border');
+            
+            buttonText.textContent = 'Publishing...';
+            spinner.classList.remove('d-none');
+            
+            // IMPORTANT: Don't disable the button - it breaks form submission
+            // Set content value
             contentInput.value = quillContent;
+            
+            // We're not preventing default - form will submit normally
         }
+    });
+    
+    // Reset button state when modal is shown
+    document.getElementById('createAssetModal').addEventListener('show.bs.modal', function() {
+        const submitButton = document.getElementById('submitAssetButton');
+        const buttonText = submitButton.querySelector('.button-text');
+        const spinner = submitButton.querySelector('.spinner-border');
+        
+        buttonText.textContent = 'Publish';
+        spinner.classList.add('d-none');
     });
 
     // Hashtag handling
@@ -1585,8 +1607,15 @@ while ($asset = $result->fetch_assoc()):
                         </div>
                     </div>
                     <div class="mt-3 animate__animated animate__fadeIn d-grid">
-                        <button type="submit" name="create_asset" class="btn btn-primary animate__animated animate__infinite w-100">Publish Asset</button>
-                    </div>
+                            <!-- Updated button with loader -->
+                            <button type="submit" name="create_asset" 
+                                    class="btn btn-primary w-100" 
+                                    id="submitAssetButton">
+                                <span class="button-text">Publish Asset</span>
+                                <span class="spinner-border spinner-border-sm d-none" 
+                                    role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
                 </form>
             </div>
         </div>
