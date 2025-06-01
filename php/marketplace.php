@@ -100,11 +100,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_asset'])) {
     // Update the INSERT query to include asset_file
     $stmt = $conn->prepare("INSERT INTO assets (title, content, category_id, hashtags, images, videos, user_id, preview_image, asset_file) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("ssisssiss", $title, $content, $category_id, $hashtags, json_encode($image_paths), json_encode($video_paths), $user_id, $preview_image_path, $asset_file_path);
-    $stmt->execute();
-    $stmt->close();
-
-    header("Location: marketplace.php");
-    exit;
+    if ($stmt->execute()) {
+        // Asset created successfully - redirect with success alert
+        $stmt->close();
+        header("Location: marketplace.php?alert=" . urlencode("Asset published successfully!") . "&type=success");
+        exit;
+    } else {
+        // Asset creation failed - redirect with error alert
+        $stmt->close();
+        header("Location: marketplace.php?alert=" . urlencode("Failed to publish asset. Please try again.") . "&type=danger");
+        exit;
+    }
 }
 
 // Fetch assets

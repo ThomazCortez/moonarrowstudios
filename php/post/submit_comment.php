@@ -65,7 +65,8 @@ if ($stmt->execute()) {
         'success' => true,
         'username' => $_SESSION['username'],
         'created_at' => date('F j, Y, g:i A'),
-        'content' => $content
+        'content' => $content,
+        'message' => 'Comment posted successfully!' // Add this line
     ]);
 } else {
     echo json_encode(['success' => false, 'error' => 'Failed to submit comment.']);

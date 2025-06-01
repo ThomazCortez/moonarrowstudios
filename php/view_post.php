@@ -1214,16 +1214,27 @@ document.addEventListener('DOMContentLoaded', () => {
         spinner.classList.remove('d-none');
 
         fetch('post/submit_comment.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: `post_id=${postId}&content=${encodeURIComponent(content)}`
-        }).then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `post_id=${postId}&content=${encodeURIComponent(content)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success alert
+            showAlert(data.message || 'Comment posted successfully!', 'success');
+            
+            // Clear editor and reset button
+            quill.setText('');
+            buttonText.textContent = 'Submit Comment';
+            spinner.classList.add('d-none');
+
+            sessionStorage.setItem('showCommentSuccess', 'true');
+            location.reload();
+            
+            // Optional: Insert comment immediately without reload
+            // You would need to implement this DOM insertion
+        } else {
                 // Reset button on error
                 buttonText.textContent = 'Submit Comment';
                 spinner.classList.add('d-none');
@@ -1287,14 +1298,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     fetch('post/submit_comment.php', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                         body: `post_id=${postId}&parent_id=${parentCommentId}&content=${encodeURIComponent(content)}`
-                    }).then(response => response.json())
+                    })
+                    .then(response => response.json())
                     .then(data => {
                         if (data.success) {
+                            showAlert('Reply posted successfully!', 'success');
+
+                            // Clear editor and reset button
+                            quill.setText('');
+                            buttonText.textContent = 'Submit Reply';
+                            spinner.classList.add('d-none');
+
+                            sessionStorage.setItem('showReplySuccess', 'true');
                             location.reload();
+
                         } else {
                             // Reset button on error
                             buttonText.textContent = 'Submit Reply';
@@ -1665,5 +1684,19 @@ function dismissAlert(alertElement) {
   alertElement.classList.remove('show');
   setTimeout(() => { alertElement.remove(); }, 300);
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('showCommentSuccess')) {
+        showAlert('Comment posted successfully!', 'success');
+        sessionStorage.removeItem('showCommentSuccess');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('showReplySuccess')) {
+        showAlert('Reply posted successfully!', 'success');
+        sessionStorage.removeItem('showReplySuccess');
+    }
+});
 	</script>
 </body>

@@ -56,11 +56,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
     // Update the INSERT query to include user_id
     $stmt = $conn->prepare("INSERT INTO posts (title, content, category_id, hashtags, images, videos, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("ssisssi", $title, $content, $category_id, $hashtags, json_encode($image_paths), json_encode($video_paths), $user_id);
-    $stmt->execute();
-    $stmt->close();
-
-    header("Location: forum.php");
-    exit;
+    
+    if ($stmt->execute()) {
+        // Post created successfully - redirect with success alert
+        $stmt->close();
+        header("Location: forum.php?alert=" . urlencode("Post published successfully!") . "&type=success");
+        exit;
+    } else {
+        // Post creation failed - redirect with error alert
+        $stmt->close();
+        header("Location: forum.php?alert=" . urlencode("Failed to publish post. Please try again.") . "&type=danger");
+        exit;
+    }
 }
 
 
