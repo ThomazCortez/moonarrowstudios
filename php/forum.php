@@ -4,11 +4,6 @@ session_start();
 
 // Database connection (update with your database credentials)
 require 'db_connect.php';
-// Include the Composer autoload file
-require '../vendor/autoload.php';
-
-// Use the ProfanityFilter\Check class
-use Mofodojodino\ProfanityFilter\Check;
 
 // Handle post creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
@@ -20,22 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
 
     $title = $_POST['title'];
     $content = $_POST['content'];
-
-    // Initialize the profanity filter
-    $profanityFilter = new Check();
-
-    // Check for profanity in the title and content
-    if ($profanityFilter->hasProfanity($title)) {
-        $_SESSION['error'] = "Your post title contains inappropriate language.";
-        header("Location: forum.php");
-        exit;
-    }
-
-    if ($profanityFilter->hasProfanity($content)) {
-        $_SESSION['error'] = "Your post content contains inappropriate language.";
-        header("Location: forum.php");
-        exit;
-    }
 
     // Sanitize content to ensure code blocks are wrapped properly
     $content = preg_replace('/<code>(.*?)<\/code>/', '<pre><code>$1</code></pre>', $content);
@@ -1069,6 +1048,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let hashtags = new Set();
 
     // Submit handler
+    // Form submission handler with loader
     const form = document.querySelector('#createPostForm');
     form.addEventListener('submit', function(e) {
         const contentInput = document.querySelector('input[name="content"]');
@@ -1093,8 +1073,29 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         if (!hasError) {
+            // Show loader and disable button
+            const submitButton = document.getElementById('submitPostButton');
+            const buttonText = submitButton.querySelector('.button-text');
+            const spinner = submitButton.querySelector('.spinner-border');
+            
+            buttonText.textContent = 'Posting...';
+            spinner.classList.remove('d-none');
+            submitButton.disabled = true;
+            
+            // Set content value
             contentInput.value = quillContent;
         }
+    });
+    
+    // Reset button state when modal is closed
+    document.getElementById('createPostModal').addEventListener('hidden.bs.modal', function() {
+        const submitButton = document.getElementById('submitPostButton');
+        const buttonText = submitButton.querySelector('.button-text');
+        const spinner = submitButton.querySelector('.spinner-border');
+        
+        buttonText.textContent = 'Post';
+        spinner.classList.add('d-none');
+        submitButton.disabled = false;
     });
 
     // Hashtag handling
@@ -1509,8 +1510,15 @@ document.addEventListener("DOMContentLoaded", function() {
                                 <input type="file" name="videos[]" id="videos" class="form-control" accept="video/*" multiple>
                             </div>
                             <div class="mt-3 animate__animated animate__fadeIn d-grid">
-                        <button type="submit" name="create_post" class="btn btn-primary animate__animated animate__infinite w-100">Post</button>
-                    </div>
+                            <!-- Updated button with loader -->
+                            <button type="submit" name="create_post" 
+                                    class="btn btn-primary w-100" 
+                                    id="submitPostButton">
+                                <span class="button-text">Post</span>
+                                <span class="spinner-border spinner-border-sm d-none" 
+                                    role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
                         </form>
                     </div>
                 </div>

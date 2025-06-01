@@ -4,11 +4,6 @@ session_start();
 
 // Database connection (update with your database credentials)
 require 'db_connect.php';
-// Include the Composer autoload file
-require '../vendor/autoload.php';
-
-// Use the ProfanityFilter\Check class
-use Mofodojodino\ProfanityFilter\Check;
 
 // Handle asset creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_asset'])) {
@@ -23,21 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_asset'])) {
 
     $title = $_POST['title'];
     $content = $_POST['content'];
-
-    // Initialize the profanity filter
-    $profanityFilter = new Check();
-
-    // Check for profanity in the title and content
-    if ($profanityFilter->hasProfanity($title)) {
-        header("Location: marketplace.php?alert=" . urlencode("Your asset title contains inappropriate language.") . "&type=danger");
-        exit;
-    }
-
-    if ($profanityFilter->hasProfanity($content)) {
-        $_SESSION['error'] = "Your asset content contains inappropriate language.";
-        header("Location: marketplace.php");
-        exit;
-    }
 
     // Sanitize content to ensure code blocks are wrapped properly
     $content = preg_replace('/<code>(.*?)<\/code>/', '<pre><code>$1</code></pre>', $content);

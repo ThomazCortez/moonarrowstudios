@@ -411,7 +411,7 @@ while ($row = $comments_result->fetch_assoc()) {
 
 /* Code Blocks */
 pre {
-    background-color: var(--color-code-bg) !important;
+    background-color: var(--color-media-overlay) !important;
     border: 1px solid var(--color-border-muted);
     border-radius: 6px;
     padding: 16px;
