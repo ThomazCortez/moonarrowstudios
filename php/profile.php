@@ -3,6 +3,137 @@ session_start();
 require 'db_connect.php';
 include 'notification_functions.php';
 
+// Handle AJAX follow/unfollow requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_follow'])) {
+    // Clear any output buffer and suppress errors in JSON responses
+    ob_clean();
+    error_reporting(0); // Suppress warnings for AJAX responses
+    header('Content-Type: application/json');
+    
+    // Get user ID from URL or POST data (same logic as main page)
+    $user_id = isset($_GET['id']) ? (int)$_GET['id'] : (isset($_POST['user_id']) ? (int)$_POST['user_id'] : null);
+    
+    // Ensure we have a valid session and required variables
+    if (!isset($_SESSION['user_id']) || !$user_id) {
+        echo json_encode(['success' => false, 'message' => 'Session error']);
+        exit;
+    }
+    
+    $is_logged_in = isset($_SESSION['user_id']);
+    $viewing_own_profile = $is_logged_in && $_SESSION['user_id'] == $user_id;
+    
+    if (!$is_logged_in || $viewing_own_profile) {
+        echo json_encode(['success' => false, 'message' => 'Invalid request']);
+        exit;
+    }
+    
+    $response = ['success' => false, 'message' => 'Unknown error', 'is_following' => false, 'follower_count' => 0];
+    
+    try {
+        // Check if database connection exists
+        if (!isset($conn) || $conn === false) {
+            $response['message'] = 'Database connection failed';
+            echo json_encode($response);
+            exit;
+        }
+        
+        // Check for action based on button clicked
+        $action = null;
+        if (isset($_POST['follow'])) {
+            $action = 'follow';
+        } elseif (isset($_POST['unfollow'])) {
+            $action = 'unfollow';
+        }
+        
+        if ($action === 'follow') {
+            // Follow user
+            $stmt = $conn->prepare("INSERT IGNORE INTO follows (follower_id, following_id) VALUES (?, ?)");
+            if (!$stmt) {
+                $response['message'] = 'Failed to prepare follow statement: ' . $conn->error;
+                echo json_encode($response);
+                exit;
+            }
+            
+            $stmt->bind_param("ii", $_SESSION['user_id'], $user_id);
+            
+            if ($stmt->execute()) {
+                if ($stmt->affected_rows > 0) {
+                    // Send notification (wrap in try-catch to not break if notification fails)
+                    try {
+                        if (function_exists('notifyNewFollower')) {
+                            notifyNewFollower($conn, $_SESSION['user_id'], $user_id);
+                        }
+                    } catch (Exception $notifyError) {
+                        error_log("Notification error: " . $notifyError->getMessage());
+                    }
+                    
+                    $response['success'] = true;
+                    $response['message'] = 'Successfully followed user!';
+                    $response['is_following'] = true;
+                } else {
+                    $response['message'] = 'Already following this user';
+                    $response['is_following'] = true;
+                    $response['success'] = true; // This should still be considered success
+                }
+            } else {
+                $response['message'] = 'Failed to execute follow: ' . $stmt->error;
+            }
+            
+        } elseif ($action === 'unfollow') {
+            // Unfollow user
+            $stmt = $conn->prepare("DELETE FROM follows WHERE follower_id = ? AND following_id = ?");
+            if (!$stmt) {
+                $response['message'] = 'Failed to prepare unfollow statement: ' . $conn->error;
+                echo json_encode($response);
+                exit;
+            }
+            
+            $stmt->bind_param("ii", $_SESSION['user_id'], $user_id);
+            
+            if ($stmt->execute()) {
+                if ($stmt->affected_rows > 0) {
+                    $response['success'] = true;
+                    $response['message'] = 'Successfully unfollowed user!';
+                    $response['is_following'] = false;
+                } else {
+                    $response['message'] = 'Not following this user';
+                    $response['is_following'] = false;
+                    $response['success'] = true; // This should still be considered success
+                }
+            } else {
+                $response['message'] = 'Failed to execute unfollow: ' . $stmt->error;
+            }
+        } else {
+            $response['message'] = 'No valid action specified';
+        }
+        
+        // Get updated follower count
+        $count_stmt = $conn->prepare("SELECT COUNT(*) as follower_count FROM follows WHERE following_id = ?");
+        if ($count_stmt) {
+            $count_stmt->bind_param("i", $user_id);
+            if ($count_stmt->execute()) {
+                $result = $count_stmt->get_result();
+                if ($result) {
+                    $count_data = $result->fetch_assoc();
+                    $response['follower_count'] = $count_data['follower_count'] ?? 0;
+                }
+            } else {
+                $response['follower_count'] = 0;
+                error_log("Failed to get follower count: " . $count_stmt->error);
+            }
+        }
+        
+    } catch (Exception $e) {
+        $response['message'] = 'Database error: ' . $e->getMessage();
+        error_log("Follow/Unfollow error: " . $e->getMessage());
+    }
+    
+    // Ensure clean JSON output
+    ob_clean();
+    echo json_encode($response);
+    exit;
+}
+
 // Get user ID from URL or session
 $user_id = isset($_GET['id']) ? (int)$_GET['id'] : ($_SESSION['user_id'] ?? null);
 if (!$user_id) {
@@ -905,14 +1036,22 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                     <h1 class="username animate__animated animate__fadeInLeft"><?= htmlspecialchars($user['username']) ?></h1>
                     <?php if ($is_logged_in && !$viewing_own_profile): ?>
                         <div class="action-buttons animate__animated animate__fadeIn">
-                            <form method="POST" class="mb-0" style="display: inline;">
+                            <form method="POST" class="mb-0" style="display: inline;" id="followForm">
+                                <input type="hidden" name="ajax_follow" value="1">
+                                <input type="hidden" name="user_id" value="<?= $user_id ?>">
                                 <?php if ($is_following): ?>
-                                    <button type="submit" name="unfollow" class="btn-follow btn-outline-primary">Unfollow</button>
+                                    <button type="submit" name="unfollow" class="btn-follow btn-outline-primary" id="followBtn">
+                                        <span class="btn-text">Unfollow</span>
+                                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                    </button>
                                 <?php else: ?>
-                                    <button type="submit" name="follow" class="btn-follow btn-primary">Follow</button>
+                                    <button type="submit" name="follow" class="btn-follow btn-primary" id="followBtn">
+                                        <span class="btn-text">Follow</span>
+                                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                    </button>
                                 <?php endif; ?>
                             </form>
-                            
+
                             <button type="button" class="report-btn" data-bs-toggle="modal" data-bs-target="#reportModal" title="Report User">
                                 <i class="bi bi-flag"> Report User</i>
                             </button>
@@ -922,7 +1061,7 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
 
                 <div class="user-stats <?= $viewing_own_profile ? 'own-profile' : '' ?> animate__animated animate__fadeIn">
                     <div class="stat-item">
-                        <p class="stat-number"><?= htmlspecialchars($follower_count) ?></p>
+                        <p class="stat-number" id="followerCount"><?= htmlspecialchars($follower_count) ?></p>
                         <p class="stat-label">Followers</p>
                     </div>
                     <div class="stat-item">
@@ -1299,155 +1438,239 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
     </div>
 
 <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Tab handling code
-            document.querySelectorAll('.nav-tabs a').forEach(tab => {
-                tab.addEventListener('shown.bs.tab', event => {
-                    const tabName = event.target.getAttribute('href').substring(1);
-                    const urlParams = new URLSearchParams(window.location.search);
-                    urlParams.set('tab', tabName);
-                    window.history.replaceState(null, '', `?${urlParams.toString()}`);
-                });
-            });
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const activeTab = urlParams.get('tab') || 'posts';
-            const tabTrigger = document.querySelector(`.nav-tabs a[href="#${activeTab}"]`);
-            if (tabTrigger) {
-                new bootstrap.Tab(tabTrigger).show();
-            }
-
-            // Report form handling
-            document.getElementById('reportForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
+document.addEventListener('DOMContentLoaded', function() {
+    // Follow/Unfollow form handling
+    const followForm = document.getElementById('followForm');
+    if (followForm) {
+        followForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const followBtn = document.getElementById('followBtn');
+            const btnText = followBtn.querySelector('.btn-text');
+            const spinner = followBtn.querySelector('.spinner-border');
+            const followerCountElement = document.getElementById('followerCount');
+            
+            // Show loading state
+            followBtn.disabled = true;
+            btnText.classList.add('d-none');
+            spinner.classList.remove('d-none');
+            
+            try {
+                const formData = new FormData(this);
                 
-                const formData = new FormData(e.target);
-                const submitBtn = e.target.querySelector('button[type="submit"]');
-                submitBtn.disabled = true;
-                
-                try {
-                    const response = await fetch('report.php', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        showAlert('Report submitted successfully!', 'success');
-                        bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
-                    } else {
-                        showAlert('Report could not be submitted.' , 'danger');
-                    }
-                } catch (error) {
-                    showAlert('Network error. Please try again.', 'warning');
-                } finally {
-                    submitBtn.disabled = false;
+                // Add user ID to form data if not already present
+                const urlParams = new URLSearchParams(window.location.search);
+                const userId = urlParams.get('id');
+                if (userId) {
+                    formData.append('user_id', userId);
                 }
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle staggered animations
-            const animatedElements = document.querySelectorAll('.staggered-animation');
-            
-            // Use IntersectionObserver for better performance
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const element = entry.target;
-                        const animation = element.getAttribute('data-animation');
-                        const delay = element.getAttribute('data-delay');
-                        
-                        // Add the animation classes
-                        element.classList.add('animate__animated', `animate__${animation}`);
-                        element.style.animationDelay = `${delay}s`;
-                        element.style.opacity = '1';
-                        
-                        // Stop observing once animation is applied
-                        observer.unobserve(element);
+                
+                // Add the button action based on the button's current name
+                const buttonName = followBtn.getAttribute('name');
+                if (buttonName) {
+                    formData.append(buttonName, '1');
+                }
+                
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
-            }, {
-                threshold: 0.1
-            });
-            
-            // Start observing all elements with staggered animation
-            animatedElements.forEach(element => {
-                observer.observe(element);
-            });
-            
-            // Add smooth transition when switching tabs
-            const tabLinks = document.querySelectorAll('.nav-link');
-            tabLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    const targetId = this.getAttribute('href');
-                    const targetPane = document.querySelector(targetId);
+                
+                // Check if response is actually JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response received:', text);
+                    throw new Error('Server returned invalid response format');
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update button state based on response
+                    if (result.is_following) {
+                        // Now following - show Unfollow button
+                        followBtn.name = 'unfollow';
+                        followBtn.className = 'btn-follow btn-outline-primary';
+                        btnText.textContent = 'Unfollow';
+                    } else {
+                        // Not following - show Follow button
+                        followBtn.name = 'follow';
+                        followBtn.className = 'btn-follow btn-primary';
+                        btnText.textContent = 'Follow';
+                    }
                     
-                    // Reset all staggered animations when switching tabs
-                    if (targetPane) {
-                        const staggeredItems = targetPane.querySelectorAll('.staggered-animation');
-                        staggeredItems.forEach((item, index) => {
-                            // Remove previous animation classes
-                            item.classList.remove('animate__animated', `animate__${item.getAttribute('data-animation')}`);
-                            item.style.opacity = '0';
-                            
-                            // Re-observe for animation
-                            observer.observe(item);
-                        });
-                    }
-                });
-            });
+                    // Update follower count with animation
+                    followerCountElement.style.transform = 'scale(1.2)';
+                    followerCountElement.style.transition = 'transform 0.3s ease';
+                    followerCountElement.textContent = result.follower_count;
+                    
+                    setTimeout(() => {
+                        followerCountElement.style.transform = 'scale(1)';
+                    }, 300);
+                    
+                    // Show success message
+                    showAlert(result.message, 'success');
+                    
+                } else {
+                    showAlert(result.message || 'An error occurred. Please try again.', 'danger');
+                }
+                
+            } catch (error) {
+                console.error('Follow/Unfollow error:', error);
+                showAlert('Network error. Please try again.', 'warning');
+            } finally {
+                // Hide loading state
+                followBtn.disabled = false;
+                btnText.classList.remove('d-none');
+                spinner.classList.add('d-none');
+            }
         });
+    }
 
-        // Alert Functions
+    // Rest of your existing JavaScript code...
+    // Tab handling code
+    document.querySelectorAll('.nav-tabs a').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', event => {
+            const tabName = event.target.getAttribute('href').substring(1);
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('tab', tabName);
+            window.history.replaceState(null, '', `?${urlParams.toString()}`);
+        });
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeTab = urlParams.get('tab') || 'posts';
+    const tabTrigger = document.querySelector(`.nav-tabs a[href="#${activeTab}"]`);
+    if (tabTrigger) {
+        new bootstrap.Tab(tabTrigger).show();
+    }
+
+    // Report form handling
+    document.getElementById('reportForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        
+        try {
+            const response = await fetch('report.php', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showAlert('Report submitted successfully!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
+            } else {
+                showAlert('Report could not be submitted.', 'danger');
+            }
+        } catch (error) {
+            showAlert('Network error. Please try again.', 'warning');
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+});
+
+// Handle staggered animations
+document.addEventListener('DOMContentLoaded', function() {
+    const animatedElements = document.querySelectorAll('.staggered-animation');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const element = entry.target;
+                const animation = element.getAttribute('data-animation');
+                const delay = element.getAttribute('data-delay');
+                
+                element.classList.add('animate__animated', `animate__${animation}`);
+                element.style.animationDelay = `${delay}s`;
+                element.style.opacity = '1';
+                
+                observer.unobserve(element);
+            }
+        });
+    }, {
+        threshold: 0.1
+    });
+    
+    animatedElements.forEach(element => {
+        observer.observe(element);
+    });
+    
+    const tabLinks = document.querySelectorAll('.nav-link');
+    tabLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            const targetId = this.getAttribute('href');
+            const targetPane = document.querySelector(targetId);
+            
+            if (targetPane) {
+                const staggeredItems = targetPane.querySelectorAll('.staggered-animation');
+                staggeredItems.forEach((item, index) => {
+                    item.classList.remove('animate__animated', `animate__${item.getAttribute('data-animation')}`);
+                    item.style.opacity = '0';
+                    observer.observe(item);
+                });
+            }
+        });
+    });
+});
+
+// Alert Functions
 function showAlert(message, type = 'info') {
-  const alertContainer = document.getElementById('alertContainer');
-  const alertElement = document.createElement('div');
-  alertElement.className = `custom-alert custom-alert-${type}`;
-  
-  let iconClass = 'bi-info-circle';
-  if (type === 'success') iconClass = 'bi-check-circle';
-  if (type === 'danger') iconClass = 'bi-exclamation-triangle';
-  if (type === 'warning') iconClass = 'bi-exclamation-circle';
-  
-  alertElement.innerHTML = `
-    <div class="custom-alert-content">
-      <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
-      <div class="custom-alert-message">${message}</div>
-      <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
-    </div>
-    <div class="progress">
-      <div class="progress-bar"></div>
-    </div>
-  `;
-  
-  alertContainer.appendChild(alertElement);
-  
-  requestAnimationFrame(() => alertElement.classList.add('show'));
-  
-  const progressBar = alertElement.querySelector('.progress-bar');
-  progressBar.style.transition = 'width linear 5000ms';
-  progressBar.style.width = '100%';
-  setTimeout(() => { progressBar.style.width = '0%'; }, 50);
-  
-  const dismissTimeout = setTimeout(() => {
-    dismissAlert(alertElement);
-  }, 5050);
-  
-  alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
-    clearTimeout(dismissTimeout);
-    dismissAlert(alertElement);
-  });
+    const alertContainer = document.getElementById('alertContainer');
+    const alertElement = document.createElement('div');
+    alertElement.className = `custom-alert custom-alert-${type}`;
+    
+    let iconClass = 'bi-info-circle';
+    if (type === 'success') iconClass = 'bi-check-circle';
+    if (type === 'danger') iconClass = 'bi-exclamation-triangle';
+    if (type === 'warning') iconClass = 'bi-exclamation-circle';
+    
+    alertElement.innerHTML = `
+        <div class="custom-alert-content">
+            <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
+            <div class="custom-alert-message">${message}</div>
+            <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
+        </div>
+        <div class="progress">
+            <div class="progress-bar"></div>
+        </div>
+    `;
+    
+    alertContainer.appendChild(alertElement);
+    
+    requestAnimationFrame(() => alertElement.classList.add('show'));
+    
+    const progressBar = alertElement.querySelector('.progress-bar');
+    progressBar.style.transition = 'width linear 5000ms';
+    progressBar.style.width = '100%';
+    setTimeout(() => { progressBar.style.width = '0%'; }, 50);
+    
+    const dismissTimeout = setTimeout(() => {
+        dismissAlert(alertElement);
+    }, 5050);
+    
+    alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
+        clearTimeout(dismissTimeout);
+        dismissAlert(alertElement);
+    });
 }
 
 function dismissAlert(alertElement) {
-  if (!alertElement || alertElement.classList.contains('hiding')) return;
-  alertElement.classList.add('hiding');
-  alertElement.classList.remove('show');
-  setTimeout(() => { alertElement.remove(); }, 300);
+    if (!alertElement || alertElement.classList.contains('hiding')) return;
+    alertElement.classList.add('hiding');
+    alertElement.classList.remove('show');
+    setTimeout(() => { alertElement.remove(); }, 300);
 }
-    </script>
+</script>
 </body>
 </html>
 <?php $conn->close(); ?>
