@@ -984,6 +984,31 @@ if (isset($_GET['tab'])) {
         <?php endif; ?>
     </script>
 
+    <!-- Cropping Modal -->
+    <div class="modal fade" id="cropModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-crop me-2"></i> Crop Image</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="cropper-container">
+                        <img id="cropImage" src="" alt="Image to crop">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </button>
+                    <button class="btn btn-primary" id="cropButton">
+                        <i class="fas fa-crop me-2"></i> Crop Image
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
         <h1 class="mb-4 animate__animated animate__fadeIn">
             <i class="fas fa-cog me-2"></i> Account Settings
         </h1>
@@ -1365,31 +1390,6 @@ if (isset($_GET['tab'])) {
     </form>
 </div>
 
-
-    <!-- Cropping Modal -->
-    <div class="modal fade" id="cropModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-crop me-2"></i> Crop Image</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="cropper-container">
-                        <img id="cropImage" src="" alt="Image to crop">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i> Cancel
-                    </button>
-                    <button class="btn btn-primary" id="cropButton">
-                        <i class="fas fa-crop me-2"></i> Crop Image
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
