@@ -743,18 +743,6 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
         margin-bottom: 8px;
     }
 
-    /* Hashtags */
-    .hashtags .badge {
-        margin-right: 4px;
-        margin-bottom: 4px;
-        transition: all 0.3s ease;
-    }
-
-    .badge:hover {
-        transform: scale(1.15);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
     /* Animations */
     .animate__animated.animate__faster {
         animation-duration: 0.4s;
@@ -1211,7 +1199,7 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                                             <?php if (!empty($post['hashtags'])): ?>
                                                 <?php $tags = explode(' ', $post['hashtags']); ?>
                                                 <?php foreach ($tags as $tag): ?>
-                                                    <span class="badge bg-dark"><?= htmlspecialchars($tag) ?></span>
+                                                    <span class=""><?= htmlspecialchars($tag) ?></span>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </div>
@@ -1332,7 +1320,7 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                                             <?php if (!empty($asset['hashtags'])): ?>
                                                 <?php $tags = explode(' ', $asset['hashtags']); ?>
                                                 <?php foreach ($tags as $tag): ?>
-                                                    <span class="badge bg-dark"><?= htmlspecialchars($tag) ?></span>
+                                                    <span class=""><?= htmlspecialchars($tag) ?></span>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </div>
