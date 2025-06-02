@@ -724,21 +724,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-check-lg me-1"></i>Update Comment
                 </button>
-                <?php if ($is_admin): ?>
                 <button type="button" class="btn btn-danger ms-2" onclick="confirmDelete()">
                     <i class="bi bi-trash me-1"></i>Delete Comment
                 </button>
-                <?php endif; ?>
             </div>
         </form>
 
-        <!-- Delete Form (hidden, Admin Only) -->
-        <?php if ($is_admin): ?>
+        <!-- Delete Form (hidden) -->
         <form id="deleteForm" method="POST" action="delete_comment.php" style="display: none;">
             <input type="hidden" name="comment_id" value="<?php echo $comment_id; ?>">
             <input type="hidden" name="comment_type" value="<?php echo $comment_type; ?>">
         </form>
-        <?php endif; ?>
 
         <script>
         // Initialize Quill editor
@@ -821,7 +817,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             showAlert(<?= json_encode($error_message) ?>, "danger");
         <?php endif; ?>
 
-        <?php if ($is_admin): ?>
+
         // Delete confirmation function (Admin Only)
         function confirmDelete() {
             if (confirm('Are you sure you want to delete this comment? This action cannot be undone.')) {
@@ -850,7 +846,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 form.submit();
             }
         }
-        <?php endif; ?>
     </script>
 </body>
 </html>

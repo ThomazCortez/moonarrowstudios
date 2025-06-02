@@ -121,6 +121,28 @@ if (!$is_admin && !$is_owner) {
     exit();
 }
 
+// Get post_id or asset_id for redirect
+$post_id = null;
+$asset_id = null;
+
+if ($comment_type === 'post') {
+    $query = "SELECT post_id FROM comments WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $comment_id);
+    $stmt->execute();
+    $stmt->bind_result($post_id);
+    $stmt->fetch();
+    $stmt->close();
+} else {
+    $query = "SELECT asset_id FROM comments_asset WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $comment_id);
+    $stmt->execute();
+    $stmt->bind_result($asset_id);
+    $stmt->fetch();
+    $stmt->close();
+}
+
 // Delete comment from the appropriate table
 $deleteQuery = ($comment_type === 'post') ? "DELETE FROM comments WHERE id = ?" : "DELETE FROM comments_asset WHERE id = ?";
 
@@ -144,8 +166,15 @@ $conn->close();
 if ($is_admin) {
     header("Location: manage_comments.php");
 } else {
-    // Redirect user to their profile or previous page
-    header("Location: " . $baseUrl . "profile/profile.php?user_id=" . $current_user_id);
+    // Redirect user back to the post/asset
+    if ($comment_type === 'post' && $post_id) {
+        header("Location: " . $baseUrl . "php/view_post.php?id=" . $post_id);
+    } elseif ($comment_type === 'asset' && $asset_id) {
+        header("Location: " . $baseUrl . "php/view_asset.php?id=" . $asset_id);
+    } else {
+        // Fallback to profile if post/asset ID not found
+        header("Location: " . $baseUrl . "php/profile/profile.php?user_id=" . $current_user_id);
+    }
 }
 exit();
 ?>
