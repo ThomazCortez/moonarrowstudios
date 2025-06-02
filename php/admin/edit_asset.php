@@ -968,8 +968,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-check-lg me-1"></i>Update Asset
                 </button>
+                <button type="button" class="btn btn-danger ms-2" onclick="confirmDelete()">
+                    <i class="bi bi-trash me-1"></i>Delete Post
+                </button>
             </div>
-        </form>
+
+            <!-- Delete Form (hidden) - Moved outside admin condition -->
+            <form id="deleteForm" method="POST" action="delete_post.php" style="display: none;">
+                <input type="hidden" name="asset_id" value="<?php echo $asset_id; ?>">
+            </form>
     </div>
 
     <script>
@@ -1052,6 +1059,30 @@ function dismissAlert(alertElement) {
         <?php if (!empty($error_message)): ?>
             showAlert(<?= json_encode($error_message) ?>, "danger");
         <?php endif; ?>
+
+        // Delete confirmation function
+        function confirmDelete() {
+                if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+                    // Create form if it doesn't exist
+                    let form = document.getElementById('deleteForm');
+                    if (!form) {
+                        form = document.createElement('form');
+                        form.id = 'deleteForm';
+                        form.method = 'POST';
+                        form.action = 'delete_asset.php';
+                        form.style.display = 'none';
+                        
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'asset_id';
+                        input.value = <?php echo $asset_id; ?>;
+                        
+                        form.appendChild(input);
+                        document.body.appendChild(form);
+                    }
+                    form.submit();
+                }
+            }
     </script>
 
     
