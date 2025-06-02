@@ -996,6 +996,29 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
             justify-content: flex-start;
         }
     }
+.edit-icon-container {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+    min-width: 35px;
+    justify-content: center;
+}
+
+.edit-icon {
+    font-size: 1.25rem;
+    color: #6c757d;
+    transition: color 0.2s;
+    text-decoration: none;
+}
+
+.edit-icon:hover {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.post-content {
+    flex-grow: 1;
+}
 </style>
 </head>
 <body>
@@ -1178,58 +1201,72 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                         <button type="submit" class="btn btn-primary">Search</button>
                     </form>
 
-                    <div class="posts-container">
-                        <?php if ($posts->num_rows > 0): ?>
-                            <?php $delay = 0.5; ?>
-                            <?php while ($post = $posts->fetch_assoc()): ?>
-                                <div class="card mb-3 staggered-animation" data-animation="fadeInUp" data-delay="<?= $delay ?>">
-                                    <div class="card-body">
-                                        <h3 class="card-title">
-                                            <a href="view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none">
-                                                <?= htmlspecialchars($post['title']) ?>
-                                            </a>
-                                        </h3>
-                                        <p class="card-text">
-                                            <em>Posted on <?= date('F j, Y, g:i A', strtotime($post['created_at'])) ?></em>
-                                        </p>
-                                        <p class="card-text text-muted">
-                                            <strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?>
-                                        </p>
-                                        <div class="hashtags card-text text-muted mb-2"><strong>Hashtags:</strong> 
-                                            <?php if (!empty($post['hashtags'])): ?>
-                                                <?php $tags = explode(' ', $post['hashtags']); ?>
-                                                <?php foreach ($tags as $tag): ?>
-                                                    <span class=""><?= htmlspecialchars($tag) ?></span>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </div>
-                                        <p class="card-text text-muted"><strong>Rating:</strong> 
-                                            <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> 
-                                            <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> 
-                                            Score: <?= $post['score'] ?? 0 ?>
-                                            <span class="ms-3"><i class="bi bi-eye-fill"></i> <?= $post['views'] ?? 0 ?> views</span>
-                                        </p>
-                                    </div>
-                                </div>
-                                <?php $delay += 0.05; ?>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <div class="alert alert-info animate__animated animate__fadeIn s">No posts found.</div>
-                        <?php endif; ?>
-                        <?php if ($total_post_pages > 1): ?>
-                            <div class="pagination-wrapper mt-4">
-    <nav aria-label="Posts pagination">
-        <ul class="pagination justify-content-center">
-            <li class="page-item <?= ($post_page <= 1) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?<?php 
-                    echo http_build_query(array_merge($_GET, ['post_page' => 1, 'tab' => 'posts']));
-                ?>">First</a>
-            </li>
-            <li class="page-item <?= ($post_page <= 1) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?<?php 
-                    echo http_build_query(array_merge($_GET, ['post_page' => $post_page - 1, 'tab' => 'posts']));
-                ?>">Previous</a>
-            </li>
+<div class="posts-container">
+    <?php if ($posts->num_rows > 0): ?>
+        <?php $delay = 0.5; ?>
+        <?php while ($post = $posts->fetch_assoc()): ?>
+            <div class="card mb-3 staggered-animation" data-animation="fadeInUp" data-delay="<?= $delay ?>">
+                <div class="card-body position-relative d-flex">
+                    <?php if ($viewing_own_profile): ?>
+                        <!-- EDIT ICON FOR OWN POSTS - LEFT SIDE -->
+                        <div class="edit-icon-container">
+                            <a href="admin/edit_post.php?id=<?= $post['id'] ?>" 
+                               class="edit-icon" 
+                               title="Edit Post">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <!-- POST CONTENT -->
+                    <div class="post-content flex-grow-1">
+                        <h3 class="card-title">
+                            <a href="view_post.php?id=<?= $post['id'] ?>" class="text-decoration-none">
+                                <?= htmlspecialchars($post['title']) ?>
+                            </a>
+                        </h3>
+                        <p class="card-text">
+                            <em>Posted on <?= date('F j, Y, g:i A', strtotime($post['created_at'])) ?></em>
+                        </p>
+                        <p class="card-text text-muted">
+                            <strong>Category:</strong> <?= htmlspecialchars($post['category_name'] ?? 'Uncategorized') ?>
+                        </p>
+                        <div class="hashtags card-text text-muted mb-2"><strong>Hashtags:</strong> 
+                            <?php if (!empty($post['hashtags'])): ?>
+                                <?php $tags = explode(' ', $post['hashtags']); ?>
+                                <?php foreach ($tags as $tag): ?>
+                                    <span class=""><?= htmlspecialchars($tag) ?></span>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                        <p class="card-text text-muted"><strong>Rating:</strong> 
+                            <i class="bi bi-caret-up-fill"></i><?= $post['upvotes'] ?? 0 ?> 
+                            <i class="bi bi-caret-down-fill"></i><?= $post['downvotes'] ?? 0 ?> 
+                            Score: <?= $post['score'] ?? 0 ?>
+                            <span class="ms-3"><i class="bi bi-eye-fill"></i> <?= $post['views'] ?? 0 ?> views</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <?php $delay += 0.05; ?>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <div class="alert alert-info animate__animated animate__fadeIn s">No posts found.</div>
+    <?php endif; ?>
+    <?php if ($total_post_pages > 1): ?>
+        <div class="pagination-wrapper mt-4">
+            <nav aria-label="Posts pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item <?= ($post_page <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?<?php 
+                            echo http_build_query(array_merge($_GET, ['post_page' => 1, 'tab' => 'posts']));
+                        ?>">First</a>
+                    </li>
+                    <li class="page-item <?= ($post_page <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?<?php 
+                            echo http_build_query(array_merge($_GET, ['post_page' => $post_page - 1, 'tab' => 'posts']));
+                        ?>">Previous</a>
+                    </li>
 
             <?php 
             $start_page = max(1, $post_page - 2);

@@ -864,18 +864,28 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="animate__animated animate__fadeIn"> 
                 <?= $post['content'] ?> 
             </div>
-            <?php
+<?php
             // After decoding the JSON, clean up the paths
             $images = !empty($post['images']) ? json_decode($post['images'], true) : [];
             $videos = !empty($post['videos']) ? json_decode($post['videos'], true) : [];
 
-            // Clean up the paths by replacing escaped slashes
+            // Clean up the paths by replacing escaped slashes and fix relative paths
             $images = array_map(function($path) {
-                return str_replace('\\/', '/', $path);
+                $cleaned_path = str_replace('\\/', '/', $path);
+                // If path starts with 'php/', go back one directory since view_post.php is in php/
+                if (strpos($cleaned_path, 'php/') === 0) {
+                    return '../' . $cleaned_path;
+                }
+                return $cleaned_path;
             }, $images);
 
             $videos = array_map(function($path) {
-                return str_replace('\\/', '/', $path);
+                $cleaned_path = str_replace('\\/', '/', $path);
+                // If path starts with 'php/', go back one directory since view_post.php is in php/
+                if (strpos($cleaned_path, 'php/') === 0) {
+                    return '../' . $cleaned_path;
+                }
+                return $cleaned_path;
             }, $videos);
 
             // Check if there are any attachments
@@ -899,7 +909,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <?php foreach ($videos as $video_path): 
                             $delay += 0.2; ?>
                             <div class="media-item animate__animated animate__zoomIn" style="animation-delay: <?= $delay ?>s">
-                                <video>
+                                <video controls>
                                     <source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag.
                                 </video>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
