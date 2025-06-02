@@ -773,7 +773,7 @@ function truncateComment($html, $length = 80) {
             </div>
 
             
-<!-- Content Grid -->
+            <!-- Content Grid -->
             <div class="row g-4 content-grid">
                 <!-- Latest from Following -->
                 <div class="col-lg-4 col-md-6">
@@ -805,11 +805,13 @@ function truncateComment($html, $length = 80) {
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
-                                <div class="text-center mt-2 mb-2">
-                                    <a href="following_posts.php" class="text-decoration-none">
-                                         View More
-                                    </a>
-                                </div>
+                                <?php if (count($following_posts) >= 3): ?>
+                                    <div class="text-center mt-2 mb-2">
+                                        <a href="following_posts.php" class="text-decoration-none">
+                                            View More
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
                             <?php else: ?>
                                 <div class="empty-state">No recent posts from people you follow</div>
                             <?php endif; ?>
@@ -847,11 +849,13 @@ function truncateComment($html, $length = 80) {
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
-                                <div class="text-center mt-2 mb-2">
-                                    <a href="recent_comments.php" class="text-decoration-none">
-                                         View More
-                                    </a>
-                                </div>
+                                <?php if (count($recent_comments) >= 3): ?>
+                                    <div class="text-center mt-2 mb-2">
+                                        <a href="recent_comments.php" class="text-decoration-none">
+                                            View More
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
                             <?php else: ?>
                                 <div class="empty-state">No recent comments on your content</div>
                             <?php endif; ?>
@@ -886,11 +890,13 @@ function truncateComment($html, $length = 80) {
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
-                                <div class="text-center mt-2 mb-2">
-                                    <a href="followers.php" class="text-decoration-none">
-                                         View More
-                                    </a>
-                                </div>
+                                <?php if (count($new_followers) >= 3): ?>
+                                    <div class="text-center mt-2 mb-2">
+                                        <a href="followers.php" class="text-decoration-none">
+                                            View More
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
                             <?php else: ?>
                                 <div class="empty-state">No new followers recently</div>
                             <?php endif; ?>
@@ -928,11 +934,13 @@ function truncateComment($html, $length = 80) {
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
-                                <div class="text-center mt-2">
-                                    <a href="following_assets.php" class="text-decoration-none">
-                                         View More
-                                    </a>
-                                </div>
+                                <?php if (count($recent_assets) >= 3): ?>
+                                    <div class="text-center mt-2">
+                                        <a href="following_assets.php" class="text-decoration-none">
+                                            View More
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
                             <?php else: ?>
                                 <div class="empty-state">No recent assets from people you follow</div>
                             <?php endif; ?>
