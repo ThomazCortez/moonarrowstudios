@@ -990,7 +990,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <?php echo htmlspecialchars($comment['username']); ?>
                                 </a>
                                 <div class="text-muted small">
-                                    <i class="bi bi-clock"></i> <?php echo date('F j, Y, g:i A', strtotime($comment['created_at'])); ?>
+                                    <i class="bi bi-clock"></i> 
+                                    <?= date('F j, Y, g:i A', strtotime($comment['created_at'])) ?>
+                                    <?php if ($comment['edited_at']): ?>
+                                        <span class="text-muted" title="Edited at <?= date('F j, Y, g:i A', strtotime($comment['edited_at'])) ?>">(edited)</span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -1012,6 +1016,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <a class="btn btn-link text-decoration-none toggle-replies-btn" data-comment-id="<?php echo $comment['id']; ?>" data-reply-count="<?php echo $comment['reply_count']; ?>"> 
                             Show Replies (<?php echo $comment['reply_count']; ?>) 
                         </a>
+
+                        <?php if (isset($_SESSION['user_id']) && $comment['user_id'] == $_SESSION['user_id']): ?>
+                            <a href="<?= $baseUrl ?>php/admin/edit_comment.php?id=<?= $comment['id'] ?>&type=post" class="btn btn-link text-decoration-none">Edit</a>
+                        <?php endif; ?>
                         
                         <button class="btn text-danger report-btn" data-content-type="comment" data-content-id="<?= $comment['id'] ?>">
                             <i class="bi bi-flag"></i> Report Comment
@@ -1038,7 +1046,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                                     <?php echo htmlspecialchars($reply['username']); ?>
                                                 </a>
                                                 <div class="text-muted small">
-                                                    <i class="bi bi-clock"></i> <?php echo date('F j, Y, g:i A', strtotime($reply['created_at'])); ?>
+                                                    <i class="bi bi-clock"></i> 
+                                                    <?= date('F j, Y, g:i A', strtotime($comment['created_at'])) ?>
+                                                    <?php if ($comment['edited_at']): ?>
+                                                        <span class="text-muted" title="Edited at <?= date('F j, Y, g:i A', strtotime($comment['edited_at'])) ?>">(edited)</span>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                         </div>
@@ -1052,6 +1064,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <button class="btn btn-outline-danger me-3 downvote-reply-btn <?php echo isset($_SESSION['user_id']) ? '' : 'disabled'; ?>" data-comment-id="<?php echo $reply['id']; ?>">
                                             <i class="bi bi-caret-down-fill"></i> <span class="downvote-count"><?php echo $reply['downvotes'] ?? 0; ?></span>
                                         </button>
+
+                                        <?php if (isset($_SESSION['user_id']) && $reply['user_id'] == $_SESSION['user_id']): ?>
+                                            <a href="<?= $baseUrl ?>php/admin/edit_comment.php?id=<?= $reply['id'] ?>&type=post" class="btn btn-link text-decoration-none">Edit</a>
+                                        <?php endif; ?>
                                         
                                         <!-- Add near reply vote buttons -->
                                         <button class="btn text-danger report-btn" data-content-type="reply" data-content-id="<?= $reply['id'] ?>">
