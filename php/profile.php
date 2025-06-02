@@ -1337,43 +1337,57 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                     </form>
 
                     <div class="assets-container">
-                        <?php if ($assets->num_rows > 0): ?>
-                            <?php $delay = 0.5; ?>
-                            <?php while ($asset = $assets->fetch_assoc()): ?>
-                                <div class="card mb-3 staggered-animation" data-animation="fadeInUp" data-delay="<?= $delay ?>">
-                                    <div class="card-body">
-                                        <h3 class="card-title">
-                                            <a href="view_asset.php?id=<?= $asset['id'] ?>" class="text-decoration-none">
-                                                <?= htmlspecialchars($asset['title']) ?>
-                                            </a>
-                                        </h3>
-                                        <p class="card-text">
-                                            <em>Posted on <?= date('F j, Y, g:i A', strtotime($asset['created_at'])) ?></em>
-                                        </p>
-                                        <p class="card-text text-muted">
-                                            <strong>Category:</strong> <?= htmlspecialchars($asset['category_name'] ?? 'Uncategorized') ?>
-                                        </p>
-                                        <div class="hashtags card-text text-muted mb-2"><strong>Hashtags:</strong>
-                                            <?php if (!empty($asset['hashtags'])): ?>
-                                                <?php $tags = explode(' ', $asset['hashtags']); ?>
-                                                <?php foreach ($tags as $tag): ?>
-                                                    <span class=""><?= htmlspecialchars($tag) ?></span>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </div>
-                                        <p class="card-text text-muted"><strong>Rating:</strong>
-                                            <i class="bi bi-caret-up-fill"></i><?= $asset['upvotes'] ?> 
-                                            <i class="bi bi-caret-down-fill"></i><?= $asset['downvotes'] ?>
-                                            Score: <?= $asset['score'] ?>
-                                            <span class="ms-3"><i class="bi bi-eye-fill"></i> <?= $asset['views'] ?? 0 ?> views</span>
-                                        </p>
-                                    </div>
-                                </div>
-                                <?php $delay += 0.05; ?>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <div class="alert alert-info animate__animated animate__fadeIn s">No assets found.</div>
+        <?php if ($assets->num_rows > 0): ?>
+            <?php $delay = 0.5; ?>
+            <?php while ($asset = $assets->fetch_assoc()): ?>
+                <div class="card mb-3 staggered-animation" data-animation="fadeInUp" data-delay="<?= $delay ?>">
+                    <div class="card-body position-relative d-flex">
+                        <?php if ($viewing_own_profile): ?>
+                            <!-- EDIT ICON FOR OWN ASSETS - LEFT SIDE -->
+                            <div class="edit-icon-container">
+                                <a href="admin/edit_asset.php?id=<?= $asset['id'] ?>" 
+                                   class="edit-icon" 
+                                   title="Edit Asset">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            </div>
                         <?php endif; ?>
+                        
+                        <!-- ASSET CONTENT -->
+                        <div class="post-content flex-grow-1">
+                            <h3 class="card-title">
+                                <a href="view_asset.php?id=<?= $asset['id'] ?>" class="text-decoration-none">
+                                    <?= htmlspecialchars($asset['title']) ?>
+                                </a>
+                            </h3>
+                            <p class="card-text">
+                                <em>Posted on <?= date('F j, Y, g:i A', strtotime($asset['created_at'])) ?></em>
+                            </p>
+                            <p class="card-text text-muted">
+                                <strong>Category:</strong> <?= htmlspecialchars($asset['category_name'] ?? 'Uncategorized') ?>
+                            </p>
+                            <div class="hashtags card-text text-muted mb-2"><strong>Hashtags:</strong>
+                                <?php if (!empty($asset['hashtags'])): ?>
+                                    <?php $tags = explode(' ', $asset['hashtags']); ?>
+                                    <?php foreach ($tags as $tag): ?>
+                                        <span class=""><?= htmlspecialchars($tag) ?></span>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                            <p class="card-text text-muted"><strong>Rating:</strong>
+                                <i class="bi bi-caret-up-fill"></i><?= $asset['upvotes'] ?> 
+                                <i class="bi bi-caret-down-fill"></i><?= $asset['downvotes'] ?>
+                                Score: <?= $asset['score'] ?>
+                                <span class="ms-3"><i class="bi bi-eye-fill"></i> <?= $asset['views'] ?? 0 ?> views</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <?php $delay += 0.05; ?>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <div class="alert alert-info animate__animated animate__fadeIn s">No assets found.</div>
+        <?php endif; ?>
                         <?php if ($total_asset_pages > 1): ?>
 <div class="pagination-wrapper mt-4">
     <nav aria-label="Assets pagination">
