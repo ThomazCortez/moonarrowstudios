@@ -9,6 +9,18 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Fetch current user data BEFORE using it
+$user_id = $_SESSION['user_id'];
+$stmt = $conn->prepare("SELECT * FROM users WHERE user_id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$user_result = $stmt->get_result();
+
+if ($user_result->num_rows === 0) {
+    die("User not found!"); // Handle missing user
+}
+$user = $user_result->fetch_assoc();
+
 // Initialize messages
 $success_message = '';
 $error_message = '';
@@ -49,6 +61,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $portfolio = isset($_POST['portfolio']) ? $_POST['portfolio'] : '';
         $youtube = isset($_POST['youtube']) ? $_POST['youtube'] : '';
         $linkedin = isset($_POST['linkedin']) ? $_POST['linkedin'] : '';
+
+        // Handle banner removal
+        if (isset($_POST['banner_data']) && $_POST['banner_data'] === 'remove') {
+            // Delete old banner if it exists
+            if ($user['banner']) {
+                $old_file = str_replace('\moonarrowstudios', '..', $user['banner']);
+                if (file_exists($old_file)) {
+                    unlink($old_file);
+                }
+            }
+            
+            $stmt = $conn->prepare("UPDATE users SET banner = NULL WHERE user_id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+        }
+
+        // Handle profile picture removal
+        if (isset($_POST['profile_picture_data']) && $_POST['profile_picture_data'] === 'remove') {
+            // Delete old profile picture if it exists
+            if ($user['profile_picture']) {
+                $old_file = str_replace('\moonarrowstudios', '..', $user['profile_picture']);
+                if (file_exists($old_file)) {
+                    unlink($old_file);
+                }
+            }
+            
+            $stmt = $conn->prepare("UPDATE users SET profile_picture = NULL WHERE user_id = ?");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+        }
         
         // Handle cropped profile picture upload
         if (!empty($_POST['profile_picture_data']) && strpos($_POST['profile_picture_data'], 'data:image/png;base64,') === 0) {
@@ -965,6 +1007,21 @@ if (isset($_GET['tab'])) {
     transform: translateY(0);
     opacity: 1;
 }
+
+.upload-preview img {
+    object-fit: cover;
+}
+
+.banner-preview {
+    width: 300px;
+    height: 90px;
+}
+
+.profile-picture-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+}
     </style>
 </head>
 <body>
@@ -1049,6 +1106,11 @@ if (isset($_GET['tab'])) {
                                         <div class="upload-preview">
                                             <?php if ($user['banner']): ?>
                                                 <img src="<?= $user['banner'] ?>" alt="Current banner" class="banner-preview">
+                                                <div class="mt-2 d-flex justify-content-center">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger remove-banner">
+                                                        <i class="fas fa-trash-alt me-1"></i> Remove Banner
+                                                    </button>
+                                                </div>
                                             <?php else: ?>
                                                 <div class="banner-preview bg-dark d-flex align-items-center justify-content-center" style="width: 300px; height: 90px;">
                                                     <i class="fas fa-image text-muted fa-2x"></i>
@@ -1072,6 +1134,11 @@ if (isset($_GET['tab'])) {
                                         <div class="upload-preview">
                                             <?php if ($user['profile_picture']): ?>
                                                 <img src="<?= $user['profile_picture'] ?>" alt="Current profile picture" class="profile-picture-preview rounded-circle">
+                                                <div class="mt-2">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger remove-profile-picture">
+                                                        <i class="fas fa-trash-alt me-1"></i> Remove Picture
+                                                    </button>
+                                                </div>
                                             <?php else: ?>
                                                 <div class="profile-picture-preview bg-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
                                                     <i class="fas fa-user text-muted fa-3x"></i>
@@ -1393,96 +1460,138 @@ if (isset($_GET['tab'])) {
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        let cropper;
-        let currentInput;
-        const modal = new bootstrap.Modal(document.getElementById('cropModal'));
-        
-        function initCropper(input, aspectRatio) {
-            currentInput = input;
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const cropImage = document.getElementById('cropImage');
-                    cropImage.src = e.target.result;
-                    
-                    if (cropper) {
-                        cropper.destroy();
-                    }
-                    
-                    modal.show();
-                    
-                    setTimeout(() => {
-                        cropper = new Cropper(cropImage, {
-                            aspectRatio: aspectRatio,
-                            viewMode: 1,
-                            background: true,
-                            modal: true,
-                            dragMode: 'move',
-                            autoCropArea: 0.8,
-                            responsive: true,
-                            restore: false,
-                            guides: true,
-                            center: true,
-                            highlight: false,
-                            cropBoxMovable: true,
-                            cropBoxResizable: true,
-                            toggleDragModeOnDblclick: false
-                        });
-                    }, 200);
+        // Initialize cropper and preview functionality
+document.addEventListener('DOMContentLoaded', function() {
+    let cropper;
+    let currentInput;
+    const modal = new bootstrap.Modal(document.getElementById('cropModal'));
+    
+    // Function to initialize cropper
+    function initCropper(input, aspectRatio) {
+        currentInput = input;
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const cropImage = document.getElementById('cropImage');
+                cropImage.src = e.target.result;
+                
+                if (cropper) {
+                    cropper.destroy();
                 }
-                reader.readAsDataURL(file);
+                
+                modal.show();
+                
+                setTimeout(() => {
+                    cropper = new Cropper(cropImage, {
+                        aspectRatio: aspectRatio,
+                        viewMode: 1,
+                        autoCropArea: 0.8,
+                        responsive: true,
+                        restore: false,
+                        guides: true,
+                        center: true,
+                        highlight: false,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true
+                    });
+                }, 200);
             }
+            reader.readAsDataURL(file);
         }
+    }
 
-        document.getElementById('profile_picture').addEventListener('change', function() {
-            initCropper(this, 1); // 1:1 aspect ratio for profile picture
-        });
+    // Profile picture cropper
+    document.getElementById('profile_picture').addEventListener('change', function() {
+        initCropper(this, 1);
+    });
 
-        document.getElementById('banner').addEventListener('change', function() {
-            initCropper(this, 669 / 200); // 669:200 aspect ratio for banner
-        });
+    // Banner cropper
+    document.getElementById('banner').addEventListener('change', function() {
+        initCropper(this, 669 / 200);
+    });
 
-        document.getElementById('cropButton').addEventListener('click', function() {
+    // Crop button handler
+    document.getElementById('cropButton').addEventListener('click', function() {
+        if (cropper) {
             const croppedCanvas = cropper.getCroppedCanvas({
-                width: currentInput.id === 'profile_picture' ? 150 : 669, // Set width for profile picture and banner
-                height: currentInput.id === 'profile_picture' ? 150 : 200 // Set height for profile picture and banner
+                width: currentInput.id === 'profile_picture' ? 150 : 669,
+                height: currentInput.id === 'profile_picture' ? 150 : 200
             });
+            
             const croppedImage = croppedCanvas.toDataURL('image/png');
+            updatePreview(currentInput.id, croppedImage);
+            modal.hide();
+        }
+    });
+
+    // Update preview function
+    function updatePreview(inputId, imageData) {
+        const isProfilePic = inputId === 'profile_picture';
+        const previewClass = isProfilePic ? '.profile-picture-preview' : '.banner-preview';
+        const previewElement = document.querySelector(previewClass);
+        const hiddenInput = document.getElementById(inputId + '_data');
+        
+        // Create or update preview image
+        if (previewElement.tagName === 'IMG') {
+            previewElement.src = imageData;
+        } else {
+            // Replace placeholder div with image
+            const img = document.createElement('img');
+            img.src = imageData;
+            img.className = previewClass.substring(1);
+            img.classList.add('animate__animated', 'animate__fadeIn');
             
-            // Update preview
-            const previewClass = currentInput.id === 'profile_picture' ? 
-                '.profile-picture-preview' : '.banner-preview';
-            
-            let preview = document.querySelector(previewClass);
-            
-            if (preview) {
-                preview.src = croppedImage;
-                preview.classList.add('animate__animated', 'animate__fadeIn');
-                
-                // Remove placeholder if it exists
-                if (preview.classList.contains('d-flex')) {
-                    preview.classList.remove('d-flex', 'align-items-center', 'justify-content-center', 'bg-dark');
-                    preview.innerHTML = '';
-                }
-            } else {
-                const previewContainer = document.createElement('div');
-                previewContainer.className = 'preview-container';
-                
-                const newPreview = document.createElement('img');
-                newPreview.src = croppedImage;
-                newPreview.className = previewClass.substring(1) + ' animate__animated animate__fadeIn';
-                
-                previewContainer.appendChild(newPreview);
-                currentInput.parentElement.appendChild(previewContainer);
+            if (isProfilePic) {
+                img.classList.add('rounded-circle');
             }
             
-            // Update hidden input
-            const hiddenInput = document.getElementById(currentInput.id + '_data');
-            hiddenInput.value = croppedImage;
+            previewElement.replaceWith(img);
+        }
+        
+        // Update hidden input
+        hiddenInput.value = imageData;
+    }
+
+    // Remove banner handler
+    document.querySelector('.remove-banner')?.addEventListener('click', function() {
+        document.getElementById('banner').value = '';
+        document.getElementById('banner_data').value = 'remove';
+        resetPreview('banner');
+    });
+
+    // Remove profile picture handler
+    document.querySelector('.remove-profile-picture')?.addEventListener('click', function() {
+        document.getElementById('profile_picture').value = '';
+        document.getElementById('profile_picture_data').value = 'remove';
+        resetPreview('profile_picture');
+    });
+
+    // Reset preview to placeholder
+    function resetPreview(type) {
+        const isProfilePic = type === 'profile_picture';
+        const previewClass = isProfilePic ? '.profile-picture-preview' : '.banner-preview';
+        const previewElement = document.querySelector(previewClass);
+        
+        if (previewElement.tagName === 'IMG') {
+            const placeholder = document.createElement('div');
+            placeholder.className = previewClass.substring(1) + ' bg-dark d-flex align-items-center justify-content-center';
             
-            modal.hide();
-        });
+            if (isProfilePic) {
+                placeholder.style.width = '150px';
+                placeholder.style.height = '150px';
+                placeholder.innerHTML = '<i class="fas fa-user text-muted fa-3x"></i>';
+                placeholder.classList.add('rounded-circle');
+            } else {
+                placeholder.style.width = '300px';
+                placeholder.style.height = '90px';
+                placeholder.innerHTML = '<i class="fas fa-image text-muted fa-2x"></i>';
+            }
+            
+            previewElement.replaceWith(placeholder);
+        }
+    }
+});
 
         // Handle tab navigation and history
         document.querySelectorAll('#settingsTabs .nav-link').forEach(tab => {
@@ -1684,6 +1793,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+document.querySelector('.remove-banner')?.addEventListener('click', function() {
+        // Clear file input
+        document.getElementById('banner').value = '';
+        // Set hidden input to indicate removal
+        document.getElementById('banner_data').value = 'remove';
+        // Update preview
+        const container = this.closest('.upload-preview');
+        container.innerHTML = `
+            <div class="banner-preview bg-dark d-flex align-items-center justify-content-center" style="width: 300px; height: 90px;">
+                <i class="fas fa-image text-muted fa-2x"></i>
+            </div>
+        `;
+    }
+);
+
+// Handle profile picture removal
+document.querySelector('.remove-profile-picture')?.addEventListener('click', function() {
+   
+        // Clear file input
+        document.getElementById('profile_picture').value = '';
+        // Set hidden input to indicate removal
+        document.getElementById('profile_picture_data').value = 'remove';
+        // Update preview
+        const container = this.closest('.upload-preview');
+        container.innerHTML = `
+            <div class="profile-picture-preview bg-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                <i class="fas fa-user text-muted fa-3x"></i>
+            </div>
+        `;
+    }
+);
 </script>
 </body>
 </html>
