@@ -590,25 +590,25 @@ hr {
 }
 
         @media (max-width: 992px) {
-            .leaderboard-card {
-                position: static;
-                max-height: none;
-                overflow-y: visible;
-            }
-        }
+    .leaderboard-card {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+    }
+}
 
-        .leaderboard-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--color-fg-default);
-        }
+.leaderboard-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--color-fg-default);
+}
 
-        .leaderboard-section {
-            margin-bottom: 1.5rem;
-        }
+.leaderboard-section {
+    margin-bottom: 1.5rem;
+}
 
-        .leaderboard-section-title {
+.leaderboard-section-title {
     font-size: 0.875rem;
     color: var(--color-fg-muted);
     margin-bottom: 1rem;
@@ -641,41 +641,41 @@ hr {
     margin-right: 0.5rem;
 }
 
-        .leaderboard-content {
-            flex: 1;
-            font-size: 0.875rem;
-        }
+.leaderboard-content {
+    flex: 1;
+    font-size: 0.875rem;
+}
 
-        .leaderboard-stat {
-            font-size: 0.75rem;
-            color: var(--color-fg-muted);
-            margin-left: 0.5rem;
-        }
+.leaderboard-stat {
+    font-size: 0.75rem;
+    color: var(--color-fg-muted);
+    margin-left: 0.5rem;
+}
 
-        .trending-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
+.trending-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
 
-        .tag-badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            background-color: var(--color-canvas-subtle);
-            color: var(--color-fg-muted);
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border: 1px solid var(--color-border-muted);
-        }
+.tag-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background-color: var(--color-canvas-subtle);
+    color: var(--color-fg-muted);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid var(--color-border-muted);
+}
 
-        .tag-badge:hover {
-            background-color: var(--color-canvas-subtle);
-            color: var(--color-accent-fg);
-            border-color: var(--color-accent-fg);
-        }
+.tag-badge:hover {
+    background-color: var(--color-canvas-subtle);
+    color: var(--color-accent-fg);
+    border-color: var(--color-accent-fg);
+}
 
-        @media (max-width: 992px) {
+@media (max-width: 992px) {
     .main-container {
         grid-template-columns: 1fr;
         padding: 0 15px;
@@ -752,14 +752,16 @@ hr {
 }
 
 @media (max-width: 768px) {
-    /* Stack search form elements vertically */
+    /* Stack search form elements and create button vertically */
     .d-flex.justify-content-between {
         flex-direction: column;
+        align-items: stretch !important; /* Override Bootstrap's align-items-center */
     }
     
     form.d-flex {
         flex-direction: column;
         width: 100%;
+        margin-bottom: 1rem; /* Add space between form and create button */
     }
     
     form.d-flex input,
@@ -770,9 +772,10 @@ hr {
         margin-bottom: 0.5rem;
     }
     
-    /* Make create post button full width */
-    .btn-success {
+    /* Make create asset button full width and stack below form */
+    .btn-primary[data-bs-toggle="modal"] {
         width: 100%;
+        margin-top: 0.5rem;
     }
 }
 /* Add/Update these styles in your CSS */
@@ -1325,7 +1328,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     
                     <!-- Top Posts Section -->
                     <div class="leaderboard-section animate__animated animate__fadeIn">
-                        <h3 class="leaderboard-section-title">Top Posts Today</h3>
+                        <h3 class="leaderboard-section-title">Top Posts</h3>
                         <?php
                         $top_posts = $conn->query("SELECT * FROM posts WHERE status != 'hidden' ORDER BY upvotes DESC LIMIT 5");
                         $rank = 1;
