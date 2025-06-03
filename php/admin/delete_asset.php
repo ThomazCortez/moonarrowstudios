@@ -23,23 +23,30 @@ $asset_id = (int)$_POST['asset_id'];
 $user_id = $_SESSION['user_id'];
 
 try {
-    // Verify user can delete this asset (either admin or asset owner)
-    $query = "SELECT a.user_id, u.role 
+    // Get asset details and user role in one query
+    $query = "SELECT a.user_id, a.preview_image, a.asset_file, u.role 
               FROM assets a
-              JOIN users u ON a.user_id = u.user_id
+              JOIN users u ON u.user_id = ?
               WHERE a.id = ?";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $asset_id);
+    $stmt->bind_param("ii", $user_id, $asset_id);
     $stmt->execute();
-    $stmt->bind_result($asset_owner_id, $user_role);
+    $result = $stmt->get_result();
     
-    if (!$stmt->fetch()) {
+    if ($result->num_rows === 0) {
         // Asset not found
         $_SESSION['error_message'] = "Asset not found.";
         header("Location: manage_assets.php");
         exit();
     }
+    
+    $asset_data = $result->fetch_assoc();
     $stmt->close();
+
+    $asset_owner_id = $asset_data['user_id'];
+    $user_role = $asset_data['role'];
+    $preview_image = $asset_data['preview_image'];
+    $asset_file = $asset_data['asset_file'];
 
     // Check permissions
     if ($user_role !== 'admin' && $asset_owner_id !== $user_id) {
@@ -51,8 +58,17 @@ try {
     // Start a transaction to ensure data integrity
     $conn->begin_transaction();
 
-    // First, delete all comments associated with the asset
-    $deleteCommentsQuery = "DELETE FROM comments WHERE post_id = ?";
+    // Delete associated files first
+    if (!empty($preview_image) && file_exists('../../' . $preview_image)) {
+        unlink('../../' . $preview_image);
+    }
+    
+    if (!empty($asset_file) && file_exists('../../' . $asset_file)) {
+        unlink('../../' . $asset_file);
+    }
+
+    // Delete all comments associated with the asset (fix table name)
+    $deleteCommentsQuery = "DELETE FROM comments_asset WHERE asset_id = ?";
     $stmt = $conn->prepare($deleteCommentsQuery);
     $stmt->bind_param("i", $asset_id);
     $stmt->execute();
@@ -70,6 +86,7 @@ try {
 
     // Set success message
     $_SESSION['success_message'] = "Asset successfully deleted.";
+    
 } catch (Exception $e) {
     // Rollback the transaction in case of error
     if (isset($conn) && $conn->ping()) {
@@ -84,7 +101,7 @@ try {
 if (isset($user_role) && $user_role === 'admin') {
     header("Location: manage_assets.php");
 } else {
-    // For regular users, redirect to their assets page
+    // For regular users, redirect to their assets page or profile
     header("Location: " . $baseUrl . "php/profile.php");
 }
 exit();

@@ -969,7 +969,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="bi bi-check-lg me-1"></i>Update Asset
                 </button>
                 <button type="button" class="btn btn-danger ms-2" onclick="confirmDelete()">
-                    <i class="bi bi-trash me-1"></i>Delete Post
+                    <i class="bi bi-trash me-1"></i>Delete Asset
                 </button>
             </div>
 
@@ -979,7 +979,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
     </div>
 
-    <script>
+<script>
         // Initialize Quill editor
         var quill = new Quill('#editor', {
             placeholder: 'Describe your asset here...',
@@ -1004,52 +1004,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
 
         // Alert Functions
-function showAlert(message, type = 'info') {
-    const alertContainer = document.getElementById('alertContainer');
-    const alertElement = document.createElement('div');
-    alertElement.className = `custom-alert custom-alert-${type}`;
-    
-    let iconClass = 'bi-info-circle';
-    if (type === 'success') iconClass = 'bi-check-circle';
-    if (type === 'danger') iconClass = 'bi-exclamation-triangle';
-    if (type === 'warning') iconClass = 'bi-exclamation-circle';
-    
-    alertElement.innerHTML = `
-        <div class="custom-alert-content">
-            <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
-            <div class="custom-alert-message">${message}</div>
-            <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
-        </div>
-        <div class="progress">
-            <div class="progress-bar"></div>
-        </div>
-    `;
-    
-    alertContainer.appendChild(alertElement);
-    
-    requestAnimationFrame(() => alertElement.classList.add('show'));
-    
-    const progressBar = alertElement.querySelector('.progress-bar');
-    progressBar.style.transition = 'width linear 5000ms';
-    progressBar.style.width = '100%';
-    setTimeout(() => { progressBar.style.width = '0%'; }, 50);
-    
-    const dismissTimeout = setTimeout(() => {
-        dismissAlert(alertElement);
-    }, 5050);
-    
-    alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
-        clearTimeout(dismissTimeout);
-        dismissAlert(alertElement);
-    });
-}
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertElement = document.createElement('div');
+            alertElement.className = `custom-alert custom-alert-${type}`;
+            
+            let iconClass = 'bi-info-circle';
+            if (type === 'success') iconClass = 'bi-check-circle';
+            if (type === 'danger') iconClass = 'bi-exclamation-triangle';
+            if (type === 'warning') iconClass = 'bi-exclamation-circle';
+            
+            alertElement.innerHTML = `
+                <div class="custom-alert-content">
+                    <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
+                    <div class="custom-alert-message">${message}</div>
+                    <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar"></div>
+                </div>
+            `;
+            
+            alertContainer.appendChild(alertElement);
+            
+            requestAnimationFrame(() => alertElement.classList.add('show'));
+            
+            const progressBar = alertElement.querySelector('.progress-bar');
+            progressBar.style.transition = 'width linear 5000ms';
+            progressBar.style.width = '100%';
+            setTimeout(() => { progressBar.style.width = '0%'; }, 50);
+            
+            const dismissTimeout = setTimeout(() => {
+                dismissAlert(alertElement);
+            }, 5050);
+            
+            alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
+                clearTimeout(dismissTimeout);
+                dismissAlert(alertElement);
+            });
+        }
 
-function dismissAlert(alertElement) {
-    if (!alertElement || alertElement.classList.contains('hiding')) return;
-    alertElement.classList.add('hiding');
-    alertElement.classList.remove('show');
-    setTimeout(() => { alertElement.remove(); }, 300);
-}
+        function dismissAlert(alertElement) {
+            if (!alertElement || alertElement.classList.contains('hiding')) return;
+            alertElement.classList.add('hiding');
+            alertElement.classList.remove('show');
+            setTimeout(() => { alertElement.remove(); }, 300);
+        }
 
         // Show alerts if messages exist
         <?php if (!empty($success_message)): ?>
@@ -1060,29 +1060,26 @@ function dismissAlert(alertElement) {
             showAlert(<?= json_encode($error_message) ?>, "danger");
         <?php endif; ?>
 
-        // Delete confirmation function
+        // Fixed delete confirmation function
         function confirmDelete() {
-                if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-                    // Create form if it doesn't exist
-                    let form = document.getElementById('deleteForm');
-                    if (!form) {
-                        form = document.createElement('form');
-                        form.id = 'deleteForm';
-                        form.method = 'POST';
-                        form.action = 'delete_asset.php';
-                        form.style.display = 'none';
-                        
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'asset_id';
-                        input.value = <?php echo $asset_id; ?>;
-                        
-                        form.appendChild(input);
-                        document.body.appendChild(form);
-                    }
-                    form.submit();
-                }
+            if (confirm('Are you sure you want to delete this asset? This action cannot be undone.')) {
+                // Create a form to submit the delete request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'delete_asset.php';
+                form.style.display = 'none';
+                
+                // Add the asset ID
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'asset_id';
+                input.value = <?php echo $asset_id; ?>;
+                
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
             }
+        }
     </script>
 
     

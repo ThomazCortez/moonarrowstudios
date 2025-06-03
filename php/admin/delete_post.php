@@ -48,10 +48,10 @@ $stmt->bind_param("i", $post_id);
 
 if ($stmt->execute()) {
     // Successfully deleted
-    $_SESSION['message'] = "Post deleted successfully.";
+    $_SESSION['success_message'] = "Post deleted successfully.";
 } else {
     // Error occurred
-    $_SESSION['error'] = "Error deleting post.";
+    $_SESSION['error_messages'] = ["Error deleting post."];
 }
 
 $stmt->close();

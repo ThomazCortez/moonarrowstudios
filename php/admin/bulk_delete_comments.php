@@ -84,7 +84,7 @@ $stmt->close();
 if ($deleted_count > 0) {
     $_SESSION['success_message'] = "Successfully deleted $deleted_count comments.";
 } else {
-    $_SESSION['error_message'] = $error_message ?: "No comments were deleted.";
+    $_SESSION['error_messages'] = [$error_message ?: "No comments were deleted."];
 }
 
 $conn->close();

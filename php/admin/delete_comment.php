@@ -30,7 +30,7 @@ $is_admin = ($user_role === 'admin');
 
 // Check if comment ID is provided
 if (!isset($_POST['comment_id']) || empty($_POST['comment_id'])) {
-    $_SESSION['error_message'] = "Missing comment ID.";
+    $_SESSION['error_messages'] = ["Missing comment ID."];
     header("Location: " . ($is_admin ? "manage_comments.php" : $baseUrl));
     exit();
 }
@@ -109,14 +109,14 @@ if (empty($comment_type)) {
 
 // Check if comment was found
 if (empty($comment_type)) {
-    $_SESSION['error_message'] = "Comment not found.";
+    $_SESSION['error_messages'] = ["Comment not found."];
     header("Location: " . ($is_admin ? "manage_comments.php" : $baseUrl));
     exit();
 }
 
 // Verify access rights
 if (!$is_admin && !$is_owner) {
-    $_SESSION['error_message'] = "You don't have permission to delete this comment.";
+    $_SESSION['error_messages'] = ["You don't have permission to delete this comment."];
     header("Location: " . ($is_admin ? "manage_comments.php" : $baseUrl));
     exit();
 }
@@ -153,10 +153,10 @@ if ($stmt->execute()) {
     if ($stmt->affected_rows > 0) {
         $_SESSION['success_message'] = "Comment deleted successfully.";
     } else {
-        $_SESSION['error_message'] = "Comment not found or already deleted.";
+        $_SESSION['error_messages'] = ["Comment not found or already deleted."];
     }
 } else {
-    $_SESSION['error_message'] = "Failed to delete comment: " . $conn->error;
+    $_SESSION['error_messages'] = ["Failed to delete comment: " . $conn->error];
 }
 
 $stmt->close();

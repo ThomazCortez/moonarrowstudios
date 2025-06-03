@@ -29,11 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['post_ids'])) {
         $placeholders = implode(',', array_fill(0, count($post_ids), '?'));
         $types = str_repeat('i', count($post_ids));
         
+        $deleted_count = 0;
+        
         // Delete posts
         $query = "DELETE FROM posts WHERE id IN ($placeholders)";
         $stmt = $conn->prepare($query);
         $stmt->bind_param($types, ...$post_ids);
-        $stmt->execute();
+        if ($stmt->execute()) {
+            $deleted_count = $stmt->affected_rows;
+        }
         $stmt->close();
         
         // Delete associated comments
@@ -43,8 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['post_ids'])) {
         $stmt->execute();
         $stmt->close();
         
-        header("Location: manage_posts.php?bulk_delete_success=1");
+        if ($deleted_count > 0) {
+            $_SESSION['success_message'] = "Successfully deleted $deleted_count posts.";
+        } else {
+            $_SESSION['error_messages'] = ["No posts were deleted."];
+        }
+        
+        header("Location: manage_posts.php");
         exit();
+    } else {
+        $_SESSION['error_messages'] = ["No posts selected for deletion."];
     }
 }
 

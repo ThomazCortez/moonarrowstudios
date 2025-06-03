@@ -576,12 +576,12 @@ $post_stats = $statsResult->fetch_assoc();
         </div>
     </div>
 
-    <!-- Delete Post Modal -->
+    <!-- Delete Asset Modal -->
     <div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="deletePostModalLabel">Delete Post</h5>
+                    <h5 class="modal-title" id="deletePostModalLabel">Delete Asset</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -591,8 +591,8 @@ $post_stats = $statsResult->fetch_assoc();
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <form action="delete_asset.php" method="POST">
-                        <input type="hidden" name="post_id" id="deletePostId">
-                        <button type="submit" class="btn btn-danger">Delete Post</button>
+                        <input type="hidden" name="asset_id" id="deletePostId">
+                        <button type="submit" class="btn btn-danger">Delete Asset</button>
                     </form>
                 </div>
             </div>
@@ -623,7 +623,7 @@ $post_stats = $statsResult->fetch_assoc();
     </div>
 </div>
 
-    <script>
+<script>
         document.addEventListener('DOMContentLoaded', function() {
     // Single delete modal functionality
     const deletePostModal = document.getElementById('deletePostModal');
@@ -686,13 +686,15 @@ $post_stats = $statsResult->fetch_assoc();
     // Function to update bulk delete button state
     function updateBulkDeleteButton() {
         const selectedCount = document.querySelectorAll('.asset-select:checked').length;
-        bulkDeleteBtn.disabled = selectedCount === 0;
-        bulkDeleteBtn.textContent = selectedCount > 0 ? 
-            `Delete Selected (${selectedCount})` : 'Delete Selected';
+        if (bulkDeleteBtn) {
+            bulkDeleteBtn.disabled = selectedCount === 0;
+            bulkDeleteBtn.textContent = selectedCount > 0 ? 
+                `Delete Selected (${selectedCount})` : 'Delete Selected';
+        }
     }
     
-    // Sorting functionality
-    function changeSort(column) {
+    // Fixed sorting functionality
+    window.changeSort = function(column) {
         let currentSort = '<?php echo $sortBy; ?>';
         let currentOrder = '<?php echo $sortOrder; ?>';
         let newOrder = 'ASC';
@@ -703,7 +705,7 @@ $post_stats = $statsResult->fetch_assoc();
         
         const form = document.createElement('form');
         form.method = 'GET';
-        form.action = 'manage_asets.php';
+        form.action = 'manage_assets.php'; // Fixed typo: was 'manage_asets.php'
         
         const inputs = {
             'search': '<?php echo htmlspecialchars($search); ?>',
@@ -727,9 +729,10 @@ $post_stats = $statsResult->fetch_assoc();
         
         document.body.appendChild(form);
         form.submit();
-    }
+    };
 });
-// Custom Alert Functions
+
+        // Custom Alert Functions
         function showAlert(message, type = 'info') {
             const alertContainer = document.getElementById('alertContainer');
             const alertElement = document.createElement('div');
@@ -788,6 +791,11 @@ $post_stats = $statsResult->fetch_assoc();
             <?php if (isset($_SESSION['success_message'])): ?>
                 showAlert(<?php echo json_encode($_SESSION['success_message']); ?>, 'success');
                 <?php unset($_SESSION['success_message']); ?>
+            <?php endif; ?>
+            
+            <?php if (isset($_SESSION['error_message'])): ?>
+                showAlert(<?php echo json_encode($_SESSION['error_message']); ?>, 'danger');
+                <?php unset($_SESSION['error_message']); ?>
             <?php endif; ?>
         });
     </script>
