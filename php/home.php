@@ -604,7 +604,6 @@ function truncateComment($html, $length = 80) {
       cursor: pointer;
       user-select: none;
       background-color: transparent;
-      border: 1px solid transparent;
       padding: 0.375rem 0.75rem;
       font-size: 1rem;
       border-radius: 0.375rem;
