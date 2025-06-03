@@ -172,34 +172,153 @@ $user_stats = $result->fetch_assoc();
         .high-reports {
             background-color: rgba(220, 53, 69, 0.1);
         }
+        /* Custom Alert Animation Styles */
+        .alert-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1060; /* Increased from 1050 to be above Bootstrap modals (1055) */
+            pointer-events: none;
+        }
+
+        .custom-alert {
+            position: relative;
+            margin: 16px auto;
+            max-width: 500px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            pointer-events: auto;
+            overflow: hidden;
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s linear;
+            z-index: 1061; /* Added explicit z-index for the alert itself */
+        }
+
+        .custom-alert.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .custom-alert.hiding {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+
+        .custom-alert .progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            border-radius: 0;
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 0;
+            margin: 0;
+        }
+
+        .custom-alert .progress-bar {
+            transition: width linear 5000ms;
+            width: 100%;
+            height: 100%;
+        }
+
+        .custom-alert-success .progress-bar {
+            background-color: #198754;
+        }
+
+        .custom-alert-danger .progress-bar {
+            background-color: #dc3545;
+        }
+
+        .custom-alert-warning .progress-bar {
+            background-color: #ffc107;
+        }
+
+        .custom-alert-info .progress-bar {
+            background-color: #0dcaf0;
+        }
+
+        .custom-alert-content {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+        }
+
+        .custom-alert-icon {
+            margin-right: 12px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-alert-message {
+            flex-grow: 1;
+        }
+
+        .custom-alert-close {
+            background: transparent;
+            border: none;
+            color: inherit;
+            opacity: 0.7;
+            padding: 0 4px;
+            cursor: pointer;
+        }
+
+        .custom-alert-close:hover {
+            opacity: 1;
+        }
+
+        .custom-alert-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .custom-alert-danger {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .custom-alert-warning {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+
+        .custom-alert-info {
+            background-color: #cff4fc;
+            color: #055160;
+        }
+        @media (prefers-color-scheme: dark) {
+        
+        .custom-alert-success {
+            background-color: #12281e;
+            color: #7ee2b8;
+        }
+        .custom-alert-danger {
+            background-color: #2e0a12;
+            color: #fda4af;
+        }
+        .custom-alert-warning {
+            background-color: #2e2a0e;
+            color: #fde047;
+        }
+        .custom-alert-info {
+            background-color: #092c42;
+            color: #7dd3fc;
+        }
+    }
     </style>
 </head>
 
 <body>
     <?php include('../header.php'); ?>
 
-    <div class="container py-4">
-        <!-- Display error messages -->
-<?php if (isset($_SESSION['error_messages'])): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <ul class="mb-0">
-            <?php foreach ($_SESSION['error_messages'] as $error): ?>
-                <li><?php echo htmlspecialchars($error); ?></li>
-            <?php endforeach; ?>
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['error_messages']); ?>
-<?php endif; ?>
+    <!-- Alert Container -->
+    <div id="alertContainer" class="alert-container"></div>
 
-<!-- Display success message -->
-<?php if (isset($_SESSION['success_message'])): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <?php echo htmlspecialchars($_SESSION['success_message']); ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['success_message']); ?>
-<?php endif; ?>
+    <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h1 class="mb-0">Manage Users</h1>
@@ -554,6 +673,67 @@ $user_stats = $result->fetch_assoc();
             }
         }
         ?>
+        // Custom Alert Functions
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertElement = document.createElement('div');
+            alertElement.className = `custom-alert custom-alert-${type}`;
+            let iconClass = 'bi-info-circle';
+            if (type === 'success') iconClass = 'bi-check-circle';
+            if (type === 'danger')  iconClass = 'bi-exclamation-triangle';
+            if (type === 'warning') iconClass = 'bi-exclamation-circle';
+
+            alertElement.innerHTML = `
+                <div class="custom-alert-content">
+                    <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
+                    <div class="custom-alert-message">${message}</div>
+                    <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar"></div>
+                </div>
+            `;
+
+            alertContainer.appendChild(alertElement);
+
+            requestAnimationFrame(() => alertElement.classList.add('show'));
+
+            const progressBar = alertElement.querySelector('.progress-bar');
+            progressBar.style.transition = 'width linear 5000ms';
+            progressBar.style.width = '100%';
+            setTimeout(() => { progressBar.style.width = '0%'; }, 50);
+
+            const dismissTimeout = setTimeout(() => {
+                dismissAlert(alertElement);
+            }, 5050);
+
+            alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
+                clearTimeout(dismissTimeout);
+                dismissAlert(alertElement);
+            });
+        }
+
+        function dismissAlert(alertElement) {
+            if (!alertElement || alertElement.classList.contains('hiding')) return;
+            alertElement.classList.add('hiding');
+            alertElement.classList.remove('show');
+            setTimeout(() => { alertElement.remove(); }, 300);
+        }
+
+        // Trigger alerts based on PHP session messages
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php if (isset($_SESSION['error_messages'])): ?>
+                <?php foreach ($_SESSION['error_messages'] as $error): ?>
+                    showAlert(<?php echo json_encode($error); ?>, 'danger');
+                <?php endforeach; ?>
+                <?php unset($_SESSION['error_messages']); ?>
+            <?php endif; ?>
+            
+            <?php if (isset($_SESSION['success_message'])): ?>
+                showAlert(<?php echo json_encode($_SESSION['success_message']); ?>, 'success');
+                <?php unset($_SESSION['success_message']); ?>
+            <?php endif; ?>
+        });
     </script>
 </body>
 </html>
