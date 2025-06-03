@@ -399,8 +399,6 @@
             if (urlParams.has('alert')) {
                 showAlert(urlParams.get('alert'), urlParams.get('type') || 'info');
             }
-
-            createTestButtons(); // demo only—remove in prod
         });
 
         function showAlert(message, type = 'info') {

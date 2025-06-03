@@ -1023,6 +1023,23 @@ if (isset($_GET['tab'])) {
     height: 150px;
     border-radius: 50%;
 }
+
+.password-toggle {
+            border-left: none;
+            cursor: pointer;
+        }
+        
+        .password-toggle:hover {
+            background-color: #0969da;
+        }
+        
+        .password-toggle i {
+            color: #6c757d;
+        }
+        
+        .password-toggle:hover i {
+            color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
@@ -1253,6 +1270,9 @@ if (isset($_GET['tab'])) {
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-key"></i></span>
                 <input type="password" class="form-control" id="current_password" name="current_password" required>
+                <button type="button" class="btn btn-outline-secondary password-toggle" data-target="current_password">
+                    <i class="fas fa-eye"></i>
+                </button>
             </div>
         </div>
         
@@ -1261,8 +1281,10 @@ if (isset($_GET['tab'])) {
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
                 <input type="password" class="form-control" id="new_password" name="new_password" required>
+                <button type="button" class="btn btn-outline-secondary password-toggle" data-target="new_password">
+                    <i class="fas fa-eye"></i>
+                </button>
             </div>
-            <small class="text-muted">Password must be at least 8 characters long and include a mix of letters and numbers.</small>
         </div>
         
         <div class="mb-4">
@@ -1270,6 +1292,9 @@ if (isset($_GET['tab'])) {
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
                 <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                <button type="button" class="btn btn-outline-secondary password-toggle" data-target="confirm_password">
+                    <i class="fas fa-eye"></i>
+                </button>
             </div>
         </div>
         
@@ -1298,6 +1323,9 @@ if (isset($_GET['tab'])) {
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-key"></i></span>
                 <input type="password" class="form-control" id="password" name="password" required>
+                <button type="button" class="btn btn-outline-secondary password-toggle" data-target="password">
+                    <i class="fas fa-eye"></i>
+                </button>
             </div>
         </div>
         
@@ -1331,6 +1359,9 @@ if (isset($_GET['tab'])) {
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-key"></i></span>
                 <input type="password" class="form-control" id="delete_password" name="delete_password" required>
+                <button type="button" class="btn btn-outline-secondary password-toggle" data-target="delete_password">
+                    <i class="fas fa-eye"></i>
+                </button>
             </div>
         </div>
         
@@ -1658,11 +1689,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 showAlert('Passwords do not match!', 'danger');
             }
-            
-            if (newPassword.length < 8) {
-                e.preventDefault();
-                showAlert('Password must be at least 8 characters long!', 'warning');
-            }
         });
 
 // Alert Functions
@@ -1826,6 +1852,56 @@ document.querySelector('.remove-profile-picture')?.addEventListener('click', fun
         `;
     }
 );
+
+// Password visibility toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordToggles = document.querySelectorAll('.password-toggle');
+            
+            passwordToggles.forEach(function(toggle) {
+                toggle.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const targetInput = document.getElementById(targetId);
+                    const icon = this.querySelector('i');
+                    
+                    if (targetInput.type === 'password') {
+                        targetInput.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        targetInput.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+        });
+
+        // Clear delete form function
+        function clearDeleteForm() {
+            document.getElementById('delete_password').value = '';
+            document.getElementById('confirm_delete').value = '';
+            document.getElementById('deleteAccountBtn').disabled = true;
+        }
+
+        // Enable delete button when form is properly filled
+        document.addEventListener('DOMContentLoaded', function() {
+            const deletePassword = document.getElementById('delete_password');
+            const confirmDelete = document.getElementById('confirm_delete');
+            const deleteBtn = document.getElementById('deleteAccountBtn');
+
+            function checkDeleteForm() {
+                if (deletePassword.value.length > 0 && confirmDelete.value === 'DELETE') {
+                    deleteBtn.disabled = false;
+                } else {
+                    deleteBtn.disabled = true;
+                }
+            }
+
+            if (deletePassword && confirmDelete && deleteBtn) {
+                deletePassword.addEventListener('input', checkDeleteForm);
+                confirmDelete.addEventListener('input', checkDeleteForm);
+            }
+        });
 </script>
 </body>
 </html>
