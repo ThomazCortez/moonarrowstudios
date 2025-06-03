@@ -349,8 +349,8 @@ require 'db_connect.php';
                 <div class="col-md-4 mb-4" data-aos="flip-left" data-aos-delay="300">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h4 class="card-title">Safety</h4>
-                            <p class="card-text">Usernames, posts, assets, comments... all have a profanity filter. You can also view if an asset file is safe before downloading it.</p>
+                            <h4 class="card-title">Customization </h4>
+                            <p class="card-text">You can change how your profile looks, tamper with settings, modify or delete your posts and assets whenever you want.</p>
                         </div>
                     </div>
                 </div>
