@@ -671,6 +671,17 @@ if (isset($_GET['tab'])) {
             margin-right: 8px;
         }
 
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+            margin-right: 1rem !important; /* Add explicit spacing between toggle and label */
+        }
+
+        .form-switch .form-check-input:checked {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
         .form-label {
             font-weight: 500;
             margin-bottom: 8px;
@@ -691,16 +702,6 @@ if (isset($_GET['tab'])) {
 
         .tab-pane {
             padding: 25px;
-        }
-
-        .form-switch .form-check-input {
-            width: 3em;
-            height: 1.5em;
-        }
-
-        .form-switch .form-check-input:checked {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
         }
 
         /* Social links styling */
@@ -1122,7 +1123,7 @@ if (isset($_GET['tab'])) {
                                                 <i class="fas fa-image"></i> Profile Banner
                                             </div>
                                             <div class="upload-description">
-                                                Recommended size 1000x300px. Max file size 2MB.
+                                                Recommended size 1000x300px.
                                             </div>
                                             <input type="file" class="form-control" id="banner" accept="image/*">
                                             <input type="hidden" name="banner_data" id="banner_data">
@@ -1150,7 +1151,7 @@ if (isset($_GET['tab'])) {
                                                 <i class="fas fa-user-circle"></i> Profile Picture
                                             </div>
                                             <div class="upload-description">
-                                                Square image recommended. Max file size 1MB.
+                                                Square image recommended.
                                             </div>
                                             <input type="file" class="form-control" id="profile_picture" accept="image/*">
                                             <input type="hidden" name="profile_picture_data" id="profile_picture_data">
@@ -1398,7 +1399,7 @@ if (isset($_GET['tab'])) {
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="comment_notifications" name="comment_notifications" <?php echo ($user['comment_notifications'] == 1) ? 'checked' : ''; ?>>
+                            <input class="form-check-input me-3" type="checkbox" id="comment_notifications" name="comment_notifications" <?php echo ($user['comment_notifications'] == 1) ? 'checked' : ''; ?>>
                             <label class="form-check-label" for="comment_notifications">
                                 <strong>Comments on Posts</strong>
                                 <br><small class="text-muted">Get notified when someone comments on your posts</small>
@@ -1407,7 +1408,7 @@ if (isset($_GET['tab'])) {
                     </div>
                     <div class="col-md-6">
                         <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="asset_comment_notifications" name="asset_comment_notifications" <?php echo ($user['asset_comment_notifications'] == 1) ? 'checked' : ''; ?>>
+                            <input class="form-check-input me-3" type="checkbox" id="asset_comment_notifications" name="asset_comment_notifications" <?php echo ($user['asset_comment_notifications'] == 1) ? 'checked' : ''; ?>>
                             <label class="form-check-label" for="asset_comment_notifications">
                                 <strong>Comments on Assets</strong>
                                 <br><small class="text-muted">Get notified when someone comments on your assets</small>
@@ -1418,7 +1419,7 @@ if (isset($_GET['tab'])) {
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="reply_notifications" name="reply_notifications" <?php echo ($user['reply_notifications'] == 1) ? 'checked' : ''; ?>>
+                            <input class="form-check-input me-3" type="checkbox" id="reply_notifications" name="reply_notifications" <?php echo ($user['reply_notifications'] == 1) ? 'checked' : ''; ?>>
                             <label class="form-check-label" for="reply_notifications">
                                 <strong>Replies to Comments</strong>
                                 <br><small class="text-muted">Get notified when someone replies to your comments</small>
