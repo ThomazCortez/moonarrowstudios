@@ -916,13 +916,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="bi bi-image"></i>
                     Images
                 </div>
-                    <input type="file" name="images[]" accept="image/*" multiple class="form-control">
+                <input type="file" name="images[]" accept="image/*" multiple class="form-control">
 
                 <?php if (!empty($images)): ?>
                     <div class="file-preview">
                         <?php foreach ($images as $index => $image): ?>
                             <div class="file-item">
-                                <img src="<?php echo $baseUrl; ?><?php echo htmlspecialchars($image); ?>" alt="Image <?php echo $index + 1; ?>">
+                                <img src="../uploads/images/<?php echo basename($image); ?>" alt="Image <?php echo $index + 1; ?>">
                                 <div class="file-item-name"><?php echo basename($image); ?></div>
                                 <button type="button" class="file-remove" onclick="markForDeletion('images', <?php echo $index; ?>, this)">
                                     <i class="bi bi-x"></i>
@@ -940,13 +940,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="bi bi-camera-video"></i>
                     Videos
                 </div>
-                    <input type="file" name="videos[]" accept="video/*" multiple class="form-control">
+                <input type="file" name="videos[]" accept="video/*" multiple class="form-control">
                 
                 <?php if (!empty($videos)): ?>
                     <div class="file-preview">
                         <?php foreach ($videos as $index => $video): ?>
                             <div class="file-item">
-                                <video src="<?php echo $baseUrl; ?><?php echo htmlspecialchars($video); ?>" controls></video>
+                                <video src="../uploads/videos/<?php echo basename($video); ?>" controls></video>
                                 <div class="file-item-name"><?php echo basename($video); ?></div>
                                 <button type="button" class="file-remove" onclick="markForDeletion('videos', <?php echo $index; ?>, this)">
                                     <i class="bi bi-x"></i>
