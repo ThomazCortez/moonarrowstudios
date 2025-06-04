@@ -31,6 +31,7 @@ if ($user_role !== 'admin') {
 }
 
 // Get site statistics
+
 // Total users
 $query = "SELECT COUNT(*) as total_users FROM users";
 $result = $conn->query($query);

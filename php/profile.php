@@ -141,6 +141,10 @@ if (!$user_id) {
     exit;
 }
 
+// Define these here so they're available in queries
+$is_logged_in = isset($_SESSION['user_id']);
+$viewing_own_profile = $is_logged_in && ($_SESSION['user_id'] == $user_id);
+
 // Get active tab from URL parameter
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'posts';
 
@@ -187,6 +191,9 @@ $post_sql = "SELECT posts.*, categories.name AS category_name,
             FROM posts 
             JOIN categories ON posts.category_id = categories.id 
             WHERE posts.user_id = ?";
+if (!$viewing_own_profile) {
+    $post_sql .= " AND posts.status != 'hidden'";
+}
 $post_params = [$user_id];
 $post_types = "i";
 
@@ -213,6 +220,9 @@ $posts = $post_stmt->get_result();
 
 // Get total posts count
 $post_count_sql = "SELECT COUNT(*) as total FROM posts WHERE user_id = ?";
+if (!$viewing_own_profile) {
+    $post_count_sql .= " AND status != 'hidden'";
+}
 $post_count_params = [$user_id];
 $post_count_types = "i";
 
@@ -253,7 +263,10 @@ $asset_sql = "SELECT assets.*, asset_categories.name AS category_name,
              (assets.upvotes - assets.downvotes) AS score 
              FROM assets 
              JOIN asset_categories ON assets.category_id = asset_categories.id 
-             WHERE assets.user_id = ? AND assets.status != 'hidden'";
+             WHERE assets.user_id = ?";
+if (!$viewing_own_profile) {
+    $asset_sql .= " AND assets.status != 'hidden'";
+}
 $asset_params = [$user_id];
 $asset_types = "i";
 
@@ -280,6 +293,9 @@ $assets = $asset_stmt->get_result();
 
 // Get total assets count
 $asset_count_sql = "SELECT COUNT(*) as total FROM assets WHERE user_id = ?";
+if (!$viewing_own_profile) {
+    $asset_count_sql .= " AND status != 'hidden'";
+}
 $asset_count_params = [$user_id];
 $asset_count_types = "i";
 

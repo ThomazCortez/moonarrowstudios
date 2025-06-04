@@ -1560,7 +1560,7 @@ while ($asset = $result->fetch_assoc()):
             </div>
         </div>
 
-        <!-- Modal for Creating Asset -->
+<!-- Modal for Creating Asset -->
 <div class="modal fade" id="createAssetModal" tabindex="-1" aria-labelledby="createAssetModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content animate__animated animate__zoomIn">
@@ -1613,13 +1613,10 @@ while ($asset = $result->fetch_assoc()):
                         </div>
                     </div>
                     <div class="mt-3 animate__animated animate__fadeIn d-grid">
-                            <!-- Updated button with loader -->
-                            <button type="submit" name="create_asset" 
-                                    class="btn btn-primary w-100" 
-                                    id="submitAssetButton">
+                        <!-- Updated button with loader -->
+                        <button type="submit" name="create_asset" class="btn btn-primary w-100" id="submitAssetButton">    
                                 <span class="button-text">Publish Asset</span>
-                                <span class="spinner-border spinner-border-sm d-none" 
-                                    role="status" aria-hidden="true"></span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                             </button>
                         </div>
                 </form>
