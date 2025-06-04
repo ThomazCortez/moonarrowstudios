@@ -1071,7 +1071,9 @@ $videos = array_map(function($path) {
 
 // Check if there are any attachments (images, videos, or asset_file)
 if (!empty($images) || !empty($videos) || !empty($asset['asset_file'])): ?>
-    <hr>
+    <?php if (!empty($asset['content']) && trim(strip_tags($asset['content'])) !== ''): ?>
+        <hr>
+    <?php endif; ?>
     <div class="media-container animate__animated animate__fadeIn">
         <?php 
         $delay = 0.3;
