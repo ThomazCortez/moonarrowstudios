@@ -909,8 +909,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <?php foreach ($videos as $video_path): 
                             $delay += 0.2; ?>
                             <div class="media-item animate__animated animate__zoomIn" style="animation-delay: <?= $delay ?>s">
-                                <video controls>
-                                    <source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> Your browser does not support the video tag.
+                                <video> <!-- Removed 'controls' attribute -->
+                                    <source src="<?= htmlspecialchars($video_path) ?>" type="video/mp4"> 
+                                    Your browser does not support the video tag.
                                 </video>
                                 <button class="fullscreen-btn" onclick="toggleFullscreen(event)">⛶</button>
                             </div>
@@ -1126,11 +1127,14 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 	<br> <?php $conn->close(); ?> <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 	<script>
+    let fullscreenVideo = null;
+
 	function toggleFullscreen(event) {
     const mediaItem = event.target.closest('.media-item');
     const mediaElement = mediaItem.querySelector('img, video');
     
     if (!document.fullscreenElement) {
+        // Enter fullscreen
         if (mediaElement.requestFullscreen) {
             mediaElement.requestFullscreen();
         } else if (mediaElement.webkitRequestFullscreen) {
@@ -1139,12 +1143,19 @@ document.addEventListener('DOMContentLoaded', () => {
             mediaElement.msRequestFullscreen();
         }
         
-        // Add entrance animation when entering fullscreen
+        // If it's a video, add controls when entering fullscreen
+        if (mediaElement.tagName.toLowerCase() === 'video') {
+            mediaElement.controls = true;
+            fullscreenVideo = mediaElement;
+        }
+        
+        // Add entrance animation
         mediaElement.classList.add('animate__animated', 'animate__zoomIn');
         setTimeout(() => {
             mediaElement.classList.remove('animate__animated', 'animate__zoomIn');
         }, 1000);
     } else {
+        // Exiting fullscreen
         if (document.exitFullscreen) {
             document.exitFullscreen();
         } else if (document.webkitExitFullscreen) {
@@ -1156,7 +1167,27 @@ document.addEventListener('DOMContentLoaded', () => {
     
     event.preventDefault();
 }
+
+// Add fullscreen change listeners
+function onFullscreenChange() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+        !document.mozFullScreenElement && !document.msFullscreenElement) {
+        // Exited fullscreen - remove controls from video
+        if (fullscreenVideo) {
+            fullscreenVideo.controls = false;
+            fullscreenVideo = null;
+        }
+    }
+}
+
 	document.addEventListener('DOMContentLoaded', () => {
+
+    // Add event listeners for fullscreen change
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    document.addEventListener('mozfullscreenchange', onFullscreenChange);
+    document.addEventListener('MSFullscreenChange', onFullscreenChange);
+
 		document.querySelectorAll('.upvote-btn, .downvote-btn').forEach(button => {
 			button.addEventListener('click', () => {
 				// Check if the button is disabled
