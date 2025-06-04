@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jun 04, 2025 at 01:50 AM
+-- Generation Time: Jun 04, 2025 at 02:06 AM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -89,7 +89,7 @@ INSERT INTO `assets` (`id`, `title`, `content`, `category_id`, `hashtags`, `imag
 (132, 'Jazzy Chase Theme', '<p><br></p>', 11, '#jazz #chase #theme', '[]', '2025-06-04 01:02:59', '[]', 38, 0, 0, '', 'uploads/assets/untitled  - caffeine tutorial.mp3', 'published', 2, '2025-06-04 01:30:34', 0, ''),
 (133, 'Wooden Floor Texture', '<p><br></p>', 6, '#wood #floor #texture', '[]', '2025-06-04 01:07:15', '[]', 38, 0, 0, 'uploads/previews/WoodFloor054_1K-JPG_Color.jpg', 'uploads/assets/WoodFloor054_1K-JPG_Color.jpg', 'published', 2, '2025-06-04 01:30:40', 0, ''),
 (134, 'MP7 Gun', '<p><br></p>', 5, '#mp7 #gun #smg #model', '[]', '2025-06-04 01:09:02', '[]', 38, 1, 0, '', 'uploads/assets/low-poly_hk_mp7_a1.glb', 'published', 7, '2025-06-04 01:18:57', 0, ''),
-(135, 'Ultrakill Font', '<p>Mankind is <strong>DEAD.</strong></p><p>Blood is <strong>FUEL.</strong></p><p>Hell is <strong>FULL.</strong></p>', 17, '#ultrakill #font', '[]', '2025-06-04 01:33:04', '[]', 30, 0, 0, '', 'uploads/assets/VCR_OSD_MONO_1.001.ttf', 'published', 2, '2025-06-04 01:48:48', 0, '');
+(135, 'Ultrakill Font', '<p>Mankind is <strong>DEAD.</strong></p><p>Blood is <strong>FUEL.</strong></p><p>Hell is <strong>FULL.</strong></p>', 17, '#ultrakill #font', '[]', '2025-06-04 01:33:04', '[]', 30, 0, 0, '', 'uploads/assets/VCR_OSD_MONO_1.001.ttf', 'published', 6, '2025-06-04 02:04:18', 0, '');
 
 -- --------------------------------------------------------
 
@@ -237,7 +237,7 @@ CREATE TABLE IF NOT EXISTS `comments_asset` (
   KEY `asset_id` (`asset_id`),
   KEY `user_id` (`user_id`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `comments_asset`
@@ -321,7 +321,8 @@ CREATE TABLE IF NOT EXISTS `email_changes` (
   `new_email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `token` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_email_changes_users` (`user_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -638,7 +639,8 @@ INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `role`, `create
 -- Constraints for table `account_deletions`
 --
 ALTER TABLE `account_deletions`
-  ADD CONSTRAINT `account_deletions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `account_deletions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_account_deletions_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `assets`
@@ -646,6 +648,41 @@ ALTER TABLE `account_deletions`
 ALTER TABLE `assets`
   ADD CONSTRAINT `fk_assets_categories` FOREIGN KEY (`category_id`) REFERENCES `asset_categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `fk_assets_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `asset_votes`
+--
+ALTER TABLE `asset_votes`
+  ADD CONSTRAINT `fk_asset_votes_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `comments`
+--
+ALTER TABLE `comments`
+  ADD CONSTRAINT `fk_comments_parent` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_comments_posts` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_comments_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `comments_asset`
+--
+ALTER TABLE `comments_asset`
+  ADD CONSTRAINT `fk_comments_asset_assets` FOREIGN KEY (`asset_id`) REFERENCES `assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_comments_asset_parent` FOREIGN KEY (`parent_id`) REFERENCES `comments_asset` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_comments_asset_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `comment_asset_votes`
+--
+ALTER TABLE `comment_asset_votes`
+  ADD CONSTRAINT `fk_comment_asset_votes_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `posts`
+--
+ALTER TABLE `posts`
+  ADD CONSTRAINT `fk_posts_categories` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `fk_posts_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
