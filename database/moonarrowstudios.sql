@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jun 04, 2025 at 02:06 AM
+-- Generation Time: Jun 04, 2025 at 03:12 AM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -87,9 +87,9 @@ INSERT INTO `assets` (`id`, `title`, `content`, `category_id`, `hashtags`, `imag
 (130, 'Rain VFX', '<p><br></p>', 9, '#rain #vfx', '[]', '2025-06-04 00:46:01', '[]', 36, 0, 0, '', 'uploads/assets/Rain Overlay Transparent Video.mp4', 'published', 21, '2025-06-04 01:42:08', 0, ''),
 (131, 'Samba Dance', '<p>It likes to dance.</p>', 8, '#samba #dance #animation', '[]', '2025-06-04 00:55:25', '[]', 36, 0, 0, '', 'uploads/assets/Samba Dancing.fbx', 'published', 9, '2025-06-04 01:30:28', 0, ''),
 (132, 'Jazzy Chase Theme', '<p><br></p>', 11, '#jazz #chase #theme', '[]', '2025-06-04 01:02:59', '[]', 38, 0, 0, '', 'uploads/assets/untitled  - caffeine tutorial.mp3', 'published', 2, '2025-06-04 01:30:34', 0, ''),
-(133, 'Wooden Floor Texture', '<p><br></p>', 6, '#wood #floor #texture', '[]', '2025-06-04 01:07:15', '[]', 38, 0, 0, 'uploads/previews/WoodFloor054_1K-JPG_Color.jpg', 'uploads/assets/WoodFloor054_1K-JPG_Color.jpg', 'published', 2, '2025-06-04 01:30:40', 0, ''),
-(134, 'MP7 Gun', '<p><br></p>', 5, '#mp7 #gun #smg #model', '[]', '2025-06-04 01:09:02', '[]', 38, 1, 0, '', 'uploads/assets/low-poly_hk_mp7_a1.glb', 'published', 7, '2025-06-04 01:18:57', 0, ''),
-(135, 'Ultrakill Font', '<p>Mankind is <strong>DEAD.</strong></p><p>Blood is <strong>FUEL.</strong></p><p>Hell is <strong>FULL.</strong></p>', 17, '#ultrakill #font', '[]', '2025-06-04 01:33:04', '[]', 30, 0, 0, '', 'uploads/assets/VCR_OSD_MONO_1.001.ttf', 'published', 6, '2025-06-04 02:04:18', 0, '');
+(133, 'Wooden Floor Texture', '<p><br></p>', 6, '#wood #floor #texture', '[]', '2025-06-04 01:07:15', '[]', 38, 0, 0, 'uploads/previews/WoodFloor054_1K-JPG_Color.jpg', 'uploads/assets/WoodFloor054_1K-JPG_Color.jpg', 'published', 3, '2025-06-04 03:07:25', 0, ''),
+(134, 'MP7 Gun', '<p><br></p>', 5, '#mp7 #gun #smg #model', '[]', '2025-06-04 01:09:02', '[]', 38, 1, 0, '', 'uploads/assets/low-poly_hk_mp7_a1.glb', 'published', 8, '2025-06-04 03:07:29', 0, ''),
+(135, 'Ultrakill Font', '<p>Mankind is <strong>DEAD.</strong></p><p>Blood is <strong>FUEL.</strong></p><p>Hell is <strong>FULL.</strong></p>', 17, '#ultrakill #font', '[]', '2025-06-04 01:33:04', '[]', 30, 1, 0, '', 'uploads/assets/VCR_OSD_MONO_1.001.ttf', 'published', 7, '2025-06-04 02:06:57', 0, '');
 
 -- --------------------------------------------------------
 
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS `asset_votes` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`asset_id`),
   KEY `asset_id` (`asset_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=138 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=140 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `asset_votes`
@@ -146,7 +146,8 @@ CREATE TABLE IF NOT EXISTS `asset_votes` (
 INSERT INTO `asset_votes` (`id`, `user_id`, `asset_id`, `vote_type`) VALUES
 (130, 30, 80, 'downvote'),
 (136, 30, 119, 'downvote'),
-(137, 30, 134, 'upvote');
+(137, 30, 134, 'upvote'),
+(139, 30, 135, 'upvote');
 
 -- --------------------------------------------------------
 
@@ -211,7 +212,14 @@ CREATE TABLE IF NOT EXISTS `comments` (
   KEY `post_id` (`post_id`),
   KEY `user_id` (`user_id`),
   KEY `idx_parent_id` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=107 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `comments`
+--
+
+INSERT INTO `comments` (`id`, `post_id`, `user_id`, `content`, `created_at`, `parent_id`, `upvotes`, `downvotes`, `status`, `reported_count`, `updated_at`, `edited_at`) VALUES
+(106, 102, 30, '<p>Thank you for sharing!</p>', '2025-06-04 04:11:48', NULL, 0, 0, 'published', 0, '2025-06-04 03:11:48', NULL);
 
 -- --------------------------------------------------------
 
@@ -448,7 +456,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
 INSERT INTO `posts` (`id`, `title`, `content`, `category_id`, `hashtags`, `images`, `created_at`, `videos`, `user_id`, `upvotes`, `downvotes`, `status`, `views`, `updated_at`, `reported_count`) VALUES
 (100, 'How Do I Optimize My Unity Game for Mobile?', '<p>Hey everyone, I\'m working on a 2D platformer in Unity for Android/iOS and it\'s struggling on lower-end phones. </p><p><br></p><p>I\'ve already reduced texture sizes and disabled real-time lights, but the performance is still not where I want it.</p><p><br></p><p>Here’s a quick look at how I’m currently limiting frame rate and resolution:</p><p><br></p><pre class=\"ql-syntax\" spellcheck=\"false\">void Start() {\r\n&nbsp; &nbsp; Application.targetFrameRate = 30;\r\n&nbsp; &nbsp; Screen.SetResolution(960, 540, true);\r\n}\r\n</pre><p><br></p><p>Is this a good approach? What else should I tweak to improve performance, especially for older devices?</p>', 9, '#godot #mobile #optimization', '[]', '2025-06-04 00:09:36', '[]', 38, 0, 0, 'published', 3, '2025-06-04 01:30:17', 0),
 (101, 'Feedback Needed on My Idle Animation Loop – Too Stiff?', '<h3>Hey artists and animators! </h3><p>I’ve been working on a pixel art idle animation for the main character in my indie action game (a monkey, lol). </p><p>I’m aiming for a subtle idle loop, but it’s feeling kind of stiff or unnatural.</p><p><strong>Here\'s the current frame sequence I’m using (8 frames total).</strong></p>', 7, '#monkey #idle #animation #2d', '[\"uploads\\/images\\/MonkeIdle.gif\",\"php\\/uploads\\/images\\/683f927a3f7b8_1748996730.png\"]', '2025-06-04 00:14:45', '[]', 38, 0, 0, 'published', 9, '2025-06-04 01:30:10', 0),
-(102, 'Super Quick Character Animation Setup in Unity', '<p>Just found this really helpful video: <strong><em>Unity Tutorial: Animate your character in less than 3 min (idle, walk, jump)</em></strong></p><p>It covers setting up idle, walk, and jump animations using Animator and transitions — perfect if you\'re just getting started with character animation in Unity.</p><p>Anyone know other quick tutorials like this? Drop links! 👇</p>', 7, '#unity #animation #sprite #tutorial', '[]', '2025-06-04 00:32:46', '[\"uploads\\/videos\\/Unity Tutorial Animate your character in less than 3 min (idle, walk, jump).mp4\"]', 36, 0, 0, 'published', 6, '2025-06-04 01:49:19', 0);
+(102, 'Super Quick Character Animation Setup in Unity', '<p>Just found this really helpful video: <strong><em>Unity Tutorial: Animate your character in less than 3 min (idle, walk, jump)</em></strong></p><p>It covers setting up idle, walk, and jump animations using Animator and transitions — perfect if you\'re just getting started with character animation in Unity.</p><p>Anyone know other quick tutorials like this? Drop links! 👇</p>', 7, '#unity #animation #sprite #tutorial', '[]', '2025-06-04 00:32:46', '[\"uploads\\/videos\\/Unity Tutorial Animate your character in less than 3 min (idle, walk, jump).mp4\"]', 36, 0, 0, 'published', 9, '2025-06-04 03:11:49', 0);
 
 -- --------------------------------------------------------
 
