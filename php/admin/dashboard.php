@@ -122,6 +122,109 @@ while ($row = $recent_assets_result->fetch_assoc()) {
             border-radius: 0.375rem;
             overflow: hidden;
         }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .stats-icon {
+                font-size: 2rem;
+            }
+            
+            .table {
+                font-size: 0.85rem;
+            }
+            
+            .table td, .table th {
+                padding: 0.5rem 0.25rem;
+                vertical-align: middle;
+            }
+            
+            .btn-sm {
+                padding: 0.25rem 0.4rem;
+                font-size: 0.75rem;
+            }
+            
+            .text-truncate-mobile {
+                max-width: 80px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            .d-none-mobile {
+                display: none !important;
+            }
+            
+            .admin-actions {
+                padding: 0.5rem;
+            }
+            
+            .admin-actions a {
+                font-size: 0.85rem;
+                padding: 0.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+            
+            .table {
+                font-size: 0.75rem;
+            }
+            
+            .table td, .table th {
+                padding: 0.25rem 0.1rem;
+            }
+            
+            .text-truncate-mobile {
+                max-width: 60px;
+            }
+            
+            .stats-icon {
+                font-size: 1.5rem;
+            }
+            
+            h3.fs-2 {
+                font-size: 1.5rem !important;
+            }
+            
+            .card-header h5 {
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Card content overflow fix */
+        .card {
+            overflow: hidden;
+        }
+        
+        .card-body {
+            overflow-x: auto;
+        }
+        
+        /* Mobile-friendly table styling */
+        @media (max-width: 768px) {
+            .mobile-stack {
+                display: block !important;
+                width: 100% !important;
+                border: none !important;
+                padding: 0.5rem !important;
+                border-bottom: 1px solid var(--bs-border-color);
+            }
+            
+            .mobile-stack:before {
+                content: attr(data-label) ": ";
+                font-weight: bold;
+                display: inline-block;
+                width: 80px;
+            }
+            
+            .mobile-hide-header {
+                display: none;
+            }
+        }
     </style>
 </head>
 
@@ -129,8 +232,8 @@ while ($row = $recent_assets_result->fetch_assoc()) {
     <?php include('../header.php'); ?>
 
     <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="mb-0">Admin Dashboard</h1>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+            <h1 class="mb-2 mb-md-0">Admin Dashboard</h1>
             <div>
                 <span class="badge bg-primary fs-6">Admin: <?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></span>
             </div>
@@ -138,39 +241,39 @@ while ($row = $recent_assets_result->fetch_assoc()) {
 
         <!-- Stats Overview Cards -->
         <div class="row mb-4">
-            <div class="col-md-3 mb-3">
+            <div class="col-6 col-md-3 mb-3">
                 <div class="card dashboard-card bg-primary bg-gradient text-white">
                     <div class="card-body text-center">
                         <i class="bi bi-people-fill stats-icon"></i>
                         <h3 class="fs-2 mb-0"><?php echo $total_users; ?></h3>
-                        <p class="mb-0">Total Users</p>
+                        <p class="mb-0 small">Total Users</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
+            <div class="col-6 col-md-3 mb-3">
                 <div class="card dashboard-card bg-success bg-gradient text-white">
                     <div class="card-body text-center">
                         <i class="bi bi-chat-left-text-fill stats-icon"></i>
                         <h3 class="fs-2 mb-0"><?php echo $total_posts; ?></h3>
-                        <p class="mb-0">Forum Posts</p>
+                        <p class="mb-0 small">Forum Posts</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
+            <div class="col-6 col-md-3 mb-3">
                 <div class="card dashboard-card bg-info bg-gradient text-white">
                     <div class="card-body text-center">
                         <i class="bi bi-bag-fill stats-icon"></i>
                         <h3 class="fs-2 mb-0"><?php echo $total_assets; ?></h3>
-                        <p class="mb-0">Marketplace Assets</p>
+                        <p class="mb-0 small">Marketplace Assets</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
+            <div class="col-6 col-md-3 mb-3">
                 <div class="card dashboard-card bg-warning bg-gradient text-dark">
                     <div class="card-body text-center">
                         <i class="bi bi-chat-dots-fill stats-icon"></i>
                         <h3 class="fs-2 mb-0"><?php echo $total_comments; ?></h3>
-                        <p class="mb-0">Total Comments</p>
+                        <p class="mb-0 small">Total Comments</p>
                     </div>
                 </div>
             </div>
@@ -178,7 +281,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
 
         <div class="row">
             <!-- Admin Actions -->
-            <div class="col-md-3 mb-4">
+            <div class="col-12 col-lg-3 mb-4">
                 <div class="card h-100">
                     <div class="card-header bg-secondary bg-gradient">
                         <h5 class="mb-0"><i class="bi bi-gear-fill me-2"></i>Admin Actions</h5>
@@ -204,7 +307,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
             </div>
 
             <!-- Recent Users -->
-            <div class="col-md-9 mb-4">
+            <div class="col-12 col-lg-9 mb-4">
                 <div class="card h-100">
                     <div class="card-header bg-primary bg-gradient text-white">
                         <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Recent Users</h5>
@@ -212,29 +315,35 @@ while ($row = $recent_assets_result->fetch_assoc()) {
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover table-striped mb-0">
-                                <thead>
+                                <thead class="mobile-hide-header">
                                     <tr>
                                         <th>ID</th>
                                         <th>Username</th>
-                                        <th>Email</th>
-                                        <th>Joined</th>
+                                        <th class="d-none d-md-table-cell">Email</th>
+                                        <th class="d-none d-sm-table-cell">Joined</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($recent_users as $user): ?>
                                     <tr>
-                                        <td><?php echo $user['user_id']; ?></td>
-                                        <td><?php echo htmlspecialchars($user['username']); ?></td>
-                                        <td><?php echo htmlspecialchars($user['email']); ?></td>
-                                        <td><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
-                                        <td>
-                                            <a href="edit_user.php?id=<?php echo $user['user_id']; ?>" class="btn btn-sm btn-primary">
-                                                <i class="bi bi-pencil-fill"></i>
-                                            </a>
-                                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal" data-user-id="<?php echo $user['user_id']; ?>">
-                                                <i class="bi bi-trash-fill"></i>
-                                            </button>
+                                        <td data-label="ID" class="mobile-stack"><?php echo $user['user_id']; ?></td>
+                                        <td data-label="Username" class="mobile-stack">
+                                            <span class="text-truncate-mobile d-inline-block"><?php echo htmlspecialchars($user['username']); ?></span>
+                                        </td>
+                                        <td data-label="Email" class="mobile-stack d-none d-md-table-cell">
+                                            <span class="text-truncate-mobile d-inline-block"><?php echo htmlspecialchars($user['email']); ?></span>
+                                        </td>
+                                        <td data-label="Joined" class="mobile-stack d-none d-sm-table-cell"><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
+                                        <td data-label="Actions" class="mobile-stack">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="edit_user.php?id=<?php echo $user['user_id']; ?>" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-pencil-fill"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal" data-user-id="<?php echo $user['user_id']; ?>">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -249,7 +358,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
             </div>
 
             <!-- Recent Posts -->
-            <div class="col-md-6 mb-4">
+            <div class="col-12 col-lg-6 mb-4">
                 <div class="card h-100">
                     <div class="card-header bg-success bg-gradient text-white">
                         <h5 class="mb-0"><i class="bi bi-chat-left-text-fill me-2"></i>Recent Forum Posts</h5>
@@ -257,29 +366,35 @@ while ($row = $recent_assets_result->fetch_assoc()) {
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover table-striped mb-0">
-                                <thead>
+                                <thead class="mobile-hide-header">
                                     <tr>
                                         <th>ID</th>
                                         <th>Title</th>
-                                        <th>Author</th>
-                                        <th>Date</th>
+                                        <th class="d-none d-sm-table-cell">Author</th>
+                                        <th class="d-none d-md-table-cell">Date</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($recent_posts as $post): ?>
                                     <tr>
-                                        <td><?php echo $post['id']; ?></td>
-                                        <td class="text-truncate" style="max-width: 150px;"><?php echo htmlspecialchars($post['title']); ?></td>
-                                        <td><?php echo htmlspecialchars($post['username']); ?></td>
-                                        <td><?php echo date('M d, Y', strtotime($post['created_at'])); ?></td>
-                                        <td>
-                                            <a href="edit_post.php?id=<?php echo $post['id']; ?>" class="btn btn-sm btn-primary">
-                                                <i class="bi bi-pencil-fill"></i>
-                                            </a>
-                                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal" data-post-id="<?php echo $post['id']; ?>">
-                                                <i class="bi bi-trash-fill"></i>
-                                            </button>
+                                        <td data-label="ID" class="mobile-stack"><?php echo $post['id']; ?></td>
+                                        <td data-label="Title" class="mobile-stack">
+                                            <span class="text-truncate-mobile d-inline-block" title="<?php echo htmlspecialchars($post['title']); ?>">
+                                                <?php echo htmlspecialchars($post['title']); ?>
+                                            </span>
+                                        </td>
+                                        <td data-label="Author" class="mobile-stack d-none d-sm-table-cell"><?php echo htmlspecialchars($post['username']); ?></td>
+                                        <td data-label="Date" class="mobile-stack d-none d-md-table-cell"><?php echo date('M d, Y', strtotime($post['created_at'])); ?></td>
+                                        <td data-label="Actions" class="mobile-stack">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="edit_post.php?id=<?php echo $post['id']; ?>" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-pencil-fill"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal" data-post-id="<?php echo $post['id']; ?>">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -294,7 +409,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
             </div>
 
             <!-- Recent Assets -->
-            <div class="col-md-6 mb-4">
+            <div class="col-12 col-lg-6 mb-4">
                 <div class="card h-100">
                     <div class="card-header bg-info bg-gradient text-white">
                         <h5 class="mb-0"><i class="bi bi-bag-fill me-2"></i>Recent Assets</h5>
@@ -302,29 +417,35 @@ while ($row = $recent_assets_result->fetch_assoc()) {
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover table-striped mb-0">
-                                <thead>
+                                <thead class="mobile-hide-header">
                                     <tr>
                                         <th>ID</th>
                                         <th>Title</th>
-                                        <th>Author</th>
-                                        <th>Date</th>
+                                        <th class="d-none d-sm-table-cell">Author</th>
+                                        <th class="d-none d-md-table-cell">Date</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($recent_assets as $asset): ?>
                                     <tr>
-                                        <td><?php echo $asset['id']; ?></td>
-                                        <td class="text-truncate" style="max-width: 150px;"><?php echo htmlspecialchars($asset['title']); ?></td>
-                                        <td><?php echo htmlspecialchars($asset['username']); ?></td>
-                                        <td><?php echo date('M d, Y', strtotime($asset['created_at'])); ?></td>
-                                        <td>
-                                            <a href="edit_asset.php?id=<?php echo $asset['id']; ?>" class="btn btn-sm btn-primary">
-                                                <i class="bi bi-pencil-fill"></i>
-                                            </a>
-                                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAssetModal" data-asset-id="<?php echo $asset['id']; ?>">
-                                                <i class="bi bi-trash-fill"></i>
-                                            </button>
+                                        <td data-label="ID" class="mobile-stack"><?php echo $asset['id']; ?></td>
+                                        <td data-label="Title" class="mobile-stack">
+                                            <span class="text-truncate-mobile d-inline-block" title="<?php echo htmlspecialchars($asset['title']); ?>">
+                                                <?php echo htmlspecialchars($asset['title']); ?>
+                                            </span>
+                                        </td>
+                                        <td data-label="Author" class="mobile-stack d-none d-sm-table-cell"><?php echo htmlspecialchars($asset['username']); ?></td>
+                                        <td data-label="Date" class="mobile-stack d-none d-md-table-cell"><?php echo date('M d, Y', strtotime($asset['created_at'])); ?></td>
+                                        <td data-label="Actions" class="mobile-stack">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="edit_asset.php?id=<?php echo $asset['id']; ?>" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-pencil-fill"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAssetModal" data-asset-id="<?php echo $asset['id']; ?>">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -342,7 +463,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
 
     <!-- Delete User Modal -->
     <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="deleteUserModalLabel">Delete User</h5>
@@ -354,7 +475,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form action="delete_user.php" method="POST">
+                    <form action="delete_user.php" method="POST" class="d-inline">
                         <input type="hidden" name="user_id" id="deleteUserId">
                         <button type="submit" class="btn btn-danger">Delete User</button>
                     </form>
@@ -365,7 +486,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
 
     <!-- Delete Post Modal -->
     <div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="deletePostModalLabel">Delete Post</h5>
@@ -376,7 +497,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form action="delete_post.php" method="POST">
+                    <form action="delete_post.php" method="POST" class="d-inline">
                         <input type="hidden" name="post_id" id="deletePostId">
                         <button type="submit" class="btn btn-danger">Delete Post</button>
                     </form>
@@ -387,7 +508,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
 
     <!-- Delete Asset Modal -->
     <div class="modal fade" id="deleteAssetModal" tabindex="-1" aria-labelledby="deleteAssetModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="deleteAssetModalLabel">Delete Asset</h5>
@@ -398,7 +519,7 @@ while ($row = $recent_assets_result->fetch_assoc()) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form action="delete_asset.php" method="POST">
+                    <form action="delete_asset.php" method="POST" class="d-inline">
                         <input type="hidden" name="asset_id" id="deleteAssetId">
                         <button type="submit" class="btn btn-danger">Delete Asset</button>
                     </form>
@@ -407,9 +528,6 @@ while ($row = $recent_assets_result->fetch_assoc()) {
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    
     <script>
         // Set the correct ID when opening the delete modals
         document.addEventListener('DOMContentLoaded', function() {
