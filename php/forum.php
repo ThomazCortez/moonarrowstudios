@@ -978,6 +978,10 @@ hr {
     background-color: #cff4fc;
     color: #055160;
 }
+
+body {
+    overflow-x: hidden;
+}
 	</style>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
