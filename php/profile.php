@@ -837,10 +837,6 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
             animation-duration: 0.6s;
         }
 
-        .staggered-animation {
-            opacity: 0;
-        }
-
         /* Tabs - Responsive */
         .nav {
             display: flex;
@@ -1653,11 +1649,11 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                         <button type="submit" class="btn btn-primary">Search</button>
                     </form>
 
-<div class="posts-container">
+<div class="posts-container animate__animated animate__fadeIn animate__slow">
     <?php if ($posts->num_rows > 0): ?>
         <?php $delay = 0.5; ?>
         <?php while ($post = $posts->fetch_assoc()): ?>
-            <div class="card mb-3 staggered-animation" data-animation="fadeInUp" data-delay="<?= $delay ?>">
+            <div class="card mb-3" data-animation="fadeInUp" data-delay="<?= $delay ?>">
                 <div class="card-body position-relative d-flex">
                     
                     <!-- POST CONTENT -->
@@ -1788,11 +1784,11 @@ $asset_categories = $conn->query("SELECT * FROM asset_categories");
                         <button type="submit" class="btn btn-primary">Search</button>
                     </form>
 
-                    <div class="assets-container">
+                    <div class="assets-container animate__fadeIn animate__slow">
         <?php if ($assets->num_rows > 0): ?>
             <?php $delay = 0.5; ?>
             <?php while ($asset = $assets->fetch_assoc()): ?>
-                <div class="card mb-3 staggered-animation" data-animation="fadeInUp" data-delay="<?= $delay ?>">
+                <div class="card mb-3" data-animation="fadeInUp" data-delay="<?= $delay ?>">
                     <div class="card-body position-relative d-flex">
                         
                         <!-- ASSET CONTENT -->
@@ -2067,50 +2063,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             submitBtn.disabled = false;
         }
-    });
-});
-
-// Handle staggered animations
-document.addEventListener('DOMContentLoaded', function() {
-    const animatedElements = document.querySelectorAll('.staggered-animation');
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const element = entry.target;
-                const animation = element.getAttribute('data-animation');
-                const delay = element.getAttribute('data-delay');
-                
-                element.classList.add('animate__animated', `animate__${animation}`);
-                element.style.animationDelay = `${delay}s`;
-                element.style.opacity = '1';
-                
-                observer.unobserve(element);
-            }
-        });
-    }, {
-        threshold: 0.1
-    });
-    
-    animatedElements.forEach(element => {
-        observer.observe(element);
-    });
-    
-    const tabLinks = document.querySelectorAll('.nav-link');
-    tabLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            const targetId = this.getAttribute('href');
-            const targetPane = document.querySelector(targetId);
-            
-            if (targetPane) {
-                const staggeredItems = targetPane.querySelectorAll('.staggered-animation');
-                staggeredItems.forEach((item, index) => {
-                    item.classList.remove('animate__animated', `animate__${item.getAttribute('data-animation')}`);
-                    item.style.opacity = '0';
-                    observer.observe(item);
-                });
-            }
-        });
     });
 });
 
