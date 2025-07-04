@@ -34,7 +34,8 @@
                 --color-fg-muted: #8b949e;
                 --color-accent-fg: #58a6ff;
                 --color-input-bg: #0d1117;
-                .custom-alert-success {
+            
+            .custom-alert-success {
                 background-color: #12281e;
                 color: #7ee2b8;
             }
@@ -50,7 +51,7 @@
                 background-color: #092c42;
                 color: #7dd3fc;
             }
-            }
+          }
         }
 
         body {
@@ -76,6 +77,14 @@
             box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
         }
 
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .form-control.is-valid {
+            border-color: #198754;
+        }
+
         .form-label {
             font-weight: 400;
             font-size: 14px;
@@ -96,6 +105,12 @@
 
         .btn-primary:hover {
             background-color: #0b5ed7;
+        }
+
+        .btn-primary:disabled {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            opacity: 0.65;
         }
 
         .btn-outline-secondary {
@@ -154,6 +169,86 @@
             margin-bottom: 8px;
         }
 
+        /* Password Requirements Styles */
+        .password-requirements {
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .password-requirements h6 {
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--color-fg-default);
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .requirement:last-child {
+            margin-bottom: 0;
+        }
+
+        .requirement .bi {
+            margin-right: 6px;
+            font-size: 12px;
+        }
+
+        .requirement.valid {
+            color: #198754;
+        }
+
+        .requirement.invalid {
+            color: #dc3545;
+        }
+
+        .requirement.pending {
+            color: var(--color-fg-muted);
+        }
+
+        .password-strength {
+            margin-top: 8px;
+        }
+
+        .strength-meter {
+            height: 4px;
+            background-color: var(--color-border-default);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .strength-fill {
+            height: 100%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+            width: 0%;
+            background-color: #dc3545;
+        }
+
+        .strength-fill.weak {
+            background-color: #dc3545;
+        }
+
+        .strength-fill.medium {
+            background-color: #ffc107;
+        }
+
+        .strength-fill.strong {
+            background-color: #198754;
+        }
+
+        .strength-text {
+            font-size: 11px;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
         /* Maintain your original animations */
         body {
             opacity: 0;
@@ -195,122 +290,122 @@
         }
 
         /* Custom Alert Animation Styles */
-.alert-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1050;
-    pointer-events: none;
-}
+        .alert-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            pointer-events: none;
+        }
 
-.custom-alert {
-    position: relative;
-    margin: 16px auto;
-    max-width: 500px;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    pointer-events: auto;
-    overflow: hidden;
-    transform: translateY(-100%);
-    opacity: 0;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s linear;
-}
+        .custom-alert {
+            position: relative;
+            margin: 16px auto;
+            max-width: 500px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            pointer-events: auto;
+            overflow: hidden;
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s linear;
+        }
 
-.custom-alert.show {
-    transform: translateY(0);
-    opacity: 1;
-}
+        .custom-alert.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
 
-.custom-alert.hiding {
-    transform: translateY(-100%);
-    opacity: 0;
-}
+        .custom-alert.hiding {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
 
-.custom-alert .progress {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 3px;
-    width: 100%;
-    border-radius: 0;
-    background-color: rgba(0, 0, 0, 0.1);
-    padding: 0;
-    margin: 0;
-}
+        .custom-alert .progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            border-radius: 0;
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 0;
+            margin: 0;
+        }
 
-.custom-alert .progress-bar {
-    transition: width linear 5000ms;
-    width: 100%;
-    height: 100%;
-}
+        .custom-alert .progress-bar {
+            transition: width linear 5000ms;
+            width: 100%;
+            height: 100%;
+        }
 
-.custom-alert-success .progress-bar {
-    background-color: #198754;
-}
+        .custom-alert-success .progress-bar {
+            background-color: #198754;
+        }
 
-.custom-alert-danger .progress-bar {
-    background-color: #dc3545;
-}
+        .custom-alert-danger .progress-bar {
+            background-color: #dc3545;
+        }
 
-.custom-alert-warning .progress-bar {
-    background-color: #ffc107;
-}
+        .custom-alert-warning .progress-bar {
+            background-color: #ffc107;
+        }
 
-.custom-alert-info .progress-bar {
-    background-color: #0dcaf0;
-}
+        .custom-alert-info .progress-bar {
+            background-color: #0dcaf0;
+        }
 
-.custom-alert-content {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-}
+        .custom-alert-content {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+        }
 
-.custom-alert-icon {
-    margin-right: 12px;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .custom-alert-icon {
+            margin-right: 12px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.custom-alert-message {
-    flex-grow: 1;
-}
+        .custom-alert-message {
+            flex-grow: 1;
+        }
 
-.custom-alert-close {
-    background: transparent;
-    border: none;
-    color: inherit;
-    opacity: 0.7;
-    padding: 0 4px;
-    cursor: pointer;
-}
+        .custom-alert-close {
+            background: transparent;
+            border: none;
+            color: inherit;
+            opacity: 0.7;
+            padding: 0 4px;
+            cursor: pointer;
+        }
 
-.custom-alert-close:hover {
-    opacity: 1;
-}
+        .custom-alert-close:hover {
+            opacity: 1;
+        }
 
-.custom-alert-success {
-    background-color: #d1e7dd;
-    color: #0f5132;
-}
+        .custom-alert-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
 
-.custom-alert-danger {
-    background-color: #f8d7da;
-    color: #842029;
-}
+        .custom-alert-danger {
+            background-color: #f8d7da;
+            color: #842029;
+        }
 
-.custom-alert-warning {
-    background-color: #fff3cd;
-    color: #664d03;
-}
+        .custom-alert-warning {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
 
-.custom-alert-info {
-    background-color: #cff4fc;
-    color: #055160;
-}
+        .custom-alert-info {
+            background-color: #cff4fc;
+            color: #055160;
+        }
     </style>
 </head>
 
@@ -347,6 +442,14 @@
                                         <i class="bi bi-eye"></i>
                                     </button>
                                 </div>
+                                <div class="password-requirements" id="passwordRequirements">
+                                    <div class="password-strength">
+                                        <div class="strength-text" id="strengthText">Password strength: Weak</div>
+                                        <div class="strength-meter">
+                                            <div class="strength-fill" id="strengthFill"></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <button id="submitButton" type="submit" class="btn btn-primary w-100">Sign Up</button>
                             <button id="spinnerButton" class="btn btn-primary w-100" type="button" disabled style="display: none;">
@@ -372,8 +475,77 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Password validation functions
+        function validatePassword(password) {
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /\d/.test(password),
+                special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+            };
+
+            return requirements;
+        }
+
+        function calculatePasswordStrength(password) {
+            const requirements = validatePassword(password);
+            const validCount = Object.values(requirements).filter(Boolean).length;
+            
+            if (validCount === 0) return { strength: 0, text: 'Weak' };
+            if (validCount <= 2) return { strength: 25, text: 'Weak' };
+            if (validCount <= 3) return { strength: 50, text: 'Medium' };
+            if (validCount <= 4) return { strength: 75, text: 'Strong' };
+            return { strength: 100, text: 'Very Strong' };
+        }
+
+        function updatePasswordRequirements(password) {
+            const strengthInfo = calculatePasswordStrength(password);
+            
+            // Update strength meter
+            const strengthFill = document.getElementById('strengthFill');
+            const strengthText = document.getElementById('strengthText');
+            
+            strengthFill.style.width = strengthInfo.strength + '%';
+            strengthText.textContent = `Password strength: ${strengthInfo.text}`;
+            
+            // Update strength fill color
+            strengthFill.className = 'strength-fill';
+            if (strengthInfo.strength >= 75) {
+                strengthFill.classList.add('strong');
+            } else if (strengthInfo.strength >= 50) {
+                strengthFill.classList.add('medium');
+            } else {
+                strengthFill.classList.add('weak');
+            }
+            
+            // Update password input border
+            const passwordInput = document.getElementById('password');
+            passwordInput.classList.remove('is-valid', 'is-invalid');
+            if (password.length > 0) {
+                if (strengthInfo.strength >= 50) {
+                    passwordInput.classList.add('is-valid');
+                } else {
+                    passwordInput.classList.add('is-invalid');
+                }
+            }
+        }
+
+        function updateRequirement(elementId, isValid) {
+            // This function is no longer needed but kept for compatibility
+        }
+
+        // Event listeners
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            updatePasswordRequirements(password);
+        });
 
         document.getElementById('signUpForm').addEventListener('submit', function(event) {
+            const password = document.getElementById('password').value;
+            const strengthInfo = calculatePasswordStrength(password);
+            
+            // Allow submission but let server-side validation handle weak passwords
             document.getElementById('submitButton').style.display = 'none';
             document.getElementById('spinnerButton').style.display = 'block';
         });
@@ -387,65 +559,65 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
-    const artSection = document.querySelector('.art-section img');
-    if(artSection) {
-        artSection.style.opacity = '0';
-        artSection.style.transition = 'opacity 1s ease-in-out';
-        setTimeout(() => { artSection.style.opacity = '1'; }, 1000);
-    }
+            const artSection = document.querySelector('.art-section img');
+            if(artSection) {
+                artSection.style.opacity = '0';
+                artSection.style.transition = 'opacity 1s ease-in-out';
+                setTimeout(() => { artSection.style.opacity = '1'; }, 1000);
+            }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('alert')) {
-        showAlert(urlParams.get('alert'), urlParams.get('type') || 'info');
-    }
-});
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('alert')) {
+                showAlert(urlParams.get('alert'), urlParams.get('type') || 'info');
+            }
+        });
 
-// Add these functions
-function showAlert(message, type = 'info') {
-    const alertContainer = document.getElementById('alertContainer');
-    const alertElement = document.createElement('div');
-    alertElement.className = `custom-alert custom-alert-${type}`;
-    let iconClass = 'bi-info-circle';
-    if (type === 'success') iconClass = 'bi-check-circle';
-    if (type === 'danger')  iconClass = 'bi-exclamation-triangle';
-    if (type === 'warning') iconClass = 'bi-exclamation-circle';
+        // Alert functions
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertElement = document.createElement('div');
+            alertElement.className = `custom-alert custom-alert-${type}`;
+            let iconClass = 'bi-info-circle';
+            if (type === 'success') iconClass = 'bi-check-circle';
+            if (type === 'danger')  iconClass = 'bi-exclamation-triangle';
+            if (type === 'warning') iconClass = 'bi-exclamation-circle';
 
-    alertElement.innerHTML = `
-        <div class="custom-alert-content">
-            <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
-            <div class="custom-alert-message">${message}</div>
-            <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
-        </div>
-        <div class="progress">
-            <div class="progress-bar"></div>
-        </div>
-    `;
+            alertElement.innerHTML = `
+                <div class="custom-alert-content">
+                    <div class="custom-alert-icon"><i class="bi ${iconClass}"></i></div>
+                    <div class="custom-alert-message">${message}</div>
+                    <button type="button" class="custom-alert-close"><i class="bi bi-x"></i></button>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar"></div>
+                </div>
+            `;
 
-    alertContainer.appendChild(alertElement);
+            alertContainer.appendChild(alertElement);
 
-    requestAnimationFrame(() => alertElement.classList.add('show'));
+            requestAnimationFrame(() => alertElement.classList.add('show'));
 
-    const progressBar = alertElement.querySelector('.progress-bar');
-    progressBar.style.transition = 'width linear 5000ms';
-    progressBar.style.width = '100%';
-    setTimeout(() => { progressBar.style.width = '0%'; }, 50);
+            const progressBar = alertElement.querySelector('.progress-bar');
+            progressBar.style.transition = 'width linear 5000ms';
+            progressBar.style.width = '100%';
+            setTimeout(() => { progressBar.style.width = '0%'; }, 50);
 
-    const dismissTimeout = setTimeout(() => {
-        dismissAlert(alertElement);
-    }, 5050);
+            const dismissTimeout = setTimeout(() => {
+                dismissAlert(alertElement);
+            }, 5050);
 
-    alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
-        clearTimeout(dismissTimeout);
-        dismissAlert(alertElement);
-    });
-}
+            alertElement.querySelector('.custom-alert-close').addEventListener('click', () => {
+                clearTimeout(dismissTimeout);
+                dismissAlert(alertElement);
+            });
+        }
 
-function dismissAlert(alertElement) {
-    if (!alertElement || alertElement.classList.contains('hiding')) return;
-    alertElement.classList.add('hiding');
-    alertElement.classList.remove('show');
-    setTimeout(() => { alertElement.remove(); }, 300);
-}
+        function dismissAlert(alertElement) {
+            if (!alertElement || alertElement.classList.contains('hiding')) return;
+            alertElement.classList.add('hiding');
+            alertElement.classList.remove('show');
+            setTimeout(() => { alertElement.remove(); }, 300);
+        }
     </script>
 </body>
 </html>

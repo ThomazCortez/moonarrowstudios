@@ -7,7 +7,6 @@ $errorMessage = '';
 $disableInput = false;
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    // Validate token
     $stmt = $pdo->prepare("SELECT email FROM password_resets WHERE token = ? AND created_at >= NOW() - INTERVAL 1 HOUR");
     $stmt->execute([$token]);
     $resetEntry = $stmt->fetch();
@@ -22,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $token = $_POST['token'];
     $newPassword = $_POST['password'];
 
-    // Validate token
     $stmt = $pdo->prepare("SELECT email FROM password_resets WHERE token = ? AND created_at >= NOW() - INTERVAL 1 HOUR");
     $stmt->execute([$token]);
     $resetEntry = $stmt->fetch();
@@ -31,19 +29,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errorMessage = 'Invalid or expired token.';
         $disableInput = true;
     } else {
-        // Hash the new password
-        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+        // Password strength validation
+        $strength = 0;
+        if (strlen($newPassword) >= 8) $strength += 1;
+        if (preg_match('/[A-Z]/', $newPassword)) $strength += 1;
+        if (preg_match('/[a-z]/', $newPassword)) $strength += 1;
+        if (preg_match('/[0-9]/', $newPassword)) $strength += 1;
+        if (preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/', $newPassword)) $strength += 1;
+        
+        
+            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+            $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE email = ?");
+            $stmt->execute([$hashedPassword, $resetEntry['email']]);
 
-        // Update the user's password
-        $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE email = ?");
-        $stmt->execute([$hashedPassword, $resetEntry['email']]);
+            $stmt = $pdo->prepare("DELETE FROM password_resets WHERE token = ?");
+            $stmt->execute([$token]);
 
-        // Delete the token
-        $stmt = $pdo->prepare("DELETE FROM password_resets WHERE token = ?");
-        $stmt->execute([$token]);
-
-        $successMessage = 'Password has been reset successfully. Redirecting...';
-        $disableInput = true;
+            $successMessage = 'Password has been reset successfully. Redirecting...';
+            $disableInput = true;
+            
     }
 }
 ?>
@@ -354,87 +358,126 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-bottom: 8px;
         }
 
-        /* Add/Update these styles in your CSS */
-.card {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    transform: translateZ(0); /* Hardware acceleration */
-    will-change: transform; /* Prepare browser for animation */
-    border: 1px solid transparent; /* Add this line */
-}
+        /* Card hover effects */
+        .card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            transform: translateZ(0);
+            will-change: transform;
+            border: 1px solid transparent;
+        }
 
-.card::before,
-.card::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: rgba(88, 166, 255, 0.3); /* Use your theme's blue color */
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 2;
-    opacity: 0;
-}
+        .card::before,
+        .card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(88, 166, 255, 0.3);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+            opacity: 0;
+        }
 
-.card::before {
-    top: 0;
-    transform: translateX(-105%);
-    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-}
+        .card::before {
+            top: 0;
+            transform: translateX(-105%);
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+        }
 
-.card::after {
-    bottom: 0;
-    transform: translateX(105%);
-    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-}
+        .card::after {
+            bottom: 0;
+            transform: translateX(105%);
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+        }
 
-.card:hover {
-    box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
-                0 4px 20px rgba(0, 0, 0, 0.3) !important;
-    border-color: rgba(88, 166, 255, 0.3) !important;
-}
+        .card:hover {
+            box-shadow: 0 0 25px 5px rgba(88, 166, 255, 0.2),
+                        0 4px 20px rgba(0, 0, 0, 0.3) !important;
+            border-color: rgba(88, 166, 255, 0.3) !important;
+        }
 
-.card:hover::before,
-.card:hover::after {
-    transform: translateX(0);
-    opacity: 1;
-}
+        .card:hover::before,
+        .card:hover::after {
+            transform: translateX(0);
+            opacity: 1;
+        }
 
-.card-body {
-    position: relative;
-    z-index: 1; /* Ensure content stays above borders */
-}
+        .card-body {
+            position: relative;
+            z-index: 1;
+        }
 
-.card-body::before,
-.card-body::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 2px;
-    background: rgba(88, 166, 255, 0.3);
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 2;
-    opacity: 0;
-    box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-}
+        .card-body::before,
+        .card-body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: rgba(88, 166, 255, 0.3);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+            opacity: 0;
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+        }
 
-.card-body::before {
-    left: 0;
-    transform: translateY(105%);
-}
+        .card-body::before {
+            left: 0;
+            transform: translateY(105%);
+        }
 
-.card-body::after {
-    right: 0;
-    transform: translateY(-105%);
-}
+        .card-body::after {
+            right: 0;
+            transform: translateY(-105%);
+        }
 
-.card:hover .card-body::before,
-.card:hover .card-body::after {
-    transform: translateY(0);
-    opacity: 1;
-}
+        .card:hover .card-body::before,
+        .card:hover .card-body::after {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Password Strength Styles - ONLY THE BAR */
+        .password-strength {
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+
+        .strength-meter {
+            height: 4px;
+            background-color: var(--color-border-default);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .strength-fill {
+            height: 100%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+            width: 0%;
+            background-color: #dc3545;
+        }
+
+        .strength-fill.weak {
+            background-color: #dc3545;
+        }
+
+        .strength-fill.medium {
+            background-color: #ffc107;
+        }
+
+        .strength-fill.strong {
+            background-color: #198754;
+        }
+
+        .strength-text {
+            font-size: 11px;
+            margin-top: 2px;
+            font-weight: 500;
+        }
     </style>
 </head>
 
@@ -446,7 +489,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <img src="../../media/horizontal_logo.png" alt="Logo" class="logo" width="180">
         <h2 class="text-center">Reset Password</h2>
         <p class="text-center">Don't worry, happens to the best of us.</p>
-        <form action="reset_password.php" method="post">
+        <form action="reset_password.php" method="post" id="passwordResetForm">
             <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
             <div class="mb-3">
                 <label for="password" class="form-label">New Password</label>
@@ -465,10 +508,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <i class="bi bi-eye"></i>
                     </button>
                 </div>
+                <!-- ONLY PASSWORD STRENGTH BAR - NO REQUIREMENTS -->
+                <div class="password-strength">
+                    <div class="strength-text" id="strengthText">Password strength: Weak</div>
+                    <div class="strength-meter">
+                        <div class="strength-fill weak" id="strengthFill"></div>
+                    </div>
+                </div>
             </div>
             <button type="submit" 
-                    class="btn btn-primary btn-reset-password w-100"
-                    <?php if ($disableInput): ?>disabled<?php endif; ?>>
+                    class="btn btn-primary w-100"
+                    id="resetButton"
+                    <?php if ($disableInput): ?>disabled<?php else: ?>disabled<?php endif; ?>>
                 Reset Password
             </button>
         </form>
@@ -478,10 +529,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
+    // Password validation functions
+    function validatePassword(password) {
+        return {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /\d/.test(password),
+            special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+        };
+    }
+
+    function calculatePasswordStrength(password) {
+        const requirements = validatePassword(password);
+        const validCount = Object.values(requirements).filter(Boolean).length;
+        
+        if (validCount === 0) return { strength: 0, text: 'Weak', class: 'weak' };
+        if (validCount <= 2) return { strength: 33, text: 'Weak', class: 'weak' };
+        if (validCount === 3) return { strength: 66, text: 'Medium', class: 'medium' };
+        return { strength: 100, text: 'Strong', class: 'strong' };
+    }
+
+    function updatePasswordStrength(password) {
+        const strengthInfo = calculatePasswordStrength(password);
+        
+        // Update strength meter
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
+        
+        strengthFill.style.width = strengthInfo.strength + '%';
+        strengthText.textContent = `Password strength: ${strengthInfo.text}`;
+        
+        // Update strength fill class
+        strengthFill.className = 'strength-fill ' + strengthInfo.class;
+        
+        // Enable/disable reset button
+        const resetButton = document.getElementById('resetButton');
+        resetButton.disabled = strengthInfo.strength < 66;
+    }
+
+    // Event listeners
+    document.getElementById('password').addEventListener('input', function(e) {
+        const password = e.target.value;
+        updatePasswordStrength(password);
+    });
+
     // Alert functions
     function showAlert(message, type = 'info') {
         const alertContainer = document.getElementById('alertContainer');
@@ -539,6 +632,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             this.innerHTML = type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
         });
     }
+
+    // Form submission validation
+    document.getElementById('passwordResetForm').addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        const strengthInfo = calculatePasswordStrength(password);
+        
+        if (strengthInfo.strength < 66) {
+            e.preventDefault();
+            showAlert('Password is not strong enough. Please make it stronger.', 'danger');
+        }
+    });
 
     // Redirect on success
     <?php if ($successMessage): ?>

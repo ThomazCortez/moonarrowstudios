@@ -7,24 +7,89 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Mofodojodino\ProfanityFilter\Check; // Add the profanity filter namespace
 
+// Function to calculate password strength
+function calculatePasswordStrength($password) {
+    $score = 0;
+    $feedback = [];
+
+    // Check length
+    if (strlen($password) >= 8) {
+        $score += 25;
+    }
+
+    // Check for uppercase
+    if (preg_match('/[A-Z]/', $password)) {
+        $score += 25;
+    }
+
+    // Check for lowercase
+    if (preg_match('/[a-z]/', $password)) {
+        $score += 25;
+    }
+
+    // Check for numbers
+    if (preg_match('/\d/', $password)) {
+        $score += 25;
+    }
+
+    // Check for special characters
+    if (preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/', $password)) {
+        $score += 25;
+    }
+
+    // Bonus for longer passwords
+    if (strlen($password) >= 12) {
+        $score += 10;
+    }
+
+    // Penalty for common patterns
+    if (preg_match('/(.)\1{2,}/', $password)) { // repeated characters
+        $score -= 10;
+    }
+
+    if (preg_match('/123|abc|qwe|password|admin/i', $password)) { // common sequences
+        $score -= 20;
+    }
+
+    $score = max(0, min(100, $score)); // Ensure score is between 0 and 100
+
+    if ($score < 40) {
+        return ['score' => $score, 'level' => 'weak'];
+    } elseif ($score < 70) {
+        return ['score' => $score, 'level' => 'medium'];
+    } else {
+        return ['score' => $score, 'level' => 'strong'];
+    }
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+    $raw_password = $_POST['password'];
     $role = 'user';
 
     // Initialize profanity filter
     $profanityFilter = new Check();
 
     // Validate inputs
-    if (!empty($username) && !empty($email) && !empty($password)) {
+    if (!empty($username) && !empty($email) && !empty($raw_password)) {
+        // Check password strength
+        $passwordStrength = calculatePasswordStrength($raw_password);
+        if ($passwordStrength['level'] === 'weak') {
+            header("Location: ../sign_up/sign_up_html.php?alert=Your password is too weak. Please choose a stronger password.&type=danger");
+            exit;
+        }
+
+        // Hash the password after validation
+        $password = password_hash($raw_password, PASSWORD_BCRYPT);
+
         // Check for profanity in username
         if ($profanityFilter->hasProfanity($username)) {
             header("Location: ../sign_up/sign_up_html.php?alert=Username contains inappropriate content. Please choose a different username.&type=danger");
             exit;
         }
         
-        // Rest of your existing code...
+        // Check if email already exists
         $check_email_stmt = $conn->prepare("SELECT user_id FROM users WHERE email = ?");
         $check_email_stmt->bind_param("s", $email);
         $check_email_stmt->execute();
