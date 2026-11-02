@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../mail_config.php';
 // Start session
 session_start();
 
@@ -70,8 +71,8 @@ function sendStatusChangeEmail($email, $username, $newStatus, $reason) {
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com'; // Replace with your SMTP server
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'moonarrowstudios@gmail.com'; // Replace with your email
-        $mail->Password   = 'jbws akjv bxvr xxac'; // Replace with your email password
+        $mail->Username   = MAIL_USERNAME; // Replace with your email
+        $mail->Password   = MAIL_PASSWORD; // Replace with your email password
         $mail->SMTPSecure = 'tls';
         $mail->Port       = 587;
         

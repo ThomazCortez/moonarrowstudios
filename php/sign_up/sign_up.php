@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../mail_config.php';
 // Include database connection
 include '../db_connect.php';
 require '../../vendor/autoload.php'; // Include PHPMailer autoload
@@ -121,8 +122,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $mail->isSMTP();
                         $mail->Host = 'smtp.gmail.com';
                         $mail->SMTPAuth = true;
-                        $mail->Username = 'moonarrowstudios@gmail.com';
-                        $mail->Password = 'jbws akjv bxvr xxac';
+                        $mail->Username = MAIL_USERNAME;
+                        $mail->Password = MAIL_PASSWORD;
                         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                         $mail->Port = 587;
 

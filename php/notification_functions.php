@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/mail_config.php';
 // notification_functions.php - Create this as a separate file
 require_once __DIR__ . '/../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
@@ -116,8 +117,8 @@ function sendNotificationEmail($conn, $recipient_user_id, $type, $context_data) 
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'moonarrowstudios@gmail.com';
-        $mail->Password   = 'jbws akjv bxvr xxac';
+        $mail->Username   = MAIL_USERNAME;
+        $mail->Password   = MAIL_PASSWORD;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port       = 465;
 

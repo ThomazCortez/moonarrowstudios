@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/mail_config.php';
 // confirm_account_deletion.php
 session_start();
 include 'db_connect.php';
@@ -121,8 +122,8 @@ if (isset($_GET['token'])) {
                     $mail->isSMTP();
                     $mail->Host       = 'smtp.gmail.com';
                     $mail->SMTPAuth   = true;
-                    $mail->Username   = 'moonarrowstudios@gmail.com';
-                    $mail->Password   = 'jbws akjv bxvr xxac';
+                    $mail->Username   = MAIL_USERNAME;
+                    $mail->Password   = MAIL_PASSWORD;
                     $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
                     $mail->Port       = 465;
 

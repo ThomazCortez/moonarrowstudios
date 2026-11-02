@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/mail_config.php';
 // settings.php
 session_start();
 
@@ -217,8 +218,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $mail->isSMTP();
                             $mail->Host       = 'smtp.gmail.com';
                             $mail->SMTPAuth   = true;
-                            $mail->Username   = 'moonarrowstudios@gmail.com';
-                            $mail->Password   = 'jbws akjv bxvr xxac';
+                            $mail->Username   = MAIL_USERNAME;
+                            $mail->Password   = MAIL_PASSWORD;
                             $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
                             $mail->Port       = 465;
 
@@ -305,8 +306,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $mail->isSMTP();
                         $mail->Host       = 'smtp.gmail.com';
                         $mail->SMTPAuth   = true;
-                        $mail->Username   = 'moonarrowstudios@gmail.com';
-                        $mail->Password   = 'jbws akjv bxvr xxac';
+                        $mail->Username   = MAIL_USERNAME;
+                        $mail->Password   = MAIL_PASSWORD;
                         $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
                         $mail->Port       = 465;
                         
@@ -347,8 +348,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $notification_mail->isSMTP();
                             $notification_mail->Host       = 'smtp.gmail.com';
                             $notification_mail->SMTPAuth   = true;
-                            $notification_mail->Username   = 'moonarrowstudios@gmail.com';
-                            $notification_mail->Password   = 'jbws akjv bxvr xxac';
+                            $notification_mail->Username   = MAIL_USERNAME;
+                            $notification_mail->Password   = MAIL_PASSWORD;
                             $notification_mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
                             $notification_mail->Port       = 465;
                             
@@ -426,8 +427,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $mail->isSMTP();
                         $mail->Host       = 'smtp.gmail.com';
                         $mail->SMTPAuth   = true;
-                        $mail->Username   = 'moonarrowstudios@gmail.com';
-                        $mail->Password   = 'jbws akjv bxvr xxac';
+                        $mail->Username   = MAIL_USERNAME;
+                        $mail->Password   = MAIL_PASSWORD;
                         $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
                         $mail->Port       = 465;
 
